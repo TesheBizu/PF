@@ -1,0 +1,120 @@
+.skills { position: relative; z-index: 1; }
+
+.skills__grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-xl);
+  margin-bottom: var(--space-3xl);
+}
+
+.skills__skeleton-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-xl);
+  margin-bottom: var(--space-3xl);
+}
+
+/* Category card */
+.skills__category { padding: var(--space-xl); }
+
+.skills__cat-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-xl);
+}
+
+.skills__cat-icon { font-size: 1.5rem; }
+
+.skills__cat-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-heading);
+  flex: 1;
+}
+
+/* Skill bars */
+.skills__bars { display: flex; flex-direction: column; gap: var(--space-lg); }
+
+.skill-item {
+  animation: fadeInUp 0.5s ease forwards;
+  opacity: 0;
+}
+
+.skill-item__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-xs);
+}
+
+.skill-item__name {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.skill-item__pct {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.skill-item__track {
+  height: 8px;
+  background: var(--color-surface-2);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.skill-item__bar {
+  height: 100%;
+  width: 0;
+  background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
+  border-radius: var(--radius-full);
+  animation: growBar 1s ease forwards 0.3s;
+  box-shadow: 0 0 8px var(--color-primary-glow);
+}
+
+@keyframes growBar {
+  from { width: 0; }
+  to   { width: var(--target-width); }
+}
+
+/* Badges strip */
+.skills__badges {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-xl);
+  text-align: center;
+}
+
+.skills__badges-title {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-text-dim);
+  margin-bottom: var(--space-md);
+}
+
+.skills__badges-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  justify-content: center;
+}
+
+.skills__badge {
+  font-size: 0.85rem;
+  padding: 0.4rem 1rem;
+  cursor: default;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .skills__grid          { grid-template-columns: 1fr; }
+  .skills__skeleton-grid { grid-template-columns: 1fr; }
+}
