@@ -1,4 +1,4 @@
-# Teshome Bizuayehu — Full Stack MERN Portfolio
+# Full Stack MERN Portfolio
 
 A professional full-stack portfolio built with the **MERN stack** (MongoDB, Express.js, React, Node.js).
 
@@ -110,4 +110,4 @@ PF/
 
 ## License
 
-MIT © 2024 Teshome Bizuayehu
+MIT © 2026 Teshome Bizuayehu
