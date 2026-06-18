@@ -12,6 +12,7 @@ const authRoutes = require('./routes/auth');
 const projectRoutes = require('./routes/projects');
 const skillRoutes = require('./routes/skills');
 const messageRoutes = require('./routes/messages');
+const uploadRoutes = require('./routes/upload');
 
 // Connect to Database
 connectDB();
@@ -48,6 +49,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/projects', projectRoutes);
 app.use('/api/skills', skillRoutes);
 app.use('/api/messages', messageRoutes);
+app.use('/api/upload', uploadRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
