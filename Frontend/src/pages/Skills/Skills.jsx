@@ -1,29 +1,29 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchSkills } from '../../redux/slices/skillsSlice';
+import { Code2, Layout, Server, Database as DbIcon, Wrench, Sparkles } from 'lucide-react';
 import './Skills.css';
 
-const CATEGORIES = ['Frontend', 'Backend', 'Database', 'Tools'];
+const CATEGORIES = ['Programming', 'Frontend', 'Backend', 'Database', 'Tools', 'Other'];
 
 const CATEGORY_ICONS = {
-  Frontend: '🎨',
-  Backend:  '⚙️',
-  Database: '🗄️',
-  Tools:    '🔧',
+  Programming: Code2,
+  Frontend: Layout,
+  Backend: Server,
+  Database: DbIcon,
+  Tools: Wrench,
+  Other: Sparkles,
 };
 
-function SkillBar({ skill, index }) {
+function SkillItem({ skill, index, showPercent }) {
   return (
-    <div className="skill-item" style={{ animationDelay: `${index * 0.07}s` }}>
-      <div className="skill-item__header">
+    <div className="skill-item animate-fadeIn" style={{ animationDelay: `${index * 0.05}s` }}>
+      <div className="skill-item__info">
         <span className="skill-item__name">{skill.name}</span>
-        <span className="skill-item__pct">{skill.proficiency}%</span>
+        {showPercent && <span className="skill-item__percent">{skill.proficiency}%</span>}
       </div>
-      <div className="skill-item__track">
-        <div
-          className="skill-item__bar"
-          style={{ '--target-width': `${skill.proficiency}%` }}
-        />
+      <div className="skill-item__progress-bar">
+        <div className="skill-item__progress-fill" style={{ width: `${skill.proficiency}%` }} />
       </div>
     </div>
   );
@@ -32,6 +32,7 @@ function SkillBar({ skill, index }) {
 function Skills() {
   const dispatch = useDispatch();
   const { items: skills, loading, error } = useSelector((s) => s.skills);
+  const [showPercent, setShowPercent] = useState(false);
 
   useEffect(() => {
     if (skills.length === 0) dispatch(fetchSkills());
@@ -57,8 +58,8 @@ function Skills() {
 
         {loading && (
           <div className="skills__skeleton-grid">
-            {Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="skeleton" style={{ height: 80, borderRadius: 12 }} />
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className="skeleton" style={{ height: 140, borderRadius: 12 }} />
             ))}
           </div>
         )}
@@ -70,38 +71,42 @@ function Skills() {
         )}
 
         {!loading && !error && (
-          <div className="skills__grid">
-            {CATEGORIES.map((cat) =>
-              grouped[cat]?.length > 0 ? (
-                <div key={cat} className="skills__category card animate-fadeInUp">
-                  <div className="skills__cat-header">
-                    <span className="skills__cat-icon">{CATEGORY_ICONS[cat]}</span>
-                    <h3 className="skills__cat-title">{cat}</h3>
-                    <span className="badge">{grouped[cat].length} skills</span>
-                  </div>
-                  <div className="skills__bars">
-                    {grouped[cat].map((skill, idx) => (
-                      <SkillBar key={skill._id} skill={skill} index={idx} />
-                    ))}
-                  </div>
-                </div>
-              ) : null
-            )}
-          </div>
-        )}
-
-        {/* Tech badges strip */}
-        {!loading && skills.length > 0 && (
-          <div className="skills__badges animate-fadeInUp">
-            <p className="skills__badges-title">All Technologies</p>
-            <div className="skills__badges-list">
-              {skills.map((s) => (
-                <span key={s._id} className="badge skills__badge">
-                  {s.name}
-                </span>
-              ))}
+          <>
+            <div className="skills__controls animate-fadeInUp">
+              <label className="skills__toggle-label">
+                <input
+                  type="checkbox"
+                  checked={showPercent}
+                  onChange={() => setShowPercent(!showPercent)}
+                  className="skills__toggle-input"
+                />
+                <span className="skills__toggle-custom" />
+                <span className="skills__toggle-text">Show Proficiency Percentages</span>
+              </label>
             </div>
-          </div>
+
+            <div className="skills__grid">
+              {CATEGORIES.map((cat) => {
+                const IconComponent = CATEGORY_ICONS[cat];
+                return grouped[cat]?.length > 0 ? (
+                  <div key={cat} className="skills__category card animate-fadeInUp">
+                    <div className="skills__cat-header">
+                      <span className="skills__cat-icon">
+                        {IconComponent && <IconComponent size={20} className="skills__cat-lucide" />}
+                      </span>
+                      <h3 className="skills__cat-title">{cat}</h3>
+                      <span className="badge">{grouped[cat].length} skills</span>
+                    </div>
+                    <div className="skills__list">
+                      {grouped[cat].map((skill, idx) => (
+                        <SkillItem key={skill._id} skill={skill} index={idx} showPercent={showPercent} />
+                      ))}
+                    </div>
+                  </div>
+                ) : null;
+              })}
+            </div>
+          </>
         )}
       </div>
     </section>

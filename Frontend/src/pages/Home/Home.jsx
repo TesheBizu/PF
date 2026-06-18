@@ -6,7 +6,7 @@ import Projects from '../Projects/Projects';
 import Contact from '../Contact/Contact';
 import './Home.css';
 
-const ROLES = ['Full Stack Developer', 'React Developer', 'Frontend-Focused Developer'];
+const ROLES = ['Web Developer', 'Team Player', 'Frontend-Focused Developer'];
 
 function HeroSection() {
   const [roleIndex, setRoleIndex] = useState(0);

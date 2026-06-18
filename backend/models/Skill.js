@@ -10,7 +10,7 @@ const skillSchema = new mongoose.Schema(
     category: {
       type: String,
       required: [true, 'Skill category is required'],
-      enum: ['Frontend', 'Backend', 'Database', 'Tools', 'Other'],
+      enum: ['Programming', 'Frontend', 'Backend', 'Database', 'Tools', 'Other'],
       default: 'Other',
     },
     proficiency: {

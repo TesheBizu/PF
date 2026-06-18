@@ -7,6 +7,23 @@ import { fetchProjects, createProject, updateProject, deleteProject } from '../.
 import { fetchSkills, createSkill, updateSkill, deleteSkill } from '../../redux/slices/skillsSlice';
 import { fetchMessages, deleteMessage, markMessageRead } from '../../redux/slices/messagesSlice';
 import api from '../../services/api';
+import {
+  LayoutDashboard,
+  Briefcase,
+  Zap,
+  MessageSquare,
+  User as UserIcon,
+  LogOut,
+  ChevronLeft,
+  ChevronRight,
+  Plus,
+  X,
+  Edit3,
+  Trash2,
+  MailOpen,
+  Mail,
+  Upload
+} from 'lucide-react';
 import './Admin.css';
 
 // ── Reusable modal ───────────────────────────────────────────
@@ -16,7 +33,9 @@ function Modal({ title, onClose, children }) {
       <div className="modal-box" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <h3>{title}</h3>
-          <button className="modal-close" onClick={onClose} aria-label="Close">✕</button>
+          <button className="modal-close" onClick={onClose} aria-label="Close">
+            <X size={18} />
+          </button>
         </div>
         {children}
       </div>
@@ -28,7 +47,9 @@ function Modal({ title, onClose, children }) {
 function StatCard({ icon, label, value, color }) {
   return (
     <div className="dash-stat card">
-      <div className="dash-stat__icon" style={{ background: color }}>{icon}</div>
+      <div className="dash-stat__icon" style={{ background: color, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-primary)' }}>
+        {icon}
+      </div>
       <div>
         <div className="dash-stat__value">{value}</div>
         <div className="dash-stat__label">{label}</div>
@@ -39,7 +60,7 @@ function StatCard({ icon, label, value, color }) {
 
 // ── Initial form states ──────────────────────────────────────
 const initProject = { title: '', description: '', techStack: '', githubUrl: '', liveUrl: '', imageUrl: '', featured: false };
-const initSkill   = { name: '', category: 'Frontend', proficiency: 80 };
+const initSkill   = { name: '', category: 'Programming', proficiency: 80 };
 
 function Dashboard() {
   const dispatch   = useDispatch();
@@ -55,6 +76,11 @@ function Dashboard() {
   const [selected, setSelected] = useState(null);
   const [pForm, setPForm]       = useState(initProject);
   const [sForm, setSForm]       = useState(initSkill);
+  const [uploading, setUploading] = useState(false);
+
+  // Profile Form State
+  const [pwdForm, setPwdForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
+  const [pwdLoading, setPwdLoading] = useState(false);
 
   useEffect(() => {
     dispatch(fetchProjects());
@@ -75,6 +101,35 @@ function Dashboard() {
     setPForm({ ...p, techStack: p.techStack.join(', ') });
     setSelected(p);
     setModal('editProject');
+  };
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('image', file);
+
+    setUploading(true);
+    try {
+      const { data } = await api.post('/upload', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      if (data.success) {
+        setPForm((f) => ({ ...f, imageUrl: data.url }));
+        toast.success('Image uploaded to Cloudinary successfully!');
+      } else {
+        toast.error(data.message || 'Failed to upload image');
+      }
+    } catch (err) {
+      console.error(err);
+      const serverErr = err.response?.data?.error || err.response?.data?.message || 'Error uploading image';
+      toast.error(typeof serverErr === 'object' ? JSON.stringify(serverErr) : String(serverErr));
+    } finally {
+      setUploading(false);
+    }
   };
   const handleSaveProject = async () => {
     const payload = { ...pForm, techStack: pForm.techStack.split(',').map((t) => t.trim()).filter(Boolean) };
@@ -121,14 +176,43 @@ function Dashboard() {
     setModal(null);
   };
 
+  // ── Profile handler ─────────────────────────────────────────
+  const handlePasswordChange = async (e) => {
+    e.preventDefault();
+    if (pwdForm.newPassword !== pwdForm.confirmPassword) {
+      toast.error('New passwords do not match');
+      return;
+    }
+    if (pwdForm.newPassword.length < 6) {
+      toast.error('New password must be at least 6 characters');
+      return;
+    }
+
+    setPwdLoading(true);
+    try {
+      const { data } = await api.put('/auth/change-password', {
+        currentPassword: pwdForm.currentPassword,
+        newPassword: pwdForm.newPassword
+      });
+      toast.success(data.message || 'Password changed successfully!');
+      setPwdForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+    } catch (err) {
+      const errMsg = err.response?.data?.message || 'Failed to change password';
+      toast.error(errMsg);
+    } finally {
+      setPwdLoading(false);
+    }
+  };
+
   const unread = messages.filter((m) => !m.isRead).length;
 
-  // ── Tabs ─────────────────────────────────────────────────────
+  // ── Tabs with Lucide Icons ───────────────────────────────────
   const TABS = [
-    { id: 'overview',  label: '📊 Overview' },
-    { id: 'projects',  label: '🚀 Projects' },
-    { id: 'skills',    label: '⚡ Skills' },
-    { id: 'messages',  label: `💬 Messages${unread > 0 ? ` (${unread})` : ''}` },
+    { id: 'overview',  label: 'Overview', icon: LayoutDashboard },
+    { id: 'projects',  label: 'Projects', icon: Briefcase },
+    { id: 'skills',    label: 'Skills', icon: Zap },
+    { id: 'messages',  label: 'Messages', icon: MessageSquare, badge: unread },
+    { id: 'profile',   label: 'Profile', icon: UserIcon },
   ];
 
   return (
@@ -142,12 +226,7 @@ function Dashboard() {
           aria-label={sidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}
           title={sidebarOpen ? 'Collapse' : 'Expand'}
         >
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            {sidebarOpen
-              ? <><polyline points="15 18 9 12 15 6"/></>  
-              : <><polyline points="9 18 15 12 9 6"/></>   
-            }
-          </svg>
+          {sidebarOpen ? <ChevronLeft size={18} /> : <ChevronRight size={18} />}
         </button>
 
         <div className="dash-sidebar__logo">
@@ -157,17 +236,25 @@ function Dashboard() {
         </div>
 
         <nav className="dash-sidebar__nav">
-          {TABS.map((t) => (
-            <button
-              key={t.id}
-              className={`dash-sidebar__link${tab === t.id ? ' dash-sidebar__link--active' : ''}`}
-              onClick={() => setTab(t.id)}
-              title={!sidebarOpen ? t.label : undefined}
-            >
-              <span className="dash-sidebar__link-icon">{t.label.split(' ')[0]}</span>
-              {sidebarOpen && <span>{t.label.slice(t.label.indexOf(' ') + 1)}</span>}
-            </button>
-          ))}
+          {TABS.map((t) => {
+            const Icon = t.icon;
+            return (
+              <button
+                key={t.id}
+                className={`dash-sidebar__link${tab === t.id ? ' dash-sidebar__link--active' : ''}`}
+                onClick={() => setTab(t.id)}
+                title={!sidebarOpen ? t.label : undefined}
+              >
+                <Icon className="dash-sidebar__link-icon" size={18} />
+                {sidebarOpen && (
+                  <span className="dash-sidebar__link-text">
+                    {t.label}
+                    {t.badge > 0 && <span className="dash-sidebar__badge">{t.badge}</span>}
+                  </span>
+                )}
+              </button>
+            );
+          })}
         </nav>
 
         <div className="dash-sidebar__bottom">
@@ -181,7 +268,7 @@ function Dashboard() {
             )}
           </div>
           <button className="btn btn-ghost dash-sidebar__logout" onClick={handleLogout} id="admin-logout" title="Logout">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            <LogOut size={16} />
             {sidebarOpen && 'Logout'}
           </button>
         </div>
@@ -190,8 +277,18 @@ function Dashboard() {
       {/* Main */}
       <main className="dash-main">
         <div className="dash-topbar">
-          <h2 className="dash-topbar__title">
-            {TABS.find((t) => t.id === tab)?.label}
+          <h2 className="dash-topbar__title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            {(() => {
+              const currentTab = TABS.find((t) => t.id === tab);
+              if (!currentTab) return null;
+              const TabIcon = currentTab.icon;
+              return (
+                <>
+                  <TabIcon size={20} style={{ color: 'var(--color-primary)' }} />
+                  {currentTab.label}
+                </>
+              );
+            })()}
           </h2>
         </div>
 
@@ -199,10 +296,10 @@ function Dashboard() {
         {tab === 'overview' && (
           <div className="dash-content animate-fadeInUp">
             <div className="dash-stats">
-              <StatCard icon="🚀" label="Total Projects"  value={projects.length}  color="rgba(99,120,255,0.15)" />
-              <StatCard icon="⚡" label="Total Skills"    value={skills.length}    color="rgba(0,229,255,0.12)" />
-              <StatCard icon="💬" label="Total Messages"  value={messages.length}  color="rgba(0,200,150,0.12)" />
-              <StatCard icon="📬" label="Unread Messages" value={unread}           color="rgba(255,204,0,0.12)" />
+              <StatCard icon={<Briefcase size={22} />} label="Total Projects"  value={projects.length}  color="rgba(99,120,255,0.15)" />
+              <StatCard icon={<Zap size={22} />} label="Total Skills"    value={skills.length}    color="rgba(0,229,255,0.12)" />
+              <StatCard icon={<MessageSquare size={22} />} label="Total Messages"  value={messages.length}  color="rgba(0,200,150,0.12)" />
+              <StatCard icon={unread > 0 ? <Mail size={22} /> : <MailOpen size={22} />} label="Unread Messages" value={unread}           color="rgba(255,204,0,0.12)" />
             </div>
             <div className="dash-welcome card">
               <h3>Welcome back, {user?.name} 👋</h3>
@@ -216,7 +313,9 @@ function Dashboard() {
           <div className="dash-content animate-fadeInUp">
             <div className="dash-toolbar">
               <h3>All Projects ({projects.length})</h3>
-              <button id="add-project-btn" className="btn btn-primary" onClick={openAddProject}>+ Add Project</button>
+              <button id="add-project-btn" className="btn btn-primary" onClick={openAddProject} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <Plus size={16} /> Add Project
+              </button>
             </div>
             {pLoading ? <p>Loading…</p> : (
               <div className="dash-table-wrap">
@@ -232,8 +331,12 @@ function Dashboard() {
                         <td>{p.featured ? '⭐' : '—'}</td>
                         <td>
                           <div className="dash-actions">
-                            <button className="btn btn-ghost dash-btn" onClick={() => openEditProject(p)}>Edit</button>
-                            <button className="btn dash-btn dash-btn--danger" onClick={() => handleDeleteProject(p._id)}>Delete</button>
+                            <button className="btn btn-ghost dash-btn" onClick={() => openEditProject(p)} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                              <Edit3 size={13} /> Edit
+                            </button>
+                            <button className="btn dash-btn dash-btn--danger" onClick={() => handleDeleteProject(p._id)} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                              <Trash2 size={13} /> Delete
+                            </button>
                           </div>
                         </td>
                       </tr>
@@ -250,7 +353,9 @@ function Dashboard() {
           <div className="dash-content animate-fadeInUp">
             <div className="dash-toolbar">
               <h3>All Skills ({skills.length})</h3>
-              <button id="add-skill-btn" className="btn btn-primary" onClick={openAddSkill}>+ Add Skill</button>
+              <button id="add-skill-btn" className="btn btn-primary" onClick={openAddSkill} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <Plus size={16} /> Add Skill
+              </button>
             </div>
             {sLoading ? <p>Loading…</p> : (
               <div className="dash-table-wrap">
@@ -271,8 +376,12 @@ function Dashboard() {
                         </td>
                         <td>
                           <div className="dash-actions">
-                            <button className="btn btn-ghost dash-btn" onClick={() => openEditSkill(s)}>Edit</button>
-                            <button className="btn dash-btn dash-btn--danger" onClick={() => handleDeleteSkill(s._id)}>Delete</button>
+                            <button className="btn btn-ghost dash-btn" onClick={() => openEditSkill(s)} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                              <Edit3 size={13} /> Edit
+                            </button>
+                            <button className="btn dash-btn dash-btn--danger" onClick={() => handleDeleteSkill(s._id)} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                              <Trash2 size={13} /> Delete
+                            </button>
                           </div>
                         </td>
                       </tr>
@@ -310,7 +419,9 @@ function Dashboard() {
                         <td>
                           <div className="dash-actions">
                             <button className="btn btn-ghost dash-btn" onClick={() => openMessage(m)}>View</button>
-                            <button className="btn dash-btn dash-btn--danger" onClick={() => handleDeleteMessage(m._id)}>Delete</button>
+                            <button className="btn dash-btn dash-btn--danger" onClick={() => handleDeleteMessage(m._id)} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                              <Trash2 size={13} /> Delete
+                            </button>
                           </div>
                         </td>
                       </tr>
@@ -319,6 +430,69 @@ function Dashboard() {
                 </table>
               </div>
             )}
+          </div>
+        )}
+
+        {/* ── PROFILE ── */}
+        {tab === 'profile' && (
+          <div className="dash-content animate-fadeInUp">
+            <div className="profile-card card">
+              <div className="profile-card__header">
+                <div className="profile-card__avatar-large">
+                  {user?.name?.[0] ?? 'A'}
+                </div>
+                <div>
+                  <h3 className="profile-card__name">{user?.name}</h3>
+                  <p className="profile-card__email">{user?.email}</p>
+                  <span className="badge profile-card__role">Role: {user?.role || 'Admin'}</span>
+                </div>
+              </div>
+
+              <div className="profile-card__body">
+                <h4 className="profile-card__section-title">Change Password</h4>
+                <form onSubmit={handlePasswordChange} className="profile-form" id="password-change-form">
+                  <div className="form-group">
+                    <label className="form-label" htmlFor="profile-current-pwd">Current Password</label>
+                    <input
+                      id="profile-current-pwd"
+                      type="password"
+                      className="form-input"
+                      placeholder="••••••••"
+                      required
+                      value={pwdForm.currentPassword}
+                      onChange={(e) => setPwdForm({ ...pwdForm, currentPassword: e.target.value })}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label" htmlFor="profile-new-pwd">New Password (min 6 characters)</label>
+                    <input
+                      id="profile-new-pwd"
+                      type="password"
+                      className="form-input"
+                      placeholder="••••••••"
+                      required
+                      value={pwdForm.newPassword}
+                      onChange={(e) => setPwdForm({ ...pwdForm, newPassword: e.target.value })}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label" htmlFor="profile-confirm-pwd">Confirm New Password</label>
+                    <input
+                      id="profile-confirm-pwd"
+                      type="password"
+                      className="form-input"
+                      placeholder="••••••••"
+                      required
+                      value={pwdForm.confirmPassword}
+                      onChange={(e) => setPwdForm({ ...pwdForm, confirmPassword: e.target.value })}
+                    />
+                  </div>
+                  <button type="submit" className="btn btn-primary profile-form__submit" disabled={pwdLoading}>
+                    {pwdLoading ? 'Saving...' : 'Update Password'}
+                  </button>
+                </form>
+              </div>
+            </div>
           </div>
         )}
       </main>
@@ -347,14 +521,43 @@ function Dashboard() {
                 value={pForm.description} onChange={(e) => setPForm((f) => ({ ...f, description: e.target.value }))} />
             </div>
 
-            {/* Image URL field with live preview */}
+            {/* Image upload selector & URL input with live preview */}
             <div className="form-group">
-              <label className="form-label">Project Image URL</label>
-              <input type="url" className="form-input" placeholder="https://example.com/screenshot.png"
-                value={pForm.imageUrl} onChange={(e) => setPForm((f) => ({ ...f, imageUrl: e.target.value }))} />
+              <label className="form-label">Project Image</label>
+              <div className="upload-container">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  style={{ display: 'none' }}
+                  id="project-image-file"
+                  disabled={uploading}
+                />
+                <label
+                  htmlFor="project-image-file"
+                  className={`upload-box${uploading ? ' upload-box--uploading' : ''}`}
+                >
+                  <Upload className="upload-box__icon" size={24} />
+                  <span className="upload-box__text">
+                    {uploading ? 'Uploading to Cloudinary...' : 'Select Image File'}
+                  </span>
+                  <span className="upload-box__hint">Max size 5MB (PNG, JPG, WEBP)</span>
+                </label>
+              </div>
+
+              <label className="form-label" style={{ marginTop: '0.75rem' }}>Or paste image URL</label>
+              <input
+                type="url"
+                className="form-input"
+                placeholder="https://example.com/screenshot.png"
+                value={pForm.imageUrl}
+                onChange={(e) => setPForm((f) => ({ ...f, imageUrl: e.target.value }))}
+                disabled={uploading}
+              />
+
               {pForm.imageUrl && (
                 <div className="modal-img-preview">
-                  <img src={pForm.imageUrl} alt="Preview" onError={(e) => { e.target.style.display='none'; }} />
+                  <img src={pForm.imageUrl} alt="Preview" onError={(e) => { e.target.style.display = 'none'; }} />
                   <span className="modal-img-preview__label">Preview</span>
                 </div>
               )}
@@ -386,7 +589,7 @@ function Dashboard() {
               <label className="form-label">Category</label>
               <select className="form-input" value={sForm.category}
                 onChange={(e) => setSForm((f) => ({ ...f, category: e.target.value }))}>
-                {['Frontend', 'Backend', 'Database', 'Tools', 'Other'].map((c) => (
+                {['Programming', 'Frontend', 'Backend', 'Database', 'Tools', 'Other'].map((c) => (
                   <option key={c} value={c}>{c}</option>
                 ))}
               </select>
@@ -416,7 +619,9 @@ function Dashboard() {
             <div className="modal-footer">
               <button className="btn btn-ghost" onClick={() => setModal(null)}>Close</button>
               <a href={`mailto:${selected.email}?subject=Re: ${selected.subject}`} className="btn btn-primary">Reply</a>
-              <button className="btn dash-btn--danger btn" onClick={() => handleDeleteMessage(selected._id)}>Delete</button>
+              <button className="btn dash-btn--danger btn" onClick={() => handleDeleteMessage(selected._id)} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <Trash2 size={13} /> Delete
+              </button>
             </div>
           </div>
         </Modal>

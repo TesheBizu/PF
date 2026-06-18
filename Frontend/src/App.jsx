@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { ToastContainer } from 'react-toastify';
+import { ToastContainer, Slide } from 'react-toastify';
 import { useSelector } from 'react-redux';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -66,12 +66,13 @@ function App() {
       {/* Toast notifications */}
       <ToastContainer
         position="top-right"
-        autoClose={4000}
+        autoClose={1800}
         hideProgressBar={false}
         newestOnTop
         closeOnClick
         pauseOnHover
         theme={theme}
+        transition={Slide}
         toastStyle={{
           background: 'var(--color-surface)',
           color: 'var(--color-text)',

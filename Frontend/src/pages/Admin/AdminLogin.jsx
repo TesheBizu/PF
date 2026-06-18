@@ -88,10 +88,7 @@ function AdminLogin() {
         {/* ── Google tab ── */}
         {tab === 'google' && (
           <div className="admin-login__google">
-            <p className="admin-login__google-hint">
-              Sign in with the Google account associated with<br/>
-              <strong>teshelin7@gmail.com</strong>
-            </p>
+            
             <div className="admin-login__google-btn">
               <GoogleLogin
                 onSuccess={handleGoogleSuccess}
@@ -123,7 +120,7 @@ function AdminLogin() {
               <label htmlFor="admin-email" className="form-label">Email Address</label>
               <input
                 id="admin-email" name="email" type="email"
-                placeholder="teshelin7@gmail.com"
+                placeholder="abc123@gmail.com"
                 className="form-input" value={form.email}
                 onChange={handleChange} autoComplete="email" required
               />

@@ -24,16 +24,18 @@ const seedData = async () => {
 
   // Seed skills
   const skills = [
-    { name: 'React', category: 'Frontend', proficiency: 90, order: 1 },
-    { name: 'Redux Toolkit', category: 'Frontend', proficiency: 85, order: 2 },
-    { name: 'JavaScript', category: 'Frontend', proficiency: 88, order: 3 },
-    { name: 'Node.js', category: 'Backend', proficiency: 80, order: 1 },
-    { name: 'Express.js', category: 'Backend', proficiency: 82, order: 2 },
-    { name: 'REST APIs', category: 'Backend', proficiency: 85, order: 3 },
-    { name: 'MongoDB', category: 'Database', proficiency: 78, order: 1 },
-    { name: 'Git', category: 'Tools', proficiency: 85, order: 1 },
-    { name: 'GitHub', category: 'Tools', proficiency: 85, order: 2 },
-    { name: 'Postman', category: 'Tools', proficiency: 80, order: 3 },
+    { name: 'JavaScript', category: 'Programming', proficiency: 88, order: 1 },
+    { name: 'TypeScript', category: 'Programming', proficiency: 85, order: 2 },
+    { name: 'Python', category: 'Programming', proficiency: 80, order: 3 },
+    { name: 'React', category: 'Frontend', proficiency: 90, order: 4 },
+    { name: 'Redux Toolkit', category: 'Frontend', proficiency: 85, order: 5 },
+    { name: 'Node.js', category: 'Backend', proficiency: 80, order: 6 },
+    { name: 'Express.js', category: 'Backend', proficiency: 82, order: 7 },
+    { name: 'REST APIs', category: 'Backend', proficiency: 85, order: 8 },
+    { name: 'MongoDB', category: 'Database', proficiency: 78, order: 9 },
+    { name: 'Git', category: 'Tools', proficiency: 85, order: 10 },
+    { name: 'GitHub', category: 'Tools', proficiency: 85, order: 11 },
+    { name: 'Postman', category: 'Tools', proficiency: 80, order: 12 },
   ];
   await Skill.insertMany(skills);
   console.log('✅ Skills seeded');
