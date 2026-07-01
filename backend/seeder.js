@@ -25,7 +25,6 @@ const seedData = async () => {
   // Seed skills
   const skills = [
     { name: 'JavaScript', category: 'Programming', proficiency: 88, order: 1 },
-    { name: 'TypeScript', category: 'Programming', proficiency: 85, order: 2 },
     { name: 'Python', category: 'Programming', proficiency: 80, order: 3 },
     { name: 'React', category: 'Frontend', proficiency: 90, order: 4 },
     { name: 'Redux Toolkit', category: 'Frontend', proficiency: 85, order: 5 },
@@ -35,7 +34,7 @@ const seedData = async () => {
     { name: 'MongoDB', category: 'Database', proficiency: 78, order: 9 },
     { name: 'Git', category: 'Tools', proficiency: 85, order: 10 },
     { name: 'GitHub', category: 'Tools', proficiency: 85, order: 11 },
-    { name: 'Postman', category: 'Tools', proficiency: 80, order: 12 },
+    { name: 'Postman', category: 'Tools', proficiency: 80, order: 12 }
   ];
   await Skill.insertMany(skills);
   console.log('✅ Skills seeded');
@@ -47,7 +46,7 @@ const seedData = async () => {
       description:
         'A full-stack personal portfolio with a React frontend, Node.js/Express backend, and MongoDB database. Features an admin dashboard for managing projects, skills, and contact messages. Secured with JWT authentication.',
       techStack: ['React', 'Redux Toolkit', 'Express.js', 'MongoDB', 'JWT Authentication'],
-      githubUrl: 'https://github.com/TesheBizu',
+      githubUrl: 'https://github.com/TesheBizu/PF',
       liveUrl: '',
       featured: true,
       order: 1,

@@ -2,12 +2,6 @@ import { Cpu, Server, Database, KeyRound, Mail } from 'lucide-react';
 import { Github } from '../../components/Icons';
 import './About.css';
 
-const highlights = [
-  { icon: Cpu, label: 'Frontend',  value: 'React & Redux Toolkit' },
-  { icon: Server, label: 'Backend',   value: 'Node.js & Express.js' },
-  { icon: Database, label: 'Database', value: 'MongoDB & Mongoose' },
-  { icon: KeyRound, label: 'Auth',      value: 'JWT & REST APIs' },
-];
 
 const quickFacts = [
   { label: 'Name',     value: 'Teshome Bizuayehu' },
@@ -74,22 +68,7 @@ function About() {
             </div>
           </div>
         </div>
-
-        {/* Highlights */}
-        <div className="about__highlights animate-fadeInUp delay-300" style={{ marginTop: 'var(--space-3xl)' }}>
-          {highlights.map((h, i) => {
-            const Icon = h.icon;
-            return (
-              <div key={h.label} className="about__highlight-card card">
-                <span className="about__highlight-icon" style={{ color: 'var(--color-primary)', display: 'flex', justifyContent: 'center', marginBottom: 'var(--space-sm)' }}>
-                  <Icon size={32} />
-                </span>
-                <h4 className="about__highlight-label">{h.label}</h4>
-                <p className="about__highlight-value">{h.value}</p>
-              </div>
-            );
-          })}
-        </div>
+        
       </div>
     </section>
   );

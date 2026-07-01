@@ -5,7 +5,7 @@ import { toast } from 'react-toastify';
 import { logout } from '../../redux/slices/authSlice';
 import { fetchProjects, createProject, updateProject, deleteProject } from '../../redux/slices/projectsSlice';
 import { fetchSkills, createSkill, updateSkill, deleteSkill } from '../../redux/slices/skillsSlice';
-import { fetchMessages, deleteMessage, markMessageRead } from '../../redux/slices/messagesSlice';
+import { fetchMessages, deleteMessage, markMessageRead, replyToMessage } from '../../redux/slices/messagesSlice';
 import api from '../../services/api';
 import {
   LayoutDashboard,
@@ -22,7 +22,10 @@ import {
   Trash2,
   MailOpen,
   Mail,
-  Upload
+  Upload,
+  Eye,
+  EyeOff,
+  Send,
 } from 'lucide-react';
 import './Admin.css';
 
@@ -81,6 +84,13 @@ function Dashboard() {
   // Profile Form State
   const [pwdForm, setPwdForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
   const [pwdLoading, setPwdLoading] = useState(false);
+  const [showCurrentPw, setShowCurrentPw] = useState(false);
+  const [showNewPw, setShowNewPw] = useState(false);
+  const [showConfirmPw, setShowConfirmPw] = useState(false);
+
+  // Reply state
+  const [replyText, setReplyText] = useState('');
+  const [replying, setReplying]   = useState(false);
 
   useEffect(() => {
     dispatch(fetchProjects());
@@ -168,12 +178,31 @@ function Dashboard() {
   };
 
   // ── Message handlers ────────────────────────────────────────
-  const openMessage = (m) => { setSelected(m); dispatch(markMessageRead(m._id)); setModal('viewMessage'); };
+  const openMessage = (m) => {
+    setSelected(m);
+    setReplyText('');
+    dispatch(markMessageRead(m._id));
+    setModal('viewMessage');
+  };
   const handleDeleteMessage = async (id) => {
     if (!window.confirm('Delete this message?')) return;
     await dispatch(deleteMessage(id));
     toast.success('Message deleted');
     setModal(null);
+  };
+  const handleReply = async () => {
+    if (!replyText.trim()) { toast.error('Please write a reply first'); return; }
+    setReplying(true);
+    try {
+      const result = await dispatch(replyToMessage({ id: selected._id, replyText })).unwrap();
+      toast.success(`✅ Reply sent to ${result.email}`);
+      setSelected(result);
+      setReplyText('');
+    } catch (err) {
+      toast.error(`❌ ${err}`);
+    } finally {
+      setReplying(false);
+    }
   };
 
   // ── Profile handler ─────────────────────────────────────────
@@ -196,6 +225,9 @@ function Dashboard() {
       });
       toast.success(data.message || 'Password changed successfully!');
       setPwdForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+      setShowCurrentPw(false);
+      setShowNewPw(false);
+      setShowConfirmPw(false);
     } catch (err) {
       const errMsg = err.response?.data?.message || 'Failed to change password';
       toast.error(errMsg);
@@ -302,7 +334,7 @@ function Dashboard() {
               <StatCard icon={unread > 0 ? <Mail size={22} /> : <MailOpen size={22} />} label="Unread Messages" value={unread}           color="rgba(255,204,0,0.12)" />
             </div>
             <div className="dash-welcome card">
-              <h3>Welcome back, {user?.name} 👋</h3>
+              <h3>Welcome back, {user?.name} </h3>
               <p>Manage your portfolio content from the sidebar tabs. All changes are saved to MongoDB in real time.</p>
             </div>
           </div>
@@ -453,39 +485,69 @@ function Dashboard() {
                 <form onSubmit={handlePasswordChange} className="profile-form" id="password-change-form">
                   <div className="form-group">
                     <label className="form-label" htmlFor="profile-current-pwd">Current Password</label>
-                    <input
-                      id="profile-current-pwd"
-                      type="password"
-                      className="form-input"
-                      placeholder="••••••••"
-                      required
-                      value={pwdForm.currentPassword}
-                      onChange={(e) => setPwdForm({ ...pwdForm, currentPassword: e.target.value })}
-                    />
+                    <div className="profile-form__pw-wrap">
+                      <input
+                        id="profile-current-pwd"
+                        type={showCurrentPw ? 'text' : 'password'}
+                        className="form-input"
+                        placeholder="••••••••"
+                        required
+                        value={pwdForm.currentPassword}
+                        onChange={(e) => setPwdForm({ ...pwdForm, currentPassword: e.target.value })}
+                      />
+                      <button
+                        type="button"
+                        className="profile-form__pw-toggle"
+                        onClick={() => setShowCurrentPw((v) => !v)}
+                        aria-label={showCurrentPw ? 'Hide password' : 'Show password'}
+                      >
+                        {showCurrentPw ? <EyeOff size={18} /> : <Eye size={18} />}
+                      </button>
+                    </div>
                   </div>
                   <div className="form-group">
                     <label className="form-label" htmlFor="profile-new-pwd">New Password (min 6 characters)</label>
-                    <input
-                      id="profile-new-pwd"
-                      type="password"
-                      className="form-input"
-                      placeholder="••••••••"
-                      required
-                      value={pwdForm.newPassword}
-                      onChange={(e) => setPwdForm({ ...pwdForm, newPassword: e.target.value })}
-                    />
+                    <div className="profile-form__pw-wrap">
+                      <input
+                        id="profile-new-pwd"
+                        type={showNewPw ? 'text' : 'password'}
+                        className="form-input"
+                        placeholder="••••••••"
+                        required
+                        value={pwdForm.newPassword}
+                        onChange={(e) => setPwdForm({ ...pwdForm, newPassword: e.target.value })}
+                      />
+                      <button
+                        type="button"
+                        className="profile-form__pw-toggle"
+                        onClick={() => setShowNewPw((v) => !v)}
+                        aria-label={showNewPw ? 'Hide password' : 'Show password'}
+                      >
+                        {showNewPw ? <EyeOff size={18} /> : <Eye size={18} />}
+                      </button>
+                    </div>
                   </div>
                   <div className="form-group">
                     <label className="form-label" htmlFor="profile-confirm-pwd">Confirm New Password</label>
-                    <input
-                      id="profile-confirm-pwd"
-                      type="password"
-                      className="form-input"
-                      placeholder="••••••••"
-                      required
-                      value={pwdForm.confirmPassword}
-                      onChange={(e) => setPwdForm({ ...pwdForm, confirmPassword: e.target.value })}
-                    />
+                    <div className="profile-form__pw-wrap">
+                      <input
+                        id="profile-confirm-pwd"
+                        type={showConfirmPw ? 'text' : 'password'}
+                        className="form-input"
+                        placeholder="••••••••"
+                        required
+                        value={pwdForm.confirmPassword}
+                        onChange={(e) => setPwdForm({ ...pwdForm, confirmPassword: e.target.value })}
+                      />
+                      <button
+                        type="button"
+                        className="profile-form__pw-toggle"
+                        onClick={() => setShowConfirmPw((v) => !v)}
+                        aria-label={showConfirmPw ? 'Hide password' : 'Show password'}
+                      >
+                        {showConfirmPw ? <EyeOff size={18} /> : <Eye size={18} />}
+                      </button>
+                    </div>
                   </div>
                   <button type="submit" className="btn btn-primary profile-form__submit" disabled={pwdLoading}>
                     {pwdLoading ? 'Saving...' : 'Update Password'}
@@ -612,13 +674,56 @@ function Dashboard() {
       {modal === 'viewMessage' && selected && (
         <Modal title="Message" onClose={() => setModal(null)}>
           <div className="modal-message">
-            <p><strong>From:</strong> {selected.name} &lt;{selected.email}&gt;</p>
-            <p><strong>Subject:</strong> {selected.subject}</p>
-            <p><strong>Date:</strong> {new Date(selected.createdAt).toLocaleString()}</p>
+            {/* Message meta */}
+            <div className="modal-message__meta">
+              <p><strong>From:</strong> {selected.name} &lt;{selected.email}&gt;</p>
+              <p><strong>Subject:</strong> {selected.subject}</p>
+              <p><strong>Date:</strong> {new Date(selected.createdAt).toLocaleString()}</p>
+              {selected.isReplied && (
+                <span className="badge modal-message__replied-badge">✓ Replied</span>
+              )}
+            </div>
+
+            {/* Original message body */}
             <div className="modal-message__body">{selected.message}</div>
+
+            {/* Previous reply display */}
+            {selected.isReplied && selected.replyText && (
+              <div className="modal-message__prev-reply">
+                <p className="modal-message__prev-reply-label">📨 Your previous reply</p>
+                <div className="modal-message__prev-reply-body">{selected.replyText}</div>
+                <p className="modal-message__prev-reply-date">
+                  Sent on {new Date(selected.repliedAt).toLocaleString()}
+                </p>
+              </div>
+            )}
+
+            {/* Reply compose box */}
+            <div className="modal-message__reply-box">
+              <label className="form-label">
+                {selected.isReplied ? 'Send another reply' : 'Write a reply'}
+              </label>
+              <textarea
+                className="form-textarea"
+                rows={5}
+                placeholder={`Hi ${selected.name},\n\nThank you for reaching out...`}
+                value={replyText}
+                onChange={(e) => setReplyText(e.target.value)}
+                disabled={replying}
+              />
+            </div>
+
             <div className="modal-footer">
               <button className="btn btn-ghost" onClick={() => setModal(null)}>Close</button>
-              <a href={`mailto:${selected.email}?subject=Re: ${selected.subject}`} className="btn btn-primary">Reply</a>
+              <button
+                className="btn btn-primary"
+                onClick={handleReply}
+                disabled={replying || !replyText.trim()}
+                style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+              >
+                <Send size={15} />
+                {replying ? 'Sending...' : 'Send Reply'}
+              </button>
               <button className="btn dash-btn--danger btn" onClick={() => handleDeleteMessage(selected._id)} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                 <Trash2 size={13} /> Delete
               </button>

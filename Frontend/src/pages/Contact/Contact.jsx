@@ -38,7 +38,7 @@ function Contact() {
   // Success toast
   useEffect(() => {
     if (sent) {
-      toast.success('🎉 Message sent! I\'ll get back to you soon.');
+      toast.success('Thank you for contacting me! I\'ll get back to you soon.');
       setForm(initialForm);
       dispatch(resetSent());
     }

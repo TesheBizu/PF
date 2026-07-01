@@ -49,6 +49,18 @@ export const deleteMessage = createAsyncThunk(
   }
 );
 
+export const replyToMessage = createAsyncThunk(
+  'messages/reply',
+  async ({ id, replyText }, { rejectWithValue }) => {
+    try {
+      const { data } = await api.post(`/messages/${id}/reply`, { replyText });
+      return data.data;
+    } catch (err) {
+      return rejectWithValue(err.response?.data?.message || 'Failed to send reply');
+    }
+  }
+);
+
 const messagesSlice = createSlice({
   name: 'messages',
   initialState: { items: [], loading: false, error: null, sent: false },
@@ -74,6 +86,11 @@ const messagesSlice = createSlice({
       // Delete
       .addCase(deleteMessage.fulfilled, (state, action) => {
         state.items = state.items.filter((m) => m._id !== action.payload);
+      })
+      // Reply
+      .addCase(replyToMessage.fulfilled, (state, action) => {
+        const idx = state.items.findIndex((m) => m._id === action.payload._id);
+        if (idx !== -1) state.items[idx] = action.payload;
       });
   },
 });

@@ -14,6 +14,7 @@ const skillRoutes = require('./routes/skills');
 const messageRoutes = require('./routes/messages');
 const uploadRoutes = require('./routes/upload');
 
+
 // Connect to Database
 connectDB();
 
@@ -69,14 +70,14 @@ app.use('*', (req, res) => {
 app.use(errorHandler);
 
 // ─── Start Server ──────────────────────────────────────────────────────────────
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5002;
 const server = app.listen(PORT, () => {
-  console.log(`\n🚀 Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
-  console.log(`📡 API available at http://localhost:${PORT}/api`);
+  console.log(`\n Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
+  console.log(` API available at http://localhost:${PORT}/api`);
 });
 
 // Handle unhandled promise rejections
 process.on('unhandledRejection', (err) => {
-  console.error(`❌ Unhandled Rejection: ${err.message}`);
+  console.error(` Unhandled Rejection: ${err.message}`);
   server.close(() => process.exit(1));
 });
