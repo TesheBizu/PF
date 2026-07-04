@@ -243,6 +243,86 @@
   100% { transform: translateY(12px); opacity: 0; }
 }
 
+/* ── Unified Stats Panel (replacing avatar & cards) ────────── */
+.home__visual {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.home__stats-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xl);
+  padding: var(--space-2xl);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--color-surface) 70%, transparent) 0%, color-mix(in srgb, var(--color-bg-secondary) 70%, transparent) 100%);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  width: 100%;
+  max-width: 380px;
+  position: relative;
+  box-shadow: var(--shadow-lg), 0 0 40px rgba(99, 120, 255, 0.05);
+}
+
+.home__stats-panel::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--color-primary), var(--color-accent), transparent);
+  opacity: 0.8;
+}
+
+.home__stat-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xl);
+  padding-bottom: var(--space-md);
+  border-bottom: 1px solid rgba(99, 120, 255, 0.08);
+  transition: transform var(--transition-base);
+}
+
+.home__stat-row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.home__stat-row:hover {
+  transform: translateX(6px);
+}
+
+.home__stat-num {
+  font-family: var(--font-mono);
+  font-size: 2.8rem;
+  font-weight: 800;
+  line-height: 1;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  min-width: 80px;
+  text-shadow: 0 4px 20px rgba(99, 120, 255, 0.15);
+}
+
+.home__stat-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.home__stat-info h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-heading);
+}
+
+.home__stat-info p {
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+}
+
+
 /* ── Responsive ─────────────────────────────────────────────── */
 @media (max-width: 900px) {
   .home__container {
@@ -253,18 +333,87 @@
   .home__bio      { margin: 0 auto var(--space-xl); }
   .home__actions  { justify-content: center; }
   .home__socials  { justify-content: center; }
-  .home__visual   { min-height: 320px; }
-  .home__stat--left  { left: 10%;  bottom: 20px; }
-  .home__stat--right { right: 10%; top: 20px; }
+  .home__visual   { min-height: auto; }
+
+  /* Stack stats horizontally below text on tablets */
+  .home__stats-panel {
+    flex-direction: row;
+    max-width: 100%;
+    justify-content: space-around;
+    padding: var(--space-xl);
+    gap: var(--space-lg);
+  }
+
+  .home__stat-row {
+    flex: 1;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    border-bottom: none;
+    border-right: 1px solid rgba(99, 120, 255, 0.08);
+    padding-bottom: 0;
+    padding-right: var(--space-md);
+    gap: var(--space-xs);
+  }
+
+  .home__stat-row:last-child {
+    border-right: none;
+    padding-right: 0;
+  }
+}
+
+@media (max-width: 600px) {
+  .home__stats-panel {
+    flex-direction: column;
+    align-items: stretch;
+    max-width: 100%;
+  }
+
+  .home__stat-row {
+    flex-direction: row;
+    align-items: center;
+    text-align: left;
+    border-right: none;
+    border-bottom: 1px solid rgba(99, 120, 255, 0.08);
+    padding-right: 0;
+    padding-bottom: var(--space-md);
+    gap: var(--space-lg);
+  }
+
+  .home__stat-row:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
 }
 
 @media (max-width: 480px) {
   .home__name { font-size: clamp(2.2rem, 8vw, 3rem); }
   .home__actions { flex-direction: column; align-items: center; }
   .home__actions .btn { width: 100%; justify-content: center; }
-  .home__avatar-wrap { width: 220px; height: 220px; }
-  .home__avatar { width: 140px; height: 140px; }
-  .home__avatar-initials { font-size: 2.8rem; }
-  .home__stat { display: none; }
   .home__scroll-hint { display: none; }
+
+  /* Compact spacing for small phone screens */
+  .home__stats-panel {
+    padding: var(--space-md);
+    gap: var(--space-md);
+  }
+
+  .home__stat-row {
+    gap: var(--space-md);
+  }
+
+  .home__stat-num {
+    font-size: 2.2rem;
+    min-width: 60px;
+  }
+
+  .home__stat-info h4 {
+    font-size: 0.9rem;
+  }
+  
+  .home__stat-info p {
+    font-size: 0.78rem;
+  }
 }
+
+
