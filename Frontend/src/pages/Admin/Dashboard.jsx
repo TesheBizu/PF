@@ -6,6 +6,7 @@ import { logout } from '../../redux/slices/authSlice';
 import { fetchProjects, createProject, updateProject, deleteProject } from '../../redux/slices/projectsSlice';
 import { fetchSkills, createSkill, updateSkill, deleteSkill } from '../../redux/slices/skillsSlice';
 import { fetchMessages, deleteMessage, markMessageRead, replyToMessage } from '../../redux/slices/messagesSlice';
+import { fetchExperiences, createExperience, updateExperience, deleteExperience } from '../../redux/slices/experiencesSlice';
 import api from '../../services/api';
 import {
   LayoutDashboard,
@@ -26,6 +27,7 @@ import {
   Eye,
   EyeOff,
   Send,
+  History,
 } from 'lucide-react';
 import './Admin.css';
 
@@ -64,6 +66,7 @@ function StatCard({ icon, label, value, color }) {
 // ── Initial form states ──────────────────────────────────────
 const initProject = { title: '', description: '', techStack: '', githubUrl: '', liveUrl: '', imageUrl: '', featured: false };
 const initSkill   = { name: '', category: 'Programming', proficiency: 80 };
+const initExperience = { role: '', company: '', period: '', location: '', description: '', iconUrl: '', type: 'work', order: 0 };
 
 function Dashboard() {
   const dispatch   = useDispatch();
@@ -72,6 +75,7 @@ function Dashboard() {
   const { items: projects, loading: pLoading } = useSelector((s) => s.projects);
   const { items: skills,   loading: sLoading } = useSelector((s) => s.skills);
   const { items: messages, loading: mLoading } = useSelector((s) => s.messages);
+  const { items: experiences, loading: eLoading } = useSelector((s) => s.experiences);
 
   const [tab, setTab]           = useState('overview');
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -79,6 +83,7 @@ function Dashboard() {
   const [selected, setSelected] = useState(null);
   const [pForm, setPForm]       = useState(initProject);
   const [sForm, setSForm]       = useState(initSkill);
+  const [eForm, setEForm]       = useState(initExperience);
   const [uploading, setUploading] = useState(false);
 
   // Profile Form State
@@ -96,6 +101,7 @@ function Dashboard() {
     dispatch(fetchProjects());
     dispatch(fetchSkills());
     dispatch(fetchMessages());
+    dispatch(fetchExperiences());
   }, [dispatch]);
 
   const handleLogout = async () => {
@@ -177,6 +183,54 @@ function Dashboard() {
     toast.success('Skill deleted');
   };
 
+  // ── Experience handlers ─────────────────────────────────────
+  const openAddExperience = () => { setEForm(initExperience); setModal('addExperience'); };
+  const openEditExperience = (exp) => { setEForm(exp); setSelected(exp); setModal('editExperience'); };
+  
+  const handleLogoUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('image', file);
+
+    setUploading(true);
+    try {
+      const { data } = await api.post('/upload', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      if (data.success) {
+        setEForm((f) => ({ ...f, iconUrl: data.url }));
+        toast.success('Logo uploaded to Cloudinary successfully!');
+      } else {
+        toast.error(data.message || 'Failed to upload logo');
+      }
+    } catch (err) {
+      console.error(err);
+      const serverErr = err.response?.data?.error || err.response?.data?.message || 'Error uploading logo';
+      toast.error(typeof serverErr === 'object' ? JSON.stringify(serverErr) : String(serverErr));
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleSaveExperience = async () => {
+    if (modal === 'addExperience') {
+      await dispatch(createExperience(eForm));
+      toast.success('Experience added!');
+    } else {
+      await dispatch(updateExperience({ id: selected._id, expData: eForm }));
+      toast.success('Experience updated!');
+    }
+    setModal(null);
+  };
+
+  const handleDeleteExperience = async (id) => {
+    if (!window.confirm('Delete this experience timeline entry?')) return;
+    await dispatch(deleteExperience(id));
+    toast.success('Experience entry deleted');
+  };
+
   // ── Message handlers ────────────────────────────────────────
   const openMessage = (m) => {
     setSelected(m);
@@ -243,6 +297,7 @@ function Dashboard() {
     { id: 'overview',  label: 'Overview', icon: LayoutDashboard },
     { id: 'projects',  label: 'Projects', icon: Briefcase },
     { id: 'skills',    label: 'Skills', icon: Zap },
+    { id: 'experiences', label: 'Experiences', icon: History },
     { id: 'messages',  label: 'Messages', icon: MessageSquare, badge: unread },
     { id: 'profile',   label: 'Profile', icon: UserIcon },
   ];
@@ -330,7 +385,7 @@ function Dashboard() {
             <div className="dash-stats">
               <StatCard icon={<Briefcase size={22} />} label="Total Projects"  value={projects.length}  color="rgba(99,120,255,0.15)" />
               <StatCard icon={<Zap size={22} />} label="Total Skills"    value={skills.length}    color="rgba(0,229,255,0.12)" />
-              <StatCard icon={<MessageSquare size={22} />} label="Total Messages"  value={messages.length}  color="rgba(0,200,150,0.12)" />
+              <StatCard icon={<History size={22} />} label="Timeline Items"  value={experiences.length} color="rgba(167,139,250,0.15)" />
               <StatCard icon={unread > 0 ? <Mail size={22} /> : <MailOpen size={22} />} label="Unread Messages" value={unread}           color="rgba(255,204,0,0.12)" />
             </div>
             <div className="dash-welcome card">
@@ -412,6 +467,56 @@ function Dashboard() {
                               <Edit3 size={13} /> Edit
                             </button>
                             <button className="btn dash-btn dash-btn--danger" onClick={() => handleDeleteSkill(s._id)} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                              <Trash2 size={13} /> Delete
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ── EXPERIENCES ── */}
+        {tab === 'experiences' && (
+          <div className="dash-content animate-fadeInUp">
+            <div className="dash-toolbar">
+              <h3>All Timeline Items ({experiences.length})</h3>
+              <button id="add-experience-btn" className="btn btn-primary" onClick={openAddExperience} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <Plus size={16} /> Add Experience
+              </button>
+            </div>
+            {eLoading ? <p>Loading…</p> : (
+              <div className="dash-table-wrap">
+                <table className="dash-table">
+                  <thead>
+                    <tr><th>Role</th><th>Company / School</th><th>Period</th><th>Type</th><th>Actions</th></tr>
+                  </thead>
+                  <tbody>
+                    {experiences.map((exp) => (
+                      <tr key={exp._id}>
+                        <td><strong>{exp.role}</strong><br/><small>{exp.location}</small></td>
+                        <td>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            {exp.iconUrl ? (
+                              <img src={exp.iconUrl} alt={exp.company} style={{ width: '28px', height: '28px', objectFit: 'contain', background: '#fff', borderRadius: '4px', border: '1px solid var(--color-border)' }} />
+                            ) : (
+                              <div style={{ width: '28px', height: '28px', borderRadius: '4px', background: 'var(--color-surface-2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: 'bold' }}>{exp.company.charAt(0).toUpperCase()}</div>
+                            )}
+                            {exp.company}
+                          </div>
+                        </td>
+                        <td>{exp.period}</td>
+                        <td><span className="badge">{exp.type}</span></td>
+                        <td>
+                          <div className="dash-actions">
+                            <button className="btn btn-ghost dash-btn" onClick={() => openEditExperience(exp)} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                              <Edit3 size={13} /> Edit
+                            </button>
+                            <button className="btn dash-btn dash-btn--danger" onClick={() => handleDeleteExperience(exp._id)} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                               <Trash2 size={13} /> Delete
                             </button>
                           </div>
@@ -731,7 +836,99 @@ function Dashboard() {
           </div>
         </Modal>
       )}
+
+      {/* Add / Edit Experience */}
+      {(modal === 'addExperience' || modal === 'editExperience') && (
+        <Modal title={modal === 'addExperience' ? 'Add Experience' : 'Edit Experience'} onClose={() => setModal(null)}>
+          <div className="modal-form">
+            {[
+              { label: 'Role / Title', key: 'role', type: 'text', placeholder: 'Computer Science Student' },
+              { label: 'Company / School', key: 'company', type: 'text', placeholder: 'Bahir Dar University' },
+              { label: 'Period', key: 'period', type: 'text', placeholder: '2024 - Present' },
+              { label: 'Location', key: 'location', type: 'text', placeholder: 'Bahir Dar, Ethiopia' },
+            ].map(({ label, key, type, placeholder }) => (
+              <div className="form-group" key={key}>
+                <label className="form-label">{label}</label>
+                <input type={type} className="form-input" placeholder={placeholder}
+                  value={eForm[key]} onChange={(e) => setEForm((f) => ({ ...f, [key]: e.target.value }))} />
+              </div>
+            ))}
+
+            <div className="form-group">
+              <label className="form-label">Type</label>
+              <select className="form-input" value={eForm.type}
+                onChange={(e) => setEForm((f) => ({ ...f, type: e.target.value }))}>
+                <option value="work">Work Experience</option>
+                <option value="education">Education</option>
+                <option value="learning">Self-Learning</option>
+              </select>
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">Display Order (lower = first)</label>
+              <input type="number" className="form-input" placeholder="0"
+                value={eForm.order} onChange={(e) => setEForm((f) => ({ ...f, order: Number(e.target.value) }))} />
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">Description (use newlines or • for bullet points)</label>
+              <textarea className="form-textarea" rows={5}
+                placeholder={`• Relevant coursework: Web Dev, Mobile Dev...\n• Built team projects and prototypes`}
+                value={eForm.description} onChange={(e) => setEForm((f) => ({ ...f, description: e.target.value }))} />
+            </div>
+
+            {/* Logo upload */}
+            <div className="form-group">
+              <label className="form-label">Logo / Icon</label>
+              <div className="upload-container">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleLogoUpload}
+                  style={{ display: 'none' }}
+                  id="experience-logo-file"
+                  disabled={uploading}
+                />
+                <label
+                  htmlFor="experience-logo-file"
+                  className={`upload-box${uploading ? ' upload-box--uploading' : ''}`}
+                >
+                  <Upload className="upload-box__icon" size={24} />
+                  <span className="upload-box__text">
+                    {uploading ? 'Uploading to Cloudinary...' : 'Select Logo File'}
+                  </span>
+                  <span className="upload-box__hint">PNG, JPG, WEBP — max 5 MB</span>
+                </label>
+              </div>
+              <label className="form-label" style={{ marginTop: '0.75rem' }}>Or paste logo URL</label>
+              <input
+                type="url"
+                className="form-input"
+                placeholder="https://example.com/logo.png"
+                value={eForm.iconUrl}
+                onChange={(e) => setEForm((f) => ({ ...f, iconUrl: e.target.value }))}
+                disabled={uploading}
+              />
+              {eForm.iconUrl && (
+                <div className="modal-img-preview" style={{ background: '#fff', padding: '8px' }}>
+                  <img src={eForm.iconUrl} alt="Logo preview" style={{ objectFit: 'contain', maxHeight: '72px' }}
+                    onError={(e) => { e.target.style.display = 'none'; }} />
+                  <span className="modal-img-preview__label">Preview</span>
+                </div>
+              )}
+            </div>
+
+            <div className="modal-footer">
+              <button className="btn btn-ghost" onClick={() => setModal(null)}>Cancel</button>
+              <button className="btn btn-primary" onClick={handleSaveExperience}>
+                {modal === 'addExperience' ? 'Add Experience' : 'Save Changes'}
+              </button>
+            </div>
+          </div>
+        </Modal>
+      )}
     </div>
+
   );
 }
 
