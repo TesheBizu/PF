@@ -1,5 +1,5 @@
-import { Cpu, Server, Database, KeyRound, Mail } from 'lucide-react';
-import { Github } from '../../components/Icons';
+import { Cpu, Server, Database, KeyRound, Mail, Download } from 'lucide-react';
+
 import './About.css';
 
 
@@ -28,16 +28,17 @@ function About() {
         </div>
 
         <div className="about__grid">
-          {/* Avatar */}
+          {/* Avatar / Profile Image */}
           <div className="about__avatar-col animate-fadeInUp">
-            <div className="about__avatar-frame">
-              <div className="about__avatar-inner animate-glow">
-                <span className="about__initials">TB</span>
-              </div>
-              <div className="about__avatar-decor about__avatar-decor--1" />
-              <div className="about__avatar-decor about__avatar-decor--2" />
+            <div className="about__lego-container">
+              <img
+                src="/lego-profile.png"
+                alt="Teshome Bizuayehu — Full Stack Developer"
+                className="about__lego-image"
+              />
             </div>
           </div>
+
 
           {/* Content */}
           <div className="about__content animate-fadeInUp delay-200">
@@ -61,9 +62,13 @@ function About() {
                 <Mail size={16} style={{ marginRight: '6px', verticalAlign: 'middle' }} />
                 Contact Me
               </a>
-              <a href="https://github.com/TesheBizu" target="_blank" rel="noopener noreferrer" className="btn btn-secondary animate-hover">
-                <Github size={16} style={{ marginRight: '6px', verticalAlign: 'middle' }} />
-                GitHub Profile
+              <a
+                href="/cv.pdf"
+                download="Teshome_Bizuayehu_CV.pdf"
+                className="btn btn-secondary animate-hover"
+              >
+                <Download size={16} style={{ marginRight: '6px', verticalAlign: 'middle' }} />
+                Download CV
               </a>
             </div>
           </div>
