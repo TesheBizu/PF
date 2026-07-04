@@ -81,7 +81,138 @@
   box-shadow: 0 4px 15px var(--color-primary-glow);
 }
 
-/* Grid */
+/* Carousel */
+.projects__carousel-wrap {
+  position: relative;
+  margin-bottom: var(--space-3xl);
+  padding: 0 var(--space-xl);
+}
+
+.projects__swiper {
+  padding-bottom: 3rem !important;
+  overflow: hidden;
+}
+
+.projects__swiper .swiper-wrapper {
+  transition-timing-function: cubic-bezier(0.45, 0.05, 0.15, 1) !important;
+}
+
+.projects__swiper .swiper-slide {
+  height: auto;
+  display: flex;
+  opacity: 0.35;
+  transform: scale(0.88) translateY(12px);
+  filter: blur(2px);
+  transition:
+    opacity 0.45s cubic-bezier(0.45, 0.05, 0.15, 1),
+    transform 0.45s cubic-bezier(0.45, 0.05, 0.15, 1),
+    filter 0.45s cubic-bezier(0.45, 0.05, 0.15, 1);
+}
+
+.projects__swiper .swiper-slide-visible {
+  opacity: 0.65;
+  transform: scale(0.94) translateY(6px);
+  filter: blur(1px);
+}
+
+.projects__swiper .swiper-slide-active {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+  filter: blur(0);
+  z-index: 2;
+}
+
+/* Hover focus — hovered card clear & large, others dimmed */
+.projects__carousel-wrap--hovering .swiper-slide {
+  opacity: 0.3;
+  transform: scale(0.86) translateY(8px);
+  filter: blur(4px);
+}
+
+.projects__carousel-wrap--hovering .swiper-slide.projects__slide--focused {
+  opacity: 1;
+  transform: scale(1.07) translateY(-4px);
+  filter: blur(0);
+  z-index: 10;
+}
+
+.projects__carousel-wrap--hovering .swiper-slide-active:not(.projects__slide--focused) {
+  opacity: 0.3;
+  transform: scale(0.86) translateY(8px);
+  filter: blur(4px);
+}
+
+.projects__swiper .project-card {
+  width: 100%;
+  height: 100%;
+  transition: box-shadow 0.45s cubic-bezier(0.45, 0.05, 0.15, 1);
+}
+
+.projects__swiper .swiper-slide-active .project-card {
+  box-shadow: var(--shadow-md), 0 0 28px var(--color-primary-glow);
+}
+
+.projects__carousel-wrap--hovering .projects__slide--focused .project-card {
+  box-shadow: var(--shadow-md), 0 0 36px var(--color-primary-glow);
+  border-color: var(--color-primary);
+}
+
+/* Let the slide handle scale — avoid double transform from global .card:hover */
+.projects__swiper .project-card:hover {
+  transform: none;
+}
+
+.projects__empty {
+  text-align: center;
+  color: var(--color-text-muted);
+  padding: var(--space-2xl) 0;
+}
+
+/* Swiper navigation arrows */
+.projects__swiper .swiper-button-prev,
+.projects__swiper .swiper-button-next {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-primary);
+  transition: all var(--transition-base);
+}
+
+.projects__swiper .swiper-button-prev::after,
+.projects__swiper .swiper-button-next::after {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.projects__swiper .swiper-button-prev:hover,
+.projects__swiper .swiper-button-next:hover {
+  background: var(--color-primary-glow);
+  border-color: var(--color-primary);
+  box-shadow: 0 4px 16px var(--color-primary-glow);
+}
+
+.projects__swiper .swiper-button-disabled {
+  opacity: 0.35;
+}
+
+/* Swiper pagination dots */
+.projects__swiper .swiper-pagination-bullet {
+  width: 8px;
+  height: 8px;
+  background: var(--color-text-dim);
+  opacity: 1;
+  transition: all var(--transition-base);
+}
+
+.projects__swiper .swiper-pagination-bullet-active {
+  width: 24px;
+  border-radius: var(--radius-full);
+  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+}
+
+/* Loading skeleton grid */
 .projects__grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
@@ -183,5 +314,17 @@
 
 /* Responsive */
 @media (max-width: 768px) {
+  .projects__carousel-wrap { padding: 0 var(--space-sm); }
   .projects__grid { grid-template-columns: 1fr; }
+
+  .projects__swiper .swiper-button-prev,
+  .projects__swiper .swiper-button-next {
+    width: 36px;
+    height: 36px;
+  }
+
+  .projects__swiper .swiper-button-prev::after,
+  .projects__swiper .swiper-button-next::after {
+    font-size: 0.85rem;
+  }
 }

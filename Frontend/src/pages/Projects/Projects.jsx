@@ -1,8 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Autoplay, Navigation, Pagination } from 'swiper/modules';
 import { fetchProjects } from '../../redux/slices/projectsSlice';
 import { Monitor, ExternalLink } from 'lucide-react';
 import { Github } from '../../components/Icons';
+import 'swiper/css';
+import 'swiper/css/navigation';
+import 'swiper/css/pagination';
 import './Projects.css';
 
 /* Default project icon banner */
@@ -19,11 +24,13 @@ function ProjectDefaultBanner() {
   );
 }
 
-function ProjectCard({ project, index }) {
+function ProjectCard({ project, onHover, onLeave }) {
   return (
     <div
-      className="project-card card animate-fadeInUp"
-      style={{ animationDelay: `${index * 0.12}s`, padding: 0, overflow: 'hidden' }}
+      className="project-card card"
+      style={{ padding: 0, overflow: 'hidden' }}
+      onMouseEnter={() => onHover(project._id)}
+      onMouseLeave={onLeave}
     >
       {/* Image or default banner */}
       {project.imageUrl ? (
@@ -94,6 +101,7 @@ function Projects() {
   const dispatch = useDispatch();
   const { items: projects, loading, error } = useSelector((s) => s.projects);
   const [filter, setFilter] = useState('All');
+  const [hoveredId, setHoveredId] = useState(null);
 
   useEffect(() => {
     if (projects.length === 0) dispatch(fetchProjects());
@@ -148,11 +156,48 @@ function Projects() {
         )}
 
         {!loading && !error && (
-          <div className="projects__grid">
-            {filtered.length > 0
-              ? filtered.map((p, i) => <ProjectCard key={p._id} project={p} index={i} />)
-              : <p style={{ textAlign: 'center', color: 'var(--color-text-muted)', gridColumn: '1/-1' }}>No projects match this filter.</p>
-              }
+          <div className={`projects__carousel-wrap${hoveredId ? ' projects__carousel-wrap--hovering' : ''}`}>
+            {filtered.length > 0 ? (
+              <Swiper
+                key={filter}
+                className="projects__swiper"
+                modules={[Autoplay, Navigation, Pagination]}
+                slidesPerView={1.15}
+                centeredSlides
+                spaceBetween={24}
+                speed={900}
+                loop={filtered.length > 3}
+                watchSlidesProgress
+                grabCursor
+                autoplay={{
+                  delay: 3500,
+                  disableOnInteraction: false,
+                  pauseOnMouseEnter: true,
+                }}
+                navigation
+                pagination={{ clickable: true }}
+                breakpoints={{
+                  640: { slidesPerView: 1.2, spaceBetween: 20, centeredSlides: true },
+                  768: { slidesPerView: 2.1, spaceBetween: 24, centeredSlides: true },
+                  1024: { slidesPerView: 3, spaceBetween: 28, centeredSlides: false },
+                }}
+              >
+                {filtered.map((p) => (
+                  <SwiperSlide
+                    key={p._id}
+                    className={hoveredId === p._id ? 'projects__slide--focused' : ''}
+                  >
+                    <ProjectCard
+                      project={p}
+                      onHover={setHoveredId}
+                      onLeave={() => setHoveredId(null)}
+                    />
+                  </SwiperSlide>
+                ))}
+              </Swiper>
+            ) : (
+              <p className="projects__empty">No projects match this filter.</p>
+            )}
           </div>
         )}
 
