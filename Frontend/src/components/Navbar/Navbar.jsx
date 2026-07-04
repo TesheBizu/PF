@@ -8,6 +8,7 @@ const NAV_LINKS = [
   { path: '/#about', label: 'About' },
   { path: '/#skills', label: 'Skills' },
   { path: '/#projects', label: 'Projects' },
+  { path: '/#experience', label: 'Experience' },
   { path: '/#contact', label: 'Contact' },
   { path: '/admin/dashboard', label: 'Dashboard', isDash: true },
 ];

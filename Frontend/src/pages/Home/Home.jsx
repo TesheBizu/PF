@@ -3,8 +3,34 @@ import { Link } from 'react-router-dom';
 import About from '../About/About';
 import Skills from '../Skills/Skills';
 import Projects from '../Projects/Projects';
+import Experience from '../Experience/Experience';
 import Contact from '../Contact/Contact';
 import './Home.css';
+
+function Counter({ target, duration = 1200, suffix = '+' }) {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    let start = 0;
+    const end = parseInt(target, 10);
+    if (start === end) return;
+
+    const totalMilliseconds = duration;
+    const incrementTime = Math.max(Math.floor(totalMilliseconds / end), 25);
+    
+    const timer = setInterval(() => {
+      start += 1;
+      setCount(start);
+      if (start === end) {
+        clearInterval(timer);
+      }
+    }, incrementTime);
+
+    return () => clearInterval(timer);
+  }, [target, duration]);
+
+  return <>{count}{suffix}</>;
+}
 
 const ROLES = ['Web Developer', 'Team Player', 'Frontend-Focused Developer'];
 
@@ -65,23 +91,23 @@ function HeroSection() {
 
           <div className="home__actions animate-fadeInUp delay-400">
             <a
-              href="#projects"
-              className="btn btn-primary"
-              onClick={(e) => {
-                e.preventDefault();
-                document.getElementById('projects')?.scrollIntoView({ behavior: 'smooth' });
-              }}
+               href="#projects"
+               className="btn btn-primary"
+               onClick={(e) => {
+                 e.preventDefault();
+                 document.getElementById('projects')?.scrollIntoView({ behavior: 'smooth' });
+               }}
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
               View Projects
             </a>
             <a
-              href="#contact"
-              className="btn btn-secondary"
-              onClick={(e) => {
-                e.preventDefault();
-                document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
-              }}
+               href="#contact"
+               className="btn btn-secondary"
+               onClick={(e) => {
+                 e.preventDefault();
+                 document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
+               }}
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
               Get In Touch
@@ -102,29 +128,37 @@ function HeroSection() {
           </div>
         </div>
 
-        {/* Right — Avatar / Visual */}
+        {/* Right — Dynamic Counter Dashboard */}
         <div className="home__visual animate-fadeInUp delay-300">
-          <div className="home__avatar-wrap animate-float">
-            <div className="home__avatar-ring home__avatar-ring--1" />
-            <div className="home__avatar-ring home__avatar-ring--2" />
-            <div className="home__avatar-ring home__avatar-ring--3" />
-            <div className="home__avatar animate-glow">
-              <span className="home__avatar-initials">TB</span>
+          <div className="home__stats-panel">
+            <div className="home__stat-row">
+              <div className="home__stat-num">
+                <Counter target="1" />
+              </div>
+              <div className="home__stat-info">
+                <h4>Year of Experience</h4>
+                <p>Industry practice</p>
+              </div>
             </div>
-          </div>
+            
+            <div className="home__stat-row">
+              <div className="home__stat-num">
+                <Counter target="5" />
+              </div>
+              <div className="home__stat-info">
+                <h4>Projects Built</h4>
+                <p>Completed works</p>
+              </div>
+            </div>
 
-          <div className="home__stat home__stat--left animate-fadeInUp delay-400">
-            <span className="home__stat-icon">🚀</span>
-            <div>
-              <div className="home__stat-value">2+</div>
-              <div className="home__stat-label">Projects</div>
-            </div>
-          </div>
-          <div className="home__stat home__stat--right animate-fadeInUp delay-500">
-            <span className="home__stat-icon">⚡</span>
-            <div>
-              <div className="home__stat-value">10+</div>
-              <div className="home__stat-label">Tech Skills</div>
+            <div className="home__stat-row">
+              <div className="home__stat-num">
+                <Counter target="10" />
+              </div>
+              <div className="home__stat-info">
+                <h4>Core Tech Skills</h4>
+                <p>Languages & frameworks</p>
+              </div>
             </div>
           </div>
         </div>
@@ -154,6 +188,9 @@ function Home() {
       </div>
       <div id="projects">
         <Projects />
+      </div>
+      <div id="experience">
+        <Experience />
       </div>
       <div id="contact">
         <Contact />
