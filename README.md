@@ -28,8 +28,8 @@ A professional full-stack portfolio built with the **MERN stack** (MongoDB, Expr
 | Styling   | Vanilla CSS + CSS Variables |
 | Bundler   | Vite |
 
-```
 
+```
 ## API Endpoints
 
 | Method | Route | Access |
@@ -43,8 +43,6 @@ A professional full-stack portfolio built with the **MERN stack** (MongoDB, Expr
 | `POST` | `/api/messages` | Public |
 | `GET`  | `/api/messages` | Admin |
 
----
-
+```
 ## License
-
 MIT © 2026 Teshome Bizuayehu
