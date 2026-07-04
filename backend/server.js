@@ -13,6 +13,8 @@ const projectRoutes = require('./routes/projects');
 const skillRoutes = require('./routes/skills');
 const messageRoutes = require('./routes/messages');
 const uploadRoutes = require('./routes/upload');
+const experienceRoutes = require('./routes/experiences');
+
 
 
 // Connect to Database
@@ -51,6 +53,8 @@ app.use('/api/projects', projectRoutes);
 app.use('/api/skills', skillRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/experiences', experienceRoutes);
+
 
 // Health check
 app.get('/api/health', (req, res) => {

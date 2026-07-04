@@ -4,6 +4,8 @@ const connectDB = require('./config/db');
 const User = require('./models/User');
 const Project = require('./models/Project');
 const Skill = require('./models/Skill');
+const Experience = require('./models/Experience');
+
 
 const seedData = async () => {
   await connectDB();
@@ -12,6 +14,7 @@ const seedData = async () => {
   await User.deleteMany();
   await Project.deleteMany();
   await Skill.deleteMany();
+  await Experience.deleteMany();
 
   // Seed admin user
   await User.create({
@@ -64,6 +67,33 @@ const seedData = async () => {
   ];
   await Project.insertMany(projects);
   console.log('✅ Projects seeded');
+
+  // Seed experiences
+  const experiences = [
+    {
+      role: 'Computer Science Student',
+      company: 'Bahir Dar University',
+      period: '2024 - Present',
+      location: 'Bahir Dar, Ethiopia',
+      description: 'Relevant coursework: Web Dev, Mobile Dev, Databases, Algorithms, Software Engineering',
+      iconUrl: 'https://upload.wikimedia.org/wikipedia/commons/e/e0/Bahir_Dar_University_Logo.png',
+      type: 'education',
+      order: 1
+    },
+    {
+      role: 'Full Stack Developer Intern',
+      company: 'Askuala Link',
+      period: 'Jun 2026 - Aug 2026',
+      location: 'Bahir Dar, Ethiopia',
+      description: 'Worked as a Software Engineer Intern developing multiple web applications with React and Express.',
+      iconUrl: 'https://img.icons8.com/?size=100&id=t4b1E0Y4b1w8&format=png&color=000000', // A premium professional placeholder
+      type: 'work',
+      order: 2
+    }
+  ];
+  await Experience.insertMany(experiences);
+  console.log('✅ Experiences seeded');
+
 
   console.log('\n🎉 Database seeded successfully!');
   console.log(`📧 Admin Email: ${process.env.ADMIN_EMAIL || 'teshelin7@gmail.com'}`);
