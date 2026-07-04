@@ -44,27 +44,6 @@ function Footer() {
               <span className="footer__logo-name">Teshome</span>
               <span className="footer__logo-bracket"> /&gt;</span>
             </Link>
-            <p className="footer__bio">
-              Full Stack Developer passionate about building modern, responsive, and scalable web applications.
-            </p>
-          </div>
-
-          {/* Nav */}
-          <div className="footer__nav">
-            <h4 className="footer__nav-title">Navigation</h4>
-            <ul>
-              {[
-                { path: '/', label: 'Home' },
-                { path: '/about', label: 'About' },
-                { path: '/skills', label: 'Skills' },
-                { path: '/projects', label: 'Projects' },
-                { path: '/contact', label: 'Contact' },
-              ].map((l) => (
-                <li key={l.path}>
-                  <Link to={l.path} className="footer__nav-link">{l.label}</Link>
-                </li>
-              ))}
-            </ul>
           </div>
 
           {/* Social */}
@@ -91,7 +70,7 @@ function Footer() {
         <div className="footer__bottom">
           <div className="footer__divider" />
           <p className="footer__copy">
-            © {year} <span className="footer__copy-name">Teshome Bizuayehu</span>. Crafted with ❤️ using React & Node.js
+             <span className="footer__copy-name">Teshome Bizuayehu</span> ©{year} All rights reserved.
           </p>
         </div>
       </div>
