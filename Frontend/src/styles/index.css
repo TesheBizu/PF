@@ -8,11 +8,11 @@
 /* ─── CSS Custom Properties — Dark Theme (default) ──────────── */
 :root {
   /* Colors */
-  --color-bg:           #0d0f1a;
-  --color-bg-secondary: #111627;
-  --color-surface:      #161b2e;
-  --color-surface-2:    #1e2540;
-  --color-border:       rgba(99, 120, 255, 0.15);
+  --color-bg:           #080a14;
+  --color-bg-secondary: #0e1224;
+  --color-surface:      #161a30;
+  --color-surface-2:    #1e2340;
+  --color-border:       rgba(99, 120, 255, 0.18);
 
   --color-primary:      #6378ff;
   --color-primary-glow: rgba(99, 120, 255, 0.35);
@@ -20,9 +20,9 @@
   --color-accent:       #00e5ff;
   --color-accent-glow:  rgba(0, 229, 255, 0.25);
 
-  --color-text:         #e8eaf6;
-  --color-text-muted:   #8892b0;
-  --color-text-dim:     #4a5568;
+  --color-text:         #e2e6f8;
+  --color-text-muted:   #7e8ab0;
+  --color-text-dim:     #4d5a7a;
   --color-heading:      #ffffff;
 
   --color-success:      #00c896;
@@ -30,8 +30,8 @@
   --color-warning:      #ffcc00;
 
   /* Web canvas lines */
-  --web-line-color:     rgba(99, 120, 255, 0.18);
-  --web-dot-color:      rgba(99, 120, 255, 0.6);
+  --web-line-color:     rgba(99, 120, 255, 0.16);
+  --web-dot-color:      rgba(99, 120, 255, 0.55);
 
   /* Typography */
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -55,9 +55,9 @@
   --radius-full: 9999px;
 
   /* Shadows */
-  --shadow-sm:   0 2px 8px rgba(0, 0, 0, 0.3);
-  --shadow-md:   0 8px 24px rgba(0, 0, 0, 0.4);
-  --shadow-lg:   0 20px 60px rgba(0, 0, 0, 0.5);
+  --shadow-sm:   0 2px 8px rgba(0, 0, 0, 0.4);
+  --shadow-md:   0 8px 24px rgba(0, 0, 0, 0.55);
+  --shadow-lg:   0 20px 60px rgba(0, 0, 0, 0.65);
   --shadow-glow: 0 0 30px var(--color-primary-glow);
 
   /* Transitions */
@@ -72,11 +72,11 @@
 
 /* ─── Light Theme ───────────────────────────────────────────── */
 [data-theme='light'] {
-  --color-bg:           #f0f2ff;
-  --color-bg-secondary: #e8ebff;
+  --color-bg:           #f2f4ff;
+  --color-bg-secondary: #e8ebfe;
   --color-surface:      #ffffff;
-  --color-surface-2:    #eef0ff;
-  --color-border:       rgba(99, 120, 255, 0.2);
+  --color-surface-2:    #edf0fe;
+  --color-border:       rgba(79, 99, 232, 0.22);
 
   --color-primary:      #4f63e8;
   --color-primary-glow: rgba(79, 99, 232, 0.2);
@@ -87,14 +87,14 @@
   --color-text:         #1a1d2e;
   --color-text-muted:   #4a5568;
   --color-text-dim:     #9aa5b4;
-  --color-heading:      #0d0f1a;
+  --color-heading:      #0b0d1a;
 
-  --web-line-color:     rgba(79, 99, 232, 0.12);
+  --web-line-color:     rgba(79, 99, 232, 0.14);
   --web-dot-color:      rgba(79, 99, 232, 0.5);
 
-  --shadow-sm:   0 2px 8px rgba(79, 99, 232, 0.08);
-  --shadow-md:   0 8px 24px rgba(79, 99, 232, 0.12);
-  --shadow-lg:   0 20px 60px rgba(79, 99, 232, 0.15);
+  --shadow-sm:   0 2px 8px rgba(79, 99, 232, 0.1);
+  --shadow-md:   0 8px 24px rgba(79, 99, 232, 0.14);
+  --shadow-lg:   0 20px 60px rgba(79, 99, 232, 0.18);
   --shadow-glow: 0 0 30px var(--color-primary-glow);
 }
 
