@@ -30,6 +30,7 @@ import {
   History,
 } from 'lucide-react';
 import './Admin.css';
+import FooterBar from '../../components/Footer/FooterBar';
 
 // ── Reusable modal ───────────────────────────────────────────
 function Modal({ title, onClose, children }) {
@@ -79,6 +80,7 @@ function Dashboard() {
 
   const [tab, setTab]           = useState('overview');
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [isMobileNav, setIsMobileNav] = useState(false);
   const [modal, setModal]       = useState(null);
   const [selected, setSelected] = useState(null);
   const [pForm, setPForm]       = useState(initProject);
@@ -103,6 +105,16 @@ function Dashboard() {
     dispatch(fetchMessages());
     dispatch(fetchExperiences());
   }, [dispatch]);
+
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 680px)');
+    const update = () => setIsMobileNav(mq.matches);
+    update();
+    mq.addEventListener('change', update);
+    return () => mq.removeEventListener('change', update);
+  }, []);
+
+  const showSidebarLabels = sidebarOpen || isMobileNav;
 
   const handleLogout = async () => {
     try { await api.post('/auth/logout'); } catch (_) {}
@@ -330,14 +342,16 @@ function Dashboard() {
                 key={t.id}
                 className={`dash-sidebar__link${tab === t.id ? ' dash-sidebar__link--active' : ''}`}
                 onClick={() => setTab(t.id)}
-                title={!sidebarOpen ? t.label : undefined}
+                title={!showSidebarLabels ? t.label : undefined}
               >
                 <Icon className="dash-sidebar__link-icon" size={18} />
-                {sidebarOpen && (
+                {showSidebarLabels ? (
                   <span className="dash-sidebar__link-text">
                     {t.label}
                     {t.badge > 0 && <span className="dash-sidebar__badge">{t.badge}</span>}
                   </span>
+                ) : (
+                  t.badge > 0 && <span className="dash-sidebar__badge dash-sidebar__badge--icon">{t.badge}</span>
                 )}
               </button>
             );
@@ -347,7 +361,7 @@ function Dashboard() {
         <div className="dash-sidebar__bottom">
           <div className="dash-sidebar__user">
             <div className="dash-sidebar__avatar">{user?.name?.[0] ?? 'A'}</div>
-            {sidebarOpen && (
+            {showSidebarLabels && (
               <div>
                 <div className="dash-sidebar__name">{user?.name}</div>
                 <div className="dash-sidebar__role">Administrator</div>
@@ -356,7 +370,7 @@ function Dashboard() {
           </div>
           <button className="btn btn-ghost dash-sidebar__logout" onClick={handleLogout} id="admin-logout" title="Logout">
             <LogOut size={16} />
-            {sidebarOpen && 'Logout'}
+            {showSidebarLabels && 'Logout'}
           </button>
         </div>
       </aside>
@@ -379,6 +393,7 @@ function Dashboard() {
           </h2>
         </div>
 
+        <div className="dash-body">
         {/* ── OVERVIEW ── */}
         {tab === 'overview' && (
           <div className="dash-content animate-fadeInUp">
@@ -390,7 +405,7 @@ function Dashboard() {
             </div>
             <div className="dash-welcome card">
               <h3>Welcome back, {user?.name} </h3>
-              <p>Manage your portfolio content from the sidebar tabs. All changes are saved to MongoDB in real time.</p>
+              <p>All changes are saved to MongoDB in real time.</p>
             </div>
           </div>
         )}
@@ -662,6 +677,9 @@ function Dashboard() {
             </div>
           </div>
         )}
+        </div>
+
+        <FooterBar variant="dashboard" />
       </main>
 
       {/* ── MODALS ── */}
@@ -931,5 +949,5 @@ function Dashboard() {
 
   );
 }
-
+ 
 export default Dashboard;
