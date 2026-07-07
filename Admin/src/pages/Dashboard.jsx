@@ -70,7 +70,7 @@ const initProject = { title: '', description: '', techStack: '', githubUrl: '', 
 const initSkill   = { name: '', category: 'Programming', proficiency: 80 };
 const initExperience = { role: '', company: '', period: '', location: '', description: '', iconUrl: '', type: 'work', order: 0 };
 
-function Dashboard() {
+function Dashboard({ theme, onToggleTheme }) {
   const dispatch   = useDispatch();
   const navigate   = useNavigate();
   const { user }   = useSelector((s) => s.auth);
