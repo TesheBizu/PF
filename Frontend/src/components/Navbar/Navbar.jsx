@@ -52,6 +52,15 @@ function Navbar({ theme, onToggleTheme }) {
 
   return (
     <nav className={`navbar${scrolled ? ' navbar--scrolled' : ''}${mobileOpen ? ' navbar--open' : ''}`} role="navigation" aria-label="Main navigation">
+      {mobileOpen && (
+        <button
+          type="button"
+          className="navbar__backdrop"
+          onClick={() => setMobileOpen(false)}
+          aria-label="Close menu"
+        />
+      )}
+
       {/* Logo */}
       <Link to="/" className="navbar__logo" onClick={() => setMobileOpen(false)}>
         <span className="navbar__logo-bracket">&lt;</span>
@@ -100,6 +109,7 @@ function Navbar({ theme, onToggleTheme }) {
         </button>
 
         <button
+          type="button"
           className="navbar__mobile-btn"
           onClick={() => setMobileOpen((o) => !o)}
           aria-label={mobileOpen ? 'Close menu' : 'Open menu'}

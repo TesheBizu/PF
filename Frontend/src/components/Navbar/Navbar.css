@@ -140,8 +140,8 @@
 /* ── Mobile menu trigger button ───────────────────── */
 .navbar__mobile-btn {
   display: none;
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   border-radius: var(--radius-md);
   border: 1.5px solid var(--color-border);
   background: var(--color-surface);
@@ -151,40 +151,69 @@
   justify-content: center;
   transition: all var(--transition-base);
   padding: 0;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 
-.navbar__mobile-btn:hover {
+.navbar__mobile-btn:hover,
+.navbar__mobile-btn:focus-visible {
   border-color: var(--color-primary);
   background: var(--color-primary-glow);
   color: var(--color-primary);
 }
 
+.navbar--open .navbar__mobile-btn {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  background: var(--color-primary-glow);
+}
+
+/* Mobile backdrop */
+.navbar__backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 998;
+  background: rgba(0, 0, 0, 0.45);
+  border: none;
+  cursor: pointer;
+  animation: fadeIn 0.25s ease;
+}
+
 /* ── Responsive design ────────────────────────────── */
 @media (max-width: 768px) {
-  /* Show mobile button */
+  .navbar {
+    padding: 0 var(--space-md);
+  }
+
+  .navbar__backdrop {
+    display: block;
+  }
+
   .navbar__mobile-btn {
     display: flex;
   }
 
-  /* Transform links container into full screen slide-out drawer */
   .navbar__links {
     position: fixed;
     top: 0;
     right: -100%;
-    width: 290px;
+    width: min(300px, 88vw);
     height: 100vh;
-    background: color-mix(in srgb, var(--color-bg) 98%, transparent);
+    height: 100dvh;
+    background: color-mix(in srgb, var(--color-bg-secondary) 97%, transparent);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border-left: 1px solid var(--color-border);
     flex-direction: column;
     align-items: flex-start;
     justify-content: flex-start;
-    padding: calc(var(--navbar-height) + var(--space-xl)) var(--space-xl) var(--space-xl);
-    gap: var(--space-lg);
-    transition: right 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-    box-shadow: -10px 0 30px color-mix(in srgb, #000 50%, transparent);
+    padding: calc(var(--navbar-height) + var(--space-lg)) var(--space-lg) var(--space-xl);
+    gap: var(--space-md);
+    transition: right 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.25);
     z-index: 999;
+    overflow-y: auto;
   }
 
   .navbar__links--open {
@@ -193,20 +222,28 @@
 
   .navbar__link {
     width: 100%;
-    font-size: 1.1rem;
+    font-size: 1rem;
     padding: var(--space-sm) 0;
+    min-height: 44px;
     border-bottom: 1px solid rgba(99, 120, 255, 0.08);
+    -webkit-tap-highlight-color: transparent;
   }
 
   .navbar__link::after {
-    display: none; /* Hide hover underline line on mobile */
+    display: none;
   }
 
   .navbar__link--dash {
     width: 100%;
     text-align: center;
     justify-content: center;
-    margin-top: var(--space-md);
+    margin-top: var(--space-sm);
+    min-height: 44px;
+  }
+
+  .navbar__theme-btn {
+    width: 44px;
+    height: 44px;
   }
 }
 
