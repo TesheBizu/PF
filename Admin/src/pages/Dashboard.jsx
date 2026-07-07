@@ -31,6 +31,7 @@ import {
 import './Admin.css';
 import FooterBar from '../components/Footer/FooterBar';
 import ConfirmDialog from '../components/ConfirmDialog/ConfirmDialog';
+import ThemeToggle from '../components/ThemeToggle/ThemeToggle';
 
 // ── Reusable modal ───────────────────────────────────────────
 function Modal({ title, onClose, children }) {
@@ -419,6 +420,7 @@ function Dashboard() {
               );
             })()}
           </h2>
+          <ThemeToggle theme={theme} onToggle={onToggleTheme} />
         </div>
 
         <div className="dash-body">

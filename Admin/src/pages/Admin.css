@@ -2,6 +2,36 @@
    ADMIN — Login + Dashboard styles
    ═══════════════════════════════════════════════════ */
 
+/* ── Theme toggle ──────────────────────────────────── */
+.admin-theme-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  border: 1.5px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all var(--transition-base);
+}
+
+.admin-theme-btn:hover {
+  border-color: var(--color-primary);
+  background: var(--color-primary-glow);
+  color: var(--color-primary);
+  transform: rotate(20deg) scale(1.1);
+}
+
+.admin-login__theme-btn {
+  position: fixed;
+  top: var(--space-lg);
+  right: var(--space-lg);
+  z-index: 10;
+}
+
 /* ── Login Page ────────────────────────────────────── */
 .admin-login {
   min-height: 100vh;
@@ -372,6 +402,10 @@
 }
 
 .dash-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
   padding: var(--space-xl) var(--space-2xl);
   border-bottom: 1px solid var(--color-border);
   background: var(--color-bg-secondary);

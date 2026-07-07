@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { ToastContainer, Slide } from 'react-toastify';
@@ -12,7 +13,14 @@ function ProtectedRoute({ children }) {
 }
 
 function App() {
-  const theme = localStorage.getItem('theme') || 'dark';
+  const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'dark');
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
 
   return (
     <BrowserRouter>
@@ -34,12 +42,12 @@ function App() {
       />
 
       <Routes>
-        <Route path="/login" element={<AdminLogin />} />
+        <Route path="/login" element={<AdminLogin theme={theme} onToggleTheme={toggleTheme} />} />
         <Route
           path="/"
           element={
             <ProtectedRoute>
-              <Dashboard />
+              <Dashboard theme={theme} onToggleTheme={toggleTheme} />
             </ProtectedRoute>
           }
         />

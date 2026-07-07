@@ -5,9 +5,10 @@ import { GoogleLogin } from '@react-oauth/google';
 import { toast } from 'react-toastify';
 import api from '../services/api';
 import { loginStart, loginSuccess, loginFailure } from '../redux/slices/authSlice';
+import ThemeToggle from '../components/ThemeToggle/ThemeToggle';
 import './Admin.css';
 
-function AdminLogin() {
+function AdminLogin({ theme, onToggleTheme }) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { isAuthenticated, loading } = useSelector((s) => s.auth);
@@ -61,6 +62,11 @@ function AdminLogin() {
 
   return (
     <div className="admin-login">
+      <ThemeToggle
+        theme={theme}
+        onToggle={onToggleTheme}
+        className="admin-login__theme-btn"
+      />
       <div className="admin-login__card animate-fadeInUp">
         {/* Logo */}
         <div className="admin-login__logo">
