@@ -60,11 +60,10 @@ function Navbar({ theme, onToggleTheme }) {
         />
       )}
 
-      {/* Logo */}
+      {/* Logo — 3D T badge */}
       <Link to="/" className="navbar__logo" onClick={() => setMobileOpen(false)}>
-        <span className="navbar__logo-bracket">&lt;</span>
-        <span className="navbar__logo-name">Teshome</span>
-        <span className="navbar__logo-bracket"> /&gt;</span>
+        <div className="navbar__logo-badge">T</div>
+        <span className="navbar__logo-name">eshome</span>
       </Link>
 
       {/* Top Navigation Links */}

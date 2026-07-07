@@ -358,9 +358,8 @@ function Dashboard({ theme, onToggleTheme }) {
         </button>
 
         <div className="dash-sidebar__logo">
-          <span className="navbar__logo-bracket">&lt;</span>
-          {sidebarOpen && <span className="navbar__logo-name">Admin</span>}
-          <span className="navbar__logo-bracket"> /&gt;</span>
+          <div className="logo-badge-3d">T</div>
+          {showSidebarLabels && <span className="dash-sidebar__logo-text">Admin</span>}
         </div>
 
         <nav className="dash-sidebar__nav">

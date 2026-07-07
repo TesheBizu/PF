@@ -64,6 +64,13 @@ function HeroSection() {
 
   return (
     <section className="home section" id="home">
+      {/* Ambient depth orbs */}
+      <div className="hero-orbs" aria-hidden="true">
+        <div className="hero-orb hero-orb--1" />
+        <div className="hero-orb hero-orb--2" />
+        <div className="hero-orb hero-orb--3" />
+      </div>
+
       <div className="container home__container">
         {/* Left — Text content */}
         <div className="home__content">
@@ -73,7 +80,7 @@ function HeroSection() {
           </div>
 
           <h1 className="home__name animate-fadeInUp delay-100">
-            Teshome<br />
+            <span className="text-3d">Teshome</span><br />
             <span className="gradient-text">Bizuayehu</span>
           </h1>
 
