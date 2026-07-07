@@ -151,7 +151,7 @@
 /* ── Dashboard Layout ──────────────────────────────── */
 .dashboard {
   display: flex;
-  min-height: calc(100vh - var(--navbar-height));
+  min-height: 100vh;
   position: relative;
   z-index: 1;
   width: 100%;
@@ -169,8 +169,8 @@
   padding: var(--space-lg) var(--space-md);
   gap: var(--space-md);
   position: sticky;
-  top: var(--navbar-height);
-  height: calc(100vh - var(--navbar-height));
+  top: 0;
+  height: 100vh;
   overflow-y: auto;
   overflow-x: hidden;
   transition: width var(--transition-base), padding var(--transition-base);

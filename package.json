@@ -3,11 +3,16 @@
   "version": "1.0.0",
   "description": "Teshome Bizuayehu — Full Stack MERN Portfolio",
   "scripts": {
-    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:public\"",
+    "dev:backend": "npm run dev --prefix backend",
+    "dev:public": "npm run dev --prefix Frontend",
+    "dev:admin": "npm run dev --prefix Admin",
     "server": "npm run dev --prefix backend",
-    "client": "npm run dev --prefix frontend",
+    "client": "npm run dev --prefix Frontend",
     "seed": "npm run seed --prefix backend",
-    "install-all": "npm install --prefix backend && npm install --prefix frontend"
+    "install-all": "npm install --prefix backend && npm install --prefix Frontend && npm install --prefix Admin",
+    "build:public": "npm run build --prefix Frontend",
+    "build:admin": "npm run build --prefix Admin"
   },
   "devDependencies": {
     "concurrently": "^8.2.2"

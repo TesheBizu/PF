@@ -67,7 +67,8 @@
 
   /* Layout */
   --container-max: 1200px;
-  --navbar-height: 70px;
+  /* Layout — standalone admin app (no public navbar) */
+  --navbar-height: 0;
 }
 
 /* ─── Light Theme ───────────────────────────────────────────── */
@@ -372,7 +373,6 @@ a:hover { color: var(--color-primary-light); }
 /* ─── Page Wrapper ──────────────────────────────────────────── */
 .page-wrapper {
   min-height: 100vh;
-  padding-top: var(--navbar-height);
   position: relative;
 }
 

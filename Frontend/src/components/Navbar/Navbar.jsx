@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { NavLink, Link, useLocation } from 'react-router-dom';
-import { Sun, Moon, LayoutGrid, Menu, X } from 'lucide-react';
+import { Sun, Moon, Menu, X } from 'lucide-react';
 import './Navbar.css';
 
 const NAV_LINKS = [
@@ -10,7 +10,6 @@ const NAV_LINKS = [
   { path: '/#projects', label: 'Projects' },
   { path: '/#experience', label: 'Experience' },
   { path: '/#contact', label: 'Contact' },
-  { path: '/admin/dashboard', label: 'Dashboard', isDash: true },
 ];
 
 function Navbar({ theme, onToggleTheme }) {
@@ -86,11 +85,10 @@ function Navbar({ theme, onToggleTheme }) {
               to={link.path}
               end={link.path === '/'}
               className={({ isActive }) =>
-                `navbar__link${link.isDash ? ' navbar__link--dash' : ''}${isActive ? ' navbar__link--active' : ''}`
+                `navbar__link${isActive ? ' navbar__link--active' : ''}`
               }
               onClick={() => setMobileOpen(false)}
             >
-              {link.isDash && <LayoutGrid size={14} className="navbar__link-icon" />}
               {link.label}
             </NavLink>
           )

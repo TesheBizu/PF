@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { GoogleLogin } from '@react-oauth/google';
 import { toast } from 'react-toastify';
-import api from '../../services/api';
-import { loginStart, loginSuccess, loginFailure } from '../../redux/slices/authSlice';
+import api from '../services/api';
+import { loginStart, loginSuccess, loginFailure } from '../redux/slices/authSlice';
 import './Admin.css';
 
 function AdminLogin() {
@@ -16,7 +16,7 @@ function AdminLogin() {
   const [tab, setTab]       = useState('google'); // 'google' | 'password'
 
   useEffect(() => {
-    if (isAuthenticated) navigate('/admin/dashboard', { replace: true });
+    if (isAuthenticated) navigate('/', { replace: true });
   }, [isAuthenticated, navigate]);
 
   const handleChange = (e) => setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
@@ -30,7 +30,7 @@ function AdminLogin() {
       const { data } = await api.post('/auth/login', form);
       dispatch(loginSuccess(data));
       toast.success(`Welcome back, ${data.user.name}! 👋`);
-      navigate('/admin/dashboard', { replace: true });
+      navigate('/', { replace: true });
     } catch (err) {
       const msg = err.response?.data?.message || 'Login failed';
       dispatch(loginFailure(msg));
@@ -47,7 +47,7 @@ function AdminLogin() {
       });
       dispatch(loginSuccess(data));
       toast.success(`Welcome, ${data.user.name}! 👋`);
-      navigate('/admin/dashboard', { replace: true });
+      navigate('/', { replace: true });
     } catch (err) {
       const msg = err.response?.data?.message || 'Google sign-in failed';
       dispatch(loginFailure(msg));
@@ -163,7 +163,12 @@ function AdminLogin() {
         )}
 
         <p className="admin-login__back">
-          <a href="/" className="admin-login__back-link">← Back to portfolio</a>
+          <a
+            href={import.meta.env.VITE_PUBLIC_SITE_URL || '/'}
+            className="admin-login__back-link"
+          >
+            ← Back to portfolio
+          </a>
         </p>
       </div>
     </div>

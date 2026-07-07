@@ -89,26 +89,6 @@
   width: 100%;
 }
 
-/* Dashboard Link style */
-.navbar__link--dash {
-  color: var(--color-primary) !important;
-  font-weight: 600;
-  border: 1.5px solid var(--color-primary);
-  padding: 0.4rem 1rem;
-  border-radius: var(--radius-md);
-  transition: all var(--transition-fast) !important;
-}
-
-.navbar__link--dash::after {
-  display: none;
-}
-
-.navbar__link--dash:hover {
-  background: var(--color-primary-glow);
-  box-shadow: 0 0 12px var(--color-primary-glow);
-  transform: translateY(-1px);
-}
-
 /* ── Controls (right side) ────────────────────────── */
 .navbar__controls {
   display: flex;
@@ -231,14 +211,6 @@
 
   .navbar__link::after {
     display: none;
-  }
-
-  .navbar__link--dash {
-    width: 100%;
-    text-align: center;
-    justify-content: center;
-    margin-top: var(--space-sm);
-    min-height: 44px;
   }
 
   .navbar__theme-btn {

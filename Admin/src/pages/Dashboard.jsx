@@ -2,12 +2,12 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
-import { logout } from '../../redux/slices/authSlice';
-import { fetchProjects, createProject, updateProject, deleteProject } from '../../redux/slices/projectsSlice';
-import { fetchSkills, createSkill, updateSkill, deleteSkill } from '../../redux/slices/skillsSlice';
-import { fetchMessages, deleteMessage, markMessageRead } from '../../redux/slices/messagesSlice';
-import { fetchExperiences, createExperience, updateExperience, deleteExperience } from '../../redux/slices/experiencesSlice';
-import api from '../../services/api';
+import { logout } from '../redux/slices/authSlice';
+import { fetchProjects, createProject, updateProject, deleteProject } from '../redux/slices/projectsSlice';
+import { fetchSkills, createSkill, updateSkill, deleteSkill } from '../redux/slices/skillsSlice';
+import { fetchMessages, deleteMessage, markMessageRead } from '../redux/slices/messagesSlice';
+import { fetchExperiences, createExperience, updateExperience, deleteExperience } from '../redux/slices/experiencesSlice';
+import api from '../services/api';
 import {
   LayoutDashboard,
   Briefcase,
@@ -29,8 +29,8 @@ import {
   History,
 } from 'lucide-react';
 import './Admin.css';
-import FooterBar from '../../components/Footer/FooterBar';
-import ConfirmDialog from '../../components/ConfirmDialog/ConfirmDialog';
+import FooterBar from '../components/Footer/FooterBar';
+import ConfirmDialog from '../components/ConfirmDialog/ConfirmDialog';
 
 // ── Reusable modal ───────────────────────────────────────────
 function Modal({ title, onClose, children }) {
@@ -124,7 +124,7 @@ function Dashboard() {
     try { await api.post('/auth/logout'); } catch (_) {}
     dispatch(logout());
     toast.info('Logged out successfully');
-    navigate('/', { replace: true });
+    navigate('/login', { replace: true });
   };
 
   const requestLogout = () => {
