@@ -2,7 +2,11 @@ import axios from 'axios';
 import store from '../redux/store';
 import { tokenRefreshed, logout } from '../redux/slices/authSlice';
 
-const API_BASE = import.meta.env.VITE_API_URL || '/api';
+// Production uses same-origin /api via Vercel rewrite (avoids CORS).
+// Dev uses Vite proxy when VITE_API_URL=/api.
+const API_BASE = import.meta.env.PROD
+  ? '/api'
+  : (import.meta.env.VITE_API_URL || '/api');
 
 const api = axios.create({
   baseURL: API_BASE,
