@@ -7,31 +7,31 @@
 
 /* ─── CSS Custom Properties — Dark Theme (default) ──────────── */
 :root {
-  /* Colors */
-  --color-bg:           #080a14;
-  --color-bg-secondary: #0e1224;
-  --color-surface:      #161a30;
-  --color-surface-2:    #1e2340;
-  --color-border:       rgba(99, 120, 255, 0.18);
+  /* Colors — lighter dark theme */
+  --color-bg:           #141829;
+  --color-bg-secondary: #1c2238;
+  --color-surface:      #242b45;
+  --color-surface-2:    #2d3555;
+  --color-border:       rgba(99, 120, 255, 0.22);
 
-  --color-primary:      #6378ff;
-  --color-primary-glow: rgba(99, 120, 255, 0.35);
-  --color-primary-light:#8b9dff;
-  --color-accent:       #00e5ff;
-  --color-accent-glow:  rgba(0, 229, 255, 0.25);
+  --color-primary:      #6d84ff;
+  --color-primary-glow: rgba(109, 132, 255, 0.28);
+  --color-primary-light:#95a8ff;
+  --color-accent:       #1ad4f0;
+  --color-accent-glow:  rgba(26, 212, 240, 0.22);
 
-  --color-text:         #e2e6f8;
-  --color-text-muted:   #7e8ab0;
-  --color-text-dim:     #4d5a7a;
-  --color-heading:      #ffffff;
+  --color-text:         #e8ecf8;
+  --color-text-muted:   #9aa5c4;
+  --color-text-dim:     #6b7694;
+  --color-heading:      #f8f9ff;
 
   --color-success:      #00c896;
   --color-error:        #ff5370;
   --color-warning:      #ffcc00;
 
   /* Web canvas lines */
-  --web-line-color:     rgba(99, 120, 255, 0.16);
-  --web-dot-color:      rgba(99, 120, 255, 0.55);
+  --web-line-color:     rgba(109, 132, 255, 0.18);
+  --web-dot-color:      rgba(109, 132, 255, 0.5);
 
   /* Typography */
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -55,9 +55,9 @@
   --radius-full: 9999px;
 
   /* Shadows */
-  --shadow-sm:   0 2px 8px rgba(0, 0, 0, 0.4);
-  --shadow-md:   0 8px 24px rgba(0, 0, 0, 0.55);
-  --shadow-lg:   0 20px 60px rgba(0, 0, 0, 0.65);
+  --shadow-sm:   0 2px 8px rgba(0, 0, 0, 0.28);
+  --shadow-md:   0 8px 24px rgba(0, 0, 0, 0.35);
+  --shadow-lg:   0 20px 60px rgba(0, 0, 0, 0.42);
   --shadow-glow: 0 0 30px var(--color-primary-glow);
 
   /* Transitions */
@@ -468,8 +468,11 @@ a:hover { color: var(--color-primary-light); }
 @media (max-width: 768px) {
   .container { padding: 0 var(--space-lg); }
   .section   { padding: var(--space-3xl) 0; }
+  html { font-size: 15px; }
 }
 
 @media (max-width: 480px) {
   .container { padding: 0 var(--space-md); }
+  .section   { padding: var(--space-2xl) 0; }
+  .btn { padding: 0.65rem 1.25rem; font-size: 0.9rem; }
 }
