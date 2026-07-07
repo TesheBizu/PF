@@ -49,18 +49,6 @@ export const deleteMessage = createAsyncThunk(
   }
 );
 
-export const replyToMessage = createAsyncThunk(
-  'messages/reply',
-  async ({ id, replyText }, { rejectWithValue }) => {
-    try {
-      const { data } = await api.post(`/messages/${id}/reply`, { replyText });
-      return data.data;
-    } catch (err) {
-      return rejectWithValue(err.response?.data?.message || 'Failed to send reply');
-    }
-  }
-);
-
 const messagesSlice = createSlice({
   name: 'messages',
   initialState: { items: [], loading: false, error: null, sent: false },
@@ -70,27 +58,18 @@ const messagesSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      // Send
       .addCase(sendMessage.pending, (state) => { state.loading = true; state.error = null; state.sent = false; })
       .addCase(sendMessage.fulfilled, (state) => { state.loading = false; state.sent = true; })
       .addCase(sendMessage.rejected, (state, action) => { state.loading = false; state.error = action.payload; })
-      // Fetch
       .addCase(fetchMessages.pending, (state) => { state.loading = true; state.error = null; })
       .addCase(fetchMessages.fulfilled, (state, action) => { state.loading = false; state.items = action.payload; })
       .addCase(fetchMessages.rejected, (state, action) => { state.loading = false; state.error = action.payload; })
-      // Mark read
       .addCase(markMessageRead.fulfilled, (state, action) => {
         const idx = state.items.findIndex((m) => m._id === action.payload._id);
         if (idx !== -1) state.items[idx] = action.payload;
       })
-      // Delete
       .addCase(deleteMessage.fulfilled, (state, action) => {
         state.items = state.items.filter((m) => m._id !== action.payload);
-      })
-      // Reply
-      .addCase(replyToMessage.fulfilled, (state, action) => {
-        const idx = state.items.findIndex((m) => m._id === action.payload._id);
-        if (idx !== -1) state.items[idx] = action.payload;
       });
   },
 });

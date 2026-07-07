@@ -6,7 +6,6 @@ const {
   getMessage,
   deleteMessage,
   markAsRead,
-  replyToMessage,
 } = require('../controllers/messageController');
 const { protect } = require('../middleware/auth');
 
@@ -17,7 +16,6 @@ router.post('/', sendMessage);
 router.get('/',            protect, getMessages);
 router.get('/:id',         protect, getMessage);
 router.patch('/:id/read',  protect, markAsRead);
-router.post('/:id/reply',  protect, replyToMessage);
 router.delete('/:id',      protect, deleteMessage);
 
 module.exports = router;

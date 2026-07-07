@@ -27,17 +27,6 @@ const messageSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-    isReplied: {
-      type: Boolean,
-      default: false,
-    },
-    replyText: {
-      type: String,
-      default: '',
-    },
-    repliedAt: {
-      type: Date,
-    },
   },
   { timestamps: true }
 );

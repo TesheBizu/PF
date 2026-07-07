@@ -5,7 +5,7 @@ import { toast } from 'react-toastify';
 import { logout } from '../../redux/slices/authSlice';
 import { fetchProjects, createProject, updateProject, deleteProject } from '../../redux/slices/projectsSlice';
 import { fetchSkills, createSkill, updateSkill, deleteSkill } from '../../redux/slices/skillsSlice';
-import { fetchMessages, deleteMessage, markMessageRead, replyToMessage } from '../../redux/slices/messagesSlice';
+import { fetchMessages, deleteMessage, markMessageRead } from '../../redux/slices/messagesSlice';
 import { fetchExperiences, createExperience, updateExperience, deleteExperience } from '../../redux/slices/experiencesSlice';
 import api from '../../services/api';
 import {
@@ -26,11 +26,11 @@ import {
   Upload,
   Eye,
   EyeOff,
-  Send,
   History,
 } from 'lucide-react';
 import './Admin.css';
 import FooterBar from '../../components/Footer/FooterBar';
+import ConfirmDialog from '../../components/ConfirmDialog/ConfirmDialog';
 
 // ── Reusable modal ───────────────────────────────────────────
 function Modal({ title, onClose, children }) {
@@ -94,10 +94,7 @@ function Dashboard() {
   const [showCurrentPw, setShowCurrentPw] = useState(false);
   const [showNewPw, setShowNewPw] = useState(false);
   const [showConfirmPw, setShowConfirmPw] = useState(false);
-
-  // Reply state
-  const [replyText, setReplyText] = useState('');
-  const [replying, setReplying]   = useState(false);
+  const [confirm, setConfirm] = useState(null);
 
   useEffect(() => {
     dispatch(fetchProjects());
@@ -116,11 +113,28 @@ function Dashboard() {
 
   const showSidebarLabels = sidebarOpen || isMobileNav;
 
+  const closeConfirm = () => setConfirm(null);
+
+  const runConfirm = async () => {
+    if (confirm?.onConfirm) await confirm.onConfirm();
+    setConfirm(null);
+  };
+
   const handleLogout = async () => {
     try { await api.post('/auth/logout'); } catch (_) {}
     dispatch(logout());
     toast.info('Logged out successfully');
     navigate('/', { replace: true });
+  };
+
+  const requestLogout = () => {
+    setConfirm({
+      title: 'Log out?',
+      message: 'You will need to sign in again to access the admin dashboard.',
+      confirmLabel: 'Log out',
+      danger: true,
+      onConfirm: handleLogout,
+    });
   };
 
   // ── Project handlers ────────────────────────────────────────
@@ -170,10 +184,17 @@ function Dashboard() {
     }
     setModal(null);
   };
-  const handleDeleteProject = async (id) => {
-    if (!window.confirm('Delete this project?')) return;
-    await dispatch(deleteProject(id));
-    toast.success('Project deleted');
+  const handleDeleteProject = (id, title) => {
+    setConfirm({
+      title: 'Delete project?',
+      message: `Are you sure you want to delete "${title}"? This action cannot be undone.`,
+      confirmLabel: 'Delete',
+      danger: true,
+      onConfirm: async () => {
+        await dispatch(deleteProject(id));
+        toast.success('Project deleted');
+      },
+    });
   };
 
   // ── Skill handlers ──────────────────────────────────────────
@@ -189,10 +210,17 @@ function Dashboard() {
     }
     setModal(null);
   };
-  const handleDeleteSkill = async (id) => {
-    if (!window.confirm('Delete this skill?')) return;
-    await dispatch(deleteSkill(id));
-    toast.success('Skill deleted');
+  const handleDeleteSkill = (id, name) => {
+    setConfirm({
+      title: 'Delete skill?',
+      message: `Are you sure you want to delete "${name}"? This action cannot be undone.`,
+      confirmLabel: 'Delete',
+      danger: true,
+      onConfirm: async () => {
+        await dispatch(deleteSkill(id));
+        toast.success('Skill deleted');
+      },
+    });
   };
 
   // ── Experience handlers ─────────────────────────────────────
@@ -237,38 +265,38 @@ function Dashboard() {
     setModal(null);
   };
 
-  const handleDeleteExperience = async (id) => {
-    if (!window.confirm('Delete this experience timeline entry?')) return;
-    await dispatch(deleteExperience(id));
-    toast.success('Experience entry deleted');
+  const handleDeleteExperience = (id, role) => {
+    setConfirm({
+      title: 'Delete experience?',
+      message: `Are you sure you want to delete "${role}"? This action cannot be undone.`,
+      confirmLabel: 'Delete',
+      danger: true,
+      onConfirm: async () => {
+        await dispatch(deleteExperience(id));
+        toast.success('Experience entry deleted');
+      },
+    });
   };
 
   // ── Message handlers ────────────────────────────────────────
   const openMessage = (m) => {
     setSelected(m);
-    setReplyText('');
     dispatch(markMessageRead(m._id));
     setModal('viewMessage');
   };
-  const handleDeleteMessage = async (id) => {
-    if (!window.confirm('Delete this message?')) return;
-    await dispatch(deleteMessage(id));
-    toast.success('Message deleted');
-    setModal(null);
-  };
-  const handleReply = async () => {
-    if (!replyText.trim()) { toast.error('Please write a reply first'); return; }
-    setReplying(true);
-    try {
-      const result = await dispatch(replyToMessage({ id: selected._id, replyText })).unwrap();
-      toast.success(`✅ Reply sent to ${result.email}`);
-      setSelected(result);
-      setReplyText('');
-    } catch (err) {
-      toast.error(`❌ ${err}`);
-    } finally {
-      setReplying(false);
-    }
+
+  const requestDeleteMessage = (id, subject) => {
+    setConfirm({
+      title: 'Delete message?',
+      message: `Are you sure you want to delete "${subject}"? This action cannot be undone.`,
+      confirmLabel: 'Delete',
+      danger: true,
+      onConfirm: async () => {
+        await dispatch(deleteMessage(id));
+        toast.success('Message deleted');
+        setModal(null);
+      },
+    });
   };
 
   // ── Profile handler ─────────────────────────────────────────
@@ -368,7 +396,7 @@ function Dashboard() {
               </div>
             )}
           </div>
-          <button className="btn btn-ghost dash-sidebar__logout" onClick={handleLogout} id="admin-logout" title="Logout">
+          <button className="btn btn-ghost dash-sidebar__logout" onClick={requestLogout} id="admin-logout" title="Logout">
             <LogOut size={16} />
             {showSidebarLabels && 'Logout'}
           </button>
@@ -421,7 +449,7 @@ function Dashboard() {
             </div>
             {pLoading ? <p>Loading…</p> : (
               <div className="dash-table-wrap">
-                <table className="dash-table">
+                <table className="dash-table dash-table--projects">
                   <thead>
                     <tr><th>Title</th><th>Tech Stack</th><th>Featured</th><th>Actions</th></tr>
                   </thead>
@@ -436,7 +464,7 @@ function Dashboard() {
                             <button className="btn btn-ghost dash-btn" onClick={() => openEditProject(p)} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                               <Edit3 size={13} /> Edit
                             </button>
-                            <button className="btn dash-btn dash-btn--danger" onClick={() => handleDeleteProject(p._id)} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <button className="btn dash-btn dash-btn--danger" onClick={() => handleDeleteProject(p._id, p.title)} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                               <Trash2 size={13} /> Delete
                             </button>
                           </div>
@@ -461,7 +489,7 @@ function Dashboard() {
             </div>
             {sLoading ? <p>Loading…</p> : (
               <div className="dash-table-wrap">
-                <table className="dash-table">
+                <table className="dash-table dash-table--skills">
                   <thead>
                     <tr><th>Name</th><th>Category</th><th>Proficiency</th><th>Actions</th></tr>
                   </thead>
@@ -481,7 +509,7 @@ function Dashboard() {
                             <button className="btn btn-ghost dash-btn" onClick={() => openEditSkill(s)} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                               <Edit3 size={13} /> Edit
                             </button>
-                            <button className="btn dash-btn dash-btn--danger" onClick={() => handleDeleteSkill(s._id)} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <button className="btn dash-btn dash-btn--danger" onClick={() => handleDeleteSkill(s._id, s.name)} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                               <Trash2 size={13} /> Delete
                             </button>
                           </div>
@@ -506,7 +534,7 @@ function Dashboard() {
             </div>
             {eLoading ? <p>Loading…</p> : (
               <div className="dash-table-wrap">
-                <table className="dash-table">
+                <table className="dash-table dash-table--experiences">
                   <thead>
                     <tr><th>Role</th><th>Company / School</th><th>Period</th><th>Type</th><th>Actions</th></tr>
                   </thead>
@@ -531,7 +559,7 @@ function Dashboard() {
                             <button className="btn btn-ghost dash-btn" onClick={() => openEditExperience(exp)} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                               <Edit3 size={13} /> Edit
                             </button>
-                            <button className="btn dash-btn dash-btn--danger" onClick={() => handleDeleteExperience(exp._id)} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <button className="btn dash-btn dash-btn--danger" onClick={() => handleDeleteExperience(exp._id, exp.role)} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                               <Trash2 size={13} /> Delete
                             </button>
                           </div>
@@ -553,7 +581,7 @@ function Dashboard() {
             </div>
             {mLoading ? <p>Loading…</p> : (
               <div className="dash-table-wrap">
-                <table className="dash-table">
+                <table className="dash-table dash-table--messages">
                   <thead>
                     <tr><th>From</th><th>Subject</th><th>Date</th><th>Status</th><th>Actions</th></tr>
                   </thead>
@@ -571,7 +599,7 @@ function Dashboard() {
                         <td>
                           <div className="dash-actions">
                             <button className="btn btn-ghost dash-btn" onClick={() => openMessage(m)}>View</button>
-                            <button className="btn dash-btn dash-btn--danger" onClick={() => handleDeleteMessage(m._id)} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <button className="btn dash-btn dash-btn--danger" onClick={() => requestDeleteMessage(m._id, m.subject)} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                               <Trash2 size={13} /> Delete
                             </button>
                           </div>
@@ -797,57 +825,21 @@ function Dashboard() {
       {modal === 'viewMessage' && selected && (
         <Modal title="Message" onClose={() => setModal(null)}>
           <div className="modal-message">
-            {/* Message meta */}
             <div className="modal-message__meta">
               <p><strong>From:</strong> {selected.name} &lt;{selected.email}&gt;</p>
               <p><strong>Subject:</strong> {selected.subject}</p>
               <p><strong>Date:</strong> {new Date(selected.createdAt).toLocaleString()}</p>
-              {selected.isReplied && (
-                <span className="badge modal-message__replied-badge">✓ Replied</span>
-              )}
             </div>
 
-            {/* Original message body */}
             <div className="modal-message__body">{selected.message}</div>
-
-            {/* Previous reply display */}
-            {selected.isReplied && selected.replyText && (
-              <div className="modal-message__prev-reply">
-                <p className="modal-message__prev-reply-label">📨 Your previous reply</p>
-                <div className="modal-message__prev-reply-body">{selected.replyText}</div>
-                <p className="modal-message__prev-reply-date">
-                  Sent on {new Date(selected.repliedAt).toLocaleString()}
-                </p>
-              </div>
-            )}
-
-            {/* Reply compose box */}
-            <div className="modal-message__reply-box">
-              <label className="form-label">
-                {selected.isReplied ? 'Send another reply' : 'Write a reply'}
-              </label>
-              <textarea
-                className="form-textarea"
-                rows={5}
-                placeholder={`Hi ${selected.name},\n\nThank you for reaching out...`}
-                value={replyText}
-                onChange={(e) => setReplyText(e.target.value)}
-                disabled={replying}
-              />
-            </div>
 
             <div className="modal-footer">
               <button className="btn btn-ghost" onClick={() => setModal(null)}>Close</button>
               <button
-                className="btn btn-primary"
-                onClick={handleReply}
-                disabled={replying || !replyText.trim()}
-                style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+                className="btn dash-btn--danger btn"
+                onClick={() => requestDeleteMessage(selected._id, selected.subject)}
+                style={{ display: 'flex', alignItems: 'center', gap: '4px' }}
               >
-                <Send size={15} />
-                {replying ? 'Sending...' : 'Send Reply'}
-              </button>
-              <button className="btn dash-btn--danger btn" onClick={() => handleDeleteMessage(selected._id)} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                 <Trash2 size={13} /> Delete
               </button>
             </div>
@@ -945,6 +937,16 @@ function Dashboard() {
           </div>
         </Modal>
       )}
+
+      <ConfirmDialog
+        open={!!confirm}
+        title={confirm?.title}
+        message={confirm?.message}
+        confirmLabel={confirm?.confirmLabel}
+        danger={confirm?.danger}
+        onConfirm={runConfirm}
+        onCancel={closeConfirm}
+      />
     </div>
 
   );
