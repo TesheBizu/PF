@@ -3,7 +3,7 @@
 /* ── Project card image ─────────────────────────── */
 .project-card__img {
   width: 100%;
-  height: 180px;
+  height: 200px;
   object-fit: cover;
   display: block;
   border-bottom: 1px solid var(--color-border);
@@ -11,7 +11,7 @@
 
 .project-card__img-default {
   width: 100%;
-  height: 180px;
+  height: 200px;
   background: linear-gradient(135deg,
     var(--color-bg-secondary) 0%,
     var(--color-surface-2) 100%);
@@ -100,9 +100,9 @@
 .projects__swiper .swiper-slide {
   height: auto;
   display: flex;
-  opacity: 0.35;
-  transform: scale(0.88) translateY(12px);
-  filter: blur(2px);
+  opacity: 0.45;
+  transform: scale(0.92) translateY(8px);
+  filter: blur(1px);
   transition:
     opacity 0.45s cubic-bezier(0.45, 0.05, 0.15, 1),
     transform 0.45s cubic-bezier(0.45, 0.05, 0.15, 1),
@@ -110,9 +110,9 @@
 }
 
 .projects__swiper .swiper-slide-visible {
-  opacity: 0.65;
-  transform: scale(0.94) translateY(6px);
-  filter: blur(1px);
+  opacity: 0.75;
+  transform: scale(0.96) translateY(4px);
+  filter: blur(0.5px);
 }
 
 .projects__swiper .swiper-slide-active {
@@ -314,8 +314,44 @@
 
 /* Responsive */
 @media (max-width: 768px) {
-  .projects__carousel-wrap { padding: 0 var(--space-sm); }
+  .projects__carousel-wrap { padding: 0 var(--space-xs); }
   .projects__grid { grid-template-columns: 1fr; }
+
+  .project-card__img,
+  .project-card__img-default {
+    height: 220px;
+  }
+
+  .project-card__body {
+    padding: var(--space-md);
+    gap: var(--space-sm);
+  }
+
+  .project-card__title {
+    font-size: 1.1rem;
+  }
+
+  .project-card__desc {
+    font-size: 0.88rem;
+    line-height: 1.6;
+  }
+
+  .project-card__btn {
+    flex: 1;
+    justify-content: center;
+    min-height: 40px;
+  }
+
+  .project-card__links {
+    width: 100%;
+  }
+
+  /* Reduce hover dimming on touch devices */
+  .projects__carousel-wrap--hovering .swiper-slide {
+    opacity: 1;
+    transform: scale(1);
+    filter: none;
+  }
 
   .projects__swiper .swiper-button-prev,
   .projects__swiper .swiper-button-next {
@@ -326,5 +362,21 @@
   .projects__swiper .swiper-button-prev::after,
   .projects__swiper .swiper-button-next::after {
     font-size: 0.85rem;
+  }
+
+  .projects__filter-btn {
+    font-size: 0.8rem;
+    padding: 0.35rem 0.85rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .project-card__img,
+  .project-card__img-default {
+    height: 200px;
+  }
+
+  .projects__cta {
+    padding: var(--space-lg);
   }
 }

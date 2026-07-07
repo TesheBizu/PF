@@ -162,9 +162,9 @@ function Projects() {
                 key={filter}
                 className="projects__swiper"
                 modules={[Autoplay, Navigation, Pagination]}
-                slidesPerView={1.15}
+                slidesPerView={1.08}
                 centeredSlides
-                spaceBetween={24}
+                spaceBetween={16}
                 speed={900}
                 loop={filtered.length > 3}
                 watchSlidesProgress
@@ -177,8 +177,9 @@ function Projects() {
                 navigation
                 pagination={{ clickable: true }}
                 breakpoints={{
-                  640: { slidesPerView: 1.2, spaceBetween: 20, centeredSlides: true },
-                  768: { slidesPerView: 2.1, spaceBetween: 24, centeredSlides: true },
+                  480: { slidesPerView: 1.15, spaceBetween: 18, centeredSlides: true },
+                  640: { slidesPerView: 1.25, spaceBetween: 20, centeredSlides: true },
+                  768: { slidesPerView: 2.05, spaceBetween: 24, centeredSlides: true },
                   1024: { slidesPerView: 3, spaceBetween: 28, centeredSlides: false },
                 }}
               >
