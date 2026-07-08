@@ -78,30 +78,21 @@
   color: var(--node-color, var(--color-primary));
   cursor: pointer;
   padding: 0;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
-  transition:
-    opacity 0.45s cubic-bezier(0.45, 0.05, 0.15, 1),
-    transform 0.45s cubic-bezier(0.45, 0.05, 0.15, 1),
-    filter 0.45s cubic-bezier(0.45, 0.05, 0.15, 1),
-    box-shadow 0.45s ease;
+  box-shadow: var(--shadow-sm);
 }
 
 .skill-node:hover,
 .skill-node:focus-visible {
   outline: none;
-  box-shadow: 0 0 24px color-mix(in srgb, var(--node-color) 45%, transparent);
 }
 
 .skill-node--focused {
   opacity: 1 !important;
   transform: scale(1.18);
-  filter: blur(0) !important;
-  box-shadow: 0 0 28px color-mix(in srgb, var(--node-color) 50%, transparent);
 }
 
 .skills-constellation--hovering .skill-node--dimmed {
   opacity: 0.3;
-  filter: blur(3px);
   transform: scale(0.88);
 }
 

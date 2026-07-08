@@ -5,7 +5,6 @@ import 'react-toastify/dist/ReactToastify.css';
 
 import Navbar from './components/Navbar/Navbar';
 import Footer from './components/Footer/Footer';
-import SpiderWeb from './components/SpiderWeb/SpiderWeb';
 import SocketListener from './components/SocketListener/SocketListener';
 
 const Home       = lazy(() => import('./pages/Home/Home'));
@@ -46,7 +45,6 @@ function App() {
 
   return (
     <BrowserRouter>
-      <SpiderWeb />
       <SocketListener />
 
       <ToastContainer
