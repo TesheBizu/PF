@@ -22,6 +22,9 @@ connectDB();
 
 const app = express();
 
+// Trust proxy for reverse proxies like Render
+app.set('trust proxy', 1);
+
 // ─── Middleware ────────────────────────────────────────────────────────────────
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
