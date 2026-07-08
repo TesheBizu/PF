@@ -6,6 +6,7 @@ const rateLimit = require('express-rate-limit');
 
 const connectDB = require('./config/db');
 const errorHandler = require('./middleware/errorHandler');
+const socketInit = require('./socket');
 
 // Route files
 const authRoutes = require('./routes/auth');
@@ -102,6 +103,10 @@ const server = app.listen(PORT, () => {
   console.log(`\n Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
   console.log(` API available at http://localhost:${PORT}/api`);
 });
+
+// ─── Socket.io (real-time) ────────────────────────────────────────────────────
+socketInit.init(server);
+console.log(' Socket.io initialized for real-time updates');
 
 // Handle unhandled promise rejections
 process.on('unhandledRejection', (err) => {

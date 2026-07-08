@@ -19,6 +19,7 @@ const messagesSlice = createSlice({
   reducers: {
     resetSent(state) { state.sent = false; },
     clearMessageError(state) { state.error = null; },
+    messageReceived(state, action) { state.items.push(action.payload); },
   },
   extraReducers: (builder) => {
     builder
@@ -28,5 +29,5 @@ const messagesSlice = createSlice({
   },
 });
 
-export const { resetSent, clearMessageError } = messagesSlice.actions;
+export const { resetSent, clearMessageError, messageReceived } = messagesSlice.actions;
 export default messagesSlice.reducer;

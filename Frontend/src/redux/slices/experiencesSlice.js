@@ -18,6 +18,14 @@ const experiencesSlice = createSlice({
   initialState: { items: [], loading: false, error: null },
   reducers: {
     clearExperienceError(state) { state.error = null; },
+    experienceAdded(state, action) { state.items.push(action.payload); },
+    experienceUpdated(state, action) {
+      const idx = state.items.findIndex((e) => e._id === action.payload._id);
+      if (idx !== -1) state.items[idx] = action.payload;
+    },
+    experienceRemoved(state, action) {
+      state.items = state.items.filter((e) => e._id !== action.payload);
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -36,5 +44,5 @@ const experiencesSlice = createSlice({
   },
 });
 
-export const { clearExperienceError } = experiencesSlice.actions;
+export const { clearExperienceError, experienceAdded, experienceUpdated, experienceRemoved } = experiencesSlice.actions;
 export default experiencesSlice.reducer;

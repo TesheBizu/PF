@@ -1,8 +1,6 @@
 const Experience = require('../models/Experience');
+const { getIO } = require('../socket');
 
-// @desc    Get all experiences (public)
-// @route   GET /api/experiences
-// @access  Public
 const getExperiences = async (req, res, next) => {
   try {
     const experiences = await Experience.find().sort({ order: 1, createdAt: -1 });
@@ -16,12 +14,10 @@ const getExperiences = async (req, res, next) => {
   }
 };
 
-// @desc    Create a new experience entry
-// @route   POST /api/experiences
-// @access  Private (Admin)
 const createExperience = async (req, res, next) => {
   try {
     const experience = await Experience.create(req.body);
+    getIO().emit('experience:created', experience.toObject());
     res.status(201).json({
       success: true,
       data: experience,
@@ -31,9 +27,6 @@ const createExperience = async (req, res, next) => {
   }
 };
 
-// @desc    Update an experience entry
-// @route   PUT /api/experiences/:id
-// @access  Private (Admin)
 const updateExperience = async (req, res, next) => {
   try {
     const experience = await Experience.findByIdAndUpdate(req.params.id, req.body, {
@@ -45,6 +38,7 @@ const updateExperience = async (req, res, next) => {
       return res.status(404).json({ success: false, message: 'Experience entry not found' });
     }
 
+    getIO().emit('experience:updated', experience.toObject());
     res.status(200).json({
       success: true,
       data: experience,
@@ -54,9 +48,6 @@ const updateExperience = async (req, res, next) => {
   }
 };
 
-// @desc    Get single experience entry
-// @route   GET /api/experiences/:id
-// @access  Public
 const getExperience = async (req, res, next) => {
   try {
     const experience = await Experience.findById(req.params.id);
@@ -69,9 +60,6 @@ const getExperience = async (req, res, next) => {
   }
 };
 
-// @desc    Delete an experience entry
-// @route   DELETE /api/experiences/:id
-// @access  Private (Admin)
 const deleteExperience = async (req, res, next) => {
   try {
     const experience = await Experience.findByIdAndDelete(req.params.id);
@@ -79,6 +67,7 @@ const deleteExperience = async (req, res, next) => {
       return res.status(404).json({ success: false, message: 'Experience entry not found' });
     }
 
+    getIO().emit('experience:deleted', experience._id.toString());
     res.status(200).json({
       success: true,
       data: {},

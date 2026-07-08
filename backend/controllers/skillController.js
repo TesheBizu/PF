@@ -1,4 +1,5 @@
 const Skill = require('../models/Skill');
+const { getIO } = require('../socket');
 
 // @desc    Get all skills
 // @route   GET /api/skills
@@ -33,6 +34,7 @@ const getSkill = async (req, res, next) => {
 const createSkill = async (req, res, next) => {
   try {
     const skill = await Skill.create(req.body);
+    getIO().emit('skill:created', skill.toObject());
     res.status(201).json({ success: true, data: skill });
   } catch (error) {
     next(error);
@@ -51,6 +53,7 @@ const updateSkill = async (req, res, next) => {
     if (!skill) {
       return res.status(404).json({ success: false, message: 'Skill not found' });
     }
+    getIO().emit('skill:updated', skill.toObject());
     res.status(200).json({ success: true, data: skill });
   } catch (error) {
     next(error);
@@ -66,6 +69,7 @@ const deleteSkill = async (req, res, next) => {
     if (!skill) {
       return res.status(404).json({ success: false, message: 'Skill not found' });
     }
+    getIO().emit('skill:deleted', skill._id.toString());
     res.status(200).json({ success: true, message: 'Skill deleted' });
   } catch (error) {
     next(error);

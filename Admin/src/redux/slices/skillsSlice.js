@@ -54,6 +54,18 @@ const skillsSlice = createSlice({
   initialState: { items: [], loading: false, error: null },
   reducers: {
     clearSkillError(state) { state.error = null; },
+    skillRealtimeAdded(state, action) {
+      if (!state.items.some((s) => s._id === action.payload._id)) {
+        state.items.push(action.payload);
+      }
+    },
+    skillRealtimeUpdated(state, action) {
+      const idx = state.items.findIndex((s) => s._id === action.payload._id);
+      if (idx !== -1) state.items[idx] = action.payload;
+    },
+    skillRealtimeRemoved(state, action) {
+      state.items = state.items.filter((s) => s._id !== action.payload);
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -71,5 +83,5 @@ const skillsSlice = createSlice({
   },
 });
 
-export const { clearSkillError } = skillsSlice.actions;
+export const { clearSkillError, skillRealtimeAdded, skillRealtimeUpdated, skillRealtimeRemoved } = skillsSlice.actions;
 export default skillsSlice.reducer;

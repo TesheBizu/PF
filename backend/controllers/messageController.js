@@ -1,8 +1,6 @@
 const Message = require('../models/Message');
+const { getIO } = require('../socket');
 
-// @desc    Send a contact message (public)
-// @route   POST /api/messages
-// @access  Public
 const sendMessage = async (req, res, next) => {
   try {
     const { name, email, subject, message } = req.body;
@@ -12,6 +10,7 @@ const sendMessage = async (req, res, next) => {
     }
 
     const newMessage = await Message.create({ name, email, subject, message });
+    getIO().emit('message:created', newMessage.toObject());
     res.status(201).json({
       success: true,
       message: 'Message sent successfully!',
@@ -22,9 +21,6 @@ const sendMessage = async (req, res, next) => {
   }
 };
 
-// @desc    Get all messages (admin inbox)
-// @route   GET /api/messages
-// @access  Private (Admin)
 const getMessages = async (req, res, next) => {
   try {
     const messages = await Message.find().sort({ createdAt: -1 });
@@ -34,9 +30,6 @@ const getMessages = async (req, res, next) => {
   }
 };
 
-// @desc    Get single message
-// @route   GET /api/messages/:id
-// @access  Private (Admin)
 const getMessage = async (req, res, next) => {
   try {
     const message = await Message.findByIdAndUpdate(
@@ -47,30 +40,26 @@ const getMessage = async (req, res, next) => {
     if (!message) {
       return res.status(404).json({ success: false, message: 'Message not found' });
     }
+    getIO().emit('message:read', message.toObject());
     res.status(200).json({ success: true, data: message });
   } catch (error) {
     next(error);
   }
 };
 
-// @desc    Delete message
-// @route   DELETE /api/messages/:id
-// @access  Private (Admin)
 const deleteMessage = async (req, res, next) => {
   try {
     const message = await Message.findByIdAndDelete(req.params.id);
     if (!message) {
       return res.status(404).json({ success: false, message: 'Message not found' });
     }
+    getIO().emit('message:deleted', message._id.toString());
     res.status(200).json({ success: true, message: 'Message deleted' });
   } catch (error) {
     next(error);
   }
 };
 
-// @desc    Mark message as read
-// @route   PATCH /api/messages/:id/read
-// @access  Private (Admin)
 const markAsRead = async (req, res, next) => {
   try {
     const message = await Message.findByIdAndUpdate(
@@ -81,6 +70,7 @@ const markAsRead = async (req, res, next) => {
     if (!message) {
       return res.status(404).json({ success: false, message: 'Message not found' });
     }
+    getIO().emit('message:read', message.toObject());
     res.status(200).json({ success: true, data: message });
   } catch (error) {
     next(error);

@@ -6,6 +6,7 @@ import 'react-toastify/dist/ReactToastify.css';
 
 import AdminLogin from './pages/AdminLogin';
 import Dashboard from './pages/Dashboard';
+import SocketListener from './components/SocketListener/SocketListener';
 
 function ProtectedRoute({ children }) {
   const { isAuthenticated } = useSelector((s) => s.auth);
@@ -40,6 +41,8 @@ function App() {
           borderRadius: 'var(--radius-md)',
         }}
       />
+
+      <SocketListener />
 
       <Routes>
         <Route path="/login" element={<AdminLogin theme={theme} onToggleTheme={toggleTheme} />} />

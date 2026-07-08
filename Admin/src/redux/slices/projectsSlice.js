@@ -54,6 +54,18 @@ const projectsSlice = createSlice({
   initialState: { items: [], loading: false, error: null },
   reducers: {
     clearProjectError(state) { state.error = null; },
+    projectRealtimeAdded(state, action) {
+      if (!state.items.some((p) => p._id === action.payload._id)) {
+        state.items.unshift(action.payload);
+      }
+    },
+    projectRealtimeUpdated(state, action) {
+      const idx = state.items.findIndex((p) => p._id === action.payload._id);
+      if (idx !== -1) state.items[idx] = action.payload;
+    },
+    projectRealtimeRemoved(state, action) {
+      state.items = state.items.filter((p) => p._id !== action.payload);
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -75,5 +87,5 @@ const projectsSlice = createSlice({
   },
 });
 
-export const { clearProjectError } = projectsSlice.actions;
+export const { clearProjectError, projectRealtimeAdded, projectRealtimeUpdated, projectRealtimeRemoved } = projectsSlice.actions;
 export default projectsSlice.reducer;

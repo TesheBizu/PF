@@ -55,6 +55,18 @@ const messagesSlice = createSlice({
   reducers: {
     resetSent(state) { state.sent = false; },
     clearMessageError(state) { state.error = null; },
+    messageRealtimeReceived(state, action) {
+      if (!state.items.some((m) => m._id === action.payload._id)) {
+        state.items.unshift(action.payload);
+      }
+    },
+    messageRealtimeRead(state, action) {
+      const idx = state.items.findIndex((m) => m._id === action.payload._id);
+      if (idx !== -1) state.items[idx] = action.payload;
+    },
+    messageRealtimeDeleted(state, action) {
+      state.items = state.items.filter((m) => m._id !== action.payload);
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -74,5 +86,5 @@ const messagesSlice = createSlice({
   },
 });
 
-export const { resetSent, clearMessageError } = messagesSlice.actions;
+export const { resetSent, clearMessageError, messageRealtimeReceived, messageRealtimeRead, messageRealtimeDeleted } = messagesSlice.actions;
 export default messagesSlice.reducer;
