@@ -401,7 +401,11 @@ a:hover { color: var(--color-primary-light); }
   100% { background-position: 200% center; }
 }
 
-.animate-fadeInUp   { animation: fadeInUp 0.7s ease forwards; }
+.animate-fadeInUp {
+  opacity: 0;
+  transform: translateY(30px);
+  animation: fadeInUp 0.7s ease forwards;
+}
 .animate-fadeIn     { animation: fadeIn 0.5s ease forwards; }
 .animate-float      { animation: float 4s ease-in-out infinite; }
 

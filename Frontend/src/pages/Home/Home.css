@@ -259,15 +259,35 @@
   border-radius: var(--radius-xl);
   width: 100%;
   max-width: 380px;
-  box-shadow: var(--shadow-md);
+  box-shadow:
+    0 4px 0 rgba(0, 0, 0, 0.2),
+    0 8px 24px rgba(0, 0, 0, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
 .home__stat-row {
   display: flex;
   align-items: center;
-  gap: var(--space-xl);
+  gap: var(--space-md);
   padding-bottom: var(--space-md);
   border-bottom: 1px solid var(--color-border);
+}
+
+.home__stat-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-primary);
+  flex-shrink: 0;
+  box-shadow:
+    0 2px 0 rgba(0, 0, 0, 0.15),
+    0 3px 6px rgba(0, 0, 0, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
 .home__stat-row:last-child {
@@ -282,6 +302,10 @@
   line-height: 1;
   color: var(--color-primary);
   min-width: 80px;
+  text-shadow:
+    1px 1px 0 #3b3f9e,
+    2px 2px 0 #2d2f6b,
+    3px 3px 0 #1e204a;
 }
 
 .home__stat-info {
