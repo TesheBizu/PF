@@ -63,7 +63,10 @@ function SpiderWeb() {
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
         ctx.fillStyle = dotColor;
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = dotColor;
         ctx.fill();
+        ctx.shadowBlur = 0; // Reset shadow
       }
     }
 
@@ -72,8 +75,8 @@ function SpiderWeb() {
     };
 
     const drawLines = () => {
-      const lineColor = getComputedStyle(document.documentElement)
-        .getPropertyValue('--web-line-color')
+      const dotColor = getComputedStyle(document.documentElement)
+        .getPropertyValue('--web-dot-color')
         .trim();
 
       for (let i = 0; i < particles.length; i++) {
@@ -83,12 +86,18 @@ function SpiderWeb() {
           const dist = Math.sqrt(dx * dx + dy * dy);
 
           if (dist < CONNECTION_DISTANCE) {
-            const alpha = 1 - dist / CONNECTION_DISTANCE;
+            const alpha = (1 - dist / CONNECTION_DISTANCE) * 0.4;
             ctx.beginPath();
             ctx.moveTo(particles[i].x, particles[i].y);
             ctx.lineTo(particles[j].x, particles[j].y);
-            ctx.strokeStyle = lineColor.replace(/[\d.]+\)$/, `${alpha * 0.7})`);
-            ctx.lineWidth = 0.8;
+            
+            // Premium linear gradient lines between nodes
+            const grad = ctx.createLinearGradient(particles[i].x, particles[i].y, particles[j].x, particles[j].y);
+            grad.addColorStop(0, `rgba(99, 102, 241, ${alpha})`);
+            grad.addColorStop(1, `rgba(6, 182, 212, ${alpha})`);
+            
+            ctx.strokeStyle = grad;
+            ctx.lineWidth = 0.9;
             ctx.stroke();
           }
         }
@@ -99,12 +108,17 @@ function SpiderWeb() {
           const dy = particles[i].y - mouse.y;
           const dist = Math.sqrt(dx * dx + dy * dy);
           if (dist < MOUSE_RADIUS * 1.2) {
-            const alpha = 1 - dist / (MOUSE_RADIUS * 1.2);
+            const alpha = (1 - dist / (MOUSE_RADIUS * 1.2)) * 0.55;
             ctx.beginPath();
             ctx.moveTo(particles[i].x, particles[i].y);
             ctx.lineTo(mouse.x, mouse.y);
-            ctx.strokeStyle = `rgba(99, 120, 255, ${alpha * 0.5})`;
-            ctx.lineWidth = 1;
+            
+            const grad = ctx.createLinearGradient(particles[i].x, particles[i].y, mouse.x, mouse.y);
+            grad.addColorStop(0, `rgba(99, 102, 241, ${alpha})`);
+            grad.addColorStop(1, `rgba(6, 182, 212, ${alpha})`);
+            
+            ctx.strokeStyle = grad;
+            ctx.lineWidth = 1.2;
             ctx.stroke();
           }
         }

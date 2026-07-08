@@ -7,31 +7,31 @@
 
 /* ─── CSS Custom Properties — Dark Theme (default) ──────────── */
 :root {
-  /* Colors — lighter dark theme */
-  --color-bg:           #141829;
-  --color-bg-secondary: #1c2238;
-  --color-surface:      #242b45;
-  --color-surface-2:    #2d3555;
-  --color-border:       rgba(99, 120, 255, 0.22);
+  /* Colors — Deep premium dark space theme */
+  --color-bg:           #080b11;
+  --color-bg-secondary: #0f131e;
+  --color-surface:      #161c2c;
+  --color-surface-2:    #1e263c;
+  --color-border:       rgba(99, 102, 241, 0.25);
 
-  --color-primary:      #6d84ff;
-  --color-primary-glow: rgba(109, 132, 255, 0.28);
-  --color-primary-light:#95a8ff;
-  --color-accent:       #1ad4f0;
-  --color-accent-glow:  rgba(26, 212, 240, 0.22);
+  --color-primary:      #6366f1;
+  --color-primary-glow: rgba(99, 102, 241, 0.35);
+  --color-primary-light:#818cf8;
+  --color-accent:       #06b6d4;
+  --color-accent-glow:  rgba(6, 182, 212, 0.25);
 
-  --color-text:         #e8ecf8;
-  --color-text-muted:   #9aa5c4;
-  --color-text-dim:     #6b7694;
-  --color-heading:      #f8f9ff;
+  --color-text:         #f1f5f9;
+  --color-text-muted:   #94a3b8;
+  --color-text-dim:     #64748b;
+  --color-heading:      #ffffff;
 
-  --color-success:      #00c896;
-  --color-error:        #ff5370;
-  --color-warning:      #ffcc00;
+  --color-success:      #10b981;
+  --color-error:        #ef4444;
+  --color-warning:      #f59e0b;
 
   /* Web canvas lines */
-  --web-line-color:     rgba(109, 132, 255, 0.18);
-  --web-dot-color:      rgba(109, 132, 255, 0.5);
+  --web-line-color:     rgba(99, 102, 241, 0.2);
+  --web-dot-color:      #06b6d4;
 
   /* Typography */
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -54,48 +54,50 @@
   --radius-xl:  32px;
   --radius-full: 9999px;
 
-  /* Shadows */
-  --shadow-sm:   0 2px 8px rgba(0, 0, 0, 0.28);
-  --shadow-md:   0 8px 24px rgba(0, 0, 0, 0.35);
-  --shadow-lg:   0 20px 60px rgba(0, 0, 0, 0.42);
-  --shadow-glow: 0 0 30px var(--color-primary-glow);
+  /* Premium 3D Shadows & Glows */
+  --shadow-sm:   0 2px 8px rgba(0, 0, 0, 0.4);
+  --shadow-md:   0 8px 30px rgba(0, 0, 0, 0.55);
+  --shadow-lg:   0 20px 50px rgba(0, 0, 0, 0.7);
+  --shadow-glow: 0 0 35px var(--color-primary-glow);
+  --shadow-3d:   0 15px 35px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 1px 2px rgba(0, 0, 0, 0.05);
 
   /* Transitions */
-  --transition-fast:   0.15s ease;
-  --transition-base:   0.3s ease;
-  --transition-slow:   0.6s ease;
+  --transition-fast:   0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-base:   0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-slow:   0.6s cubic-bezier(0.16, 1, 0.3, 1);
 
   /* Layout */
   --container-max: 1200px;
-  --navbar-height: 70px;
+  --navbar-height: 80px;
 }
 
-/* ─── Light Theme ───────────────────────────────────────────── */
+/* ─── Light Theme — Premium clean glass style ───────────────── */
 [data-theme='light'] {
-  --color-bg:           #f2f4ff;
-  --color-bg-secondary: #e8ebfe;
-  --color-surface:      #ffffff;
-  --color-surface-2:    #edf0fe;
-  --color-border:       rgba(79, 99, 232, 0.22);
+  --color-bg:           #f8fafc;
+  --color-bg-secondary: #f1f5f9;
+  --color-surface:      rgba(255, 255, 255, 0.85);
+  --color-surface-2:    #e2e8f0;
+  --color-border:       rgba(99, 102, 241, 0.18);
 
-  --color-primary:      #4f63e8;
-  --color-primary-glow: rgba(79, 99, 232, 0.2);
-  --color-primary-light:#6378ff;
-  --color-accent:       #0097a7;
-  --color-accent-glow:  rgba(0, 151, 167, 0.15);
+  --color-primary:      #4f46e5;
+  --color-primary-glow: rgba(79, 70, 229, 0.15);
+  --color-primary-light:#6366f1;
+  --color-accent:       #0891b2;
+  --color-accent-glow:  rgba(8, 145, 178, 0.15);
 
-  --color-text:         #1a1d2e;
-  --color-text-muted:   #4a5568;
-  --color-text-dim:     #9aa5b4;
-  --color-heading:      #0b0d1a;
+  --color-text:         #0f172a;
+  --color-text-muted:   #475569;
+  --color-text-dim:     #64748b;
+  --color-heading:      #0f172a;
 
-  --web-line-color:     rgba(79, 99, 232, 0.14);
-  --web-dot-color:      rgba(79, 99, 232, 0.5);
+  --web-line-color:     rgba(79, 70, 229, 0.15);
+  --web-dot-color:      #0891b2;
 
-  --shadow-sm:   0 2px 8px rgba(79, 99, 232, 0.1);
-  --shadow-md:   0 8px 24px rgba(79, 99, 232, 0.14);
-  --shadow-lg:   0 20px 60px rgba(79, 99, 232, 0.18);
-  --shadow-glow: 0 0 30px var(--color-primary-glow);
+  --shadow-sm:   0 2px 8px rgba(79, 70, 229, 0.08);
+  --shadow-md:   0 10px 25px rgba(79, 70, 229, 0.1);
+  --shadow-lg:   0 20px 50px rgba(79, 70, 229, 0.15);
+  --shadow-glow: 0 0 35px var(--color-primary-glow);
+  --shadow-3d:   0 15px 35px rgba(79, 70, 229, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.8);
 }
 
 /* ─── Reset & Base ──────────────────────────────────────────── */
