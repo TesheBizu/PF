@@ -178,7 +178,7 @@
 
 /* Description Lists matching screenshot */
 .timeline__desc-wrapper {
-  border-top: 1px solid var(--color-border);
+  border-top: 1px solid rgba(99, 120, 255, 0.08);
   padding-top: var(--space-md);
 }
 

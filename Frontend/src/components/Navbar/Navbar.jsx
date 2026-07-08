@@ -1,15 +1,15 @@
 import { useState, useEffect, useCallback } from 'react';
 import { NavLink, Link, useLocation } from 'react-router-dom';
-import { Sun, Moon, Menu, X, Home, User, Code, Folder, Briefcase, Mail } from 'lucide-react';
+import { Sun, Moon, Menu, X } from 'lucide-react';
 import './Navbar.css';
 
 const NAV_LINKS = [
-  { path: '/', label: 'Home', icon: Home },
-  { path: '/#about', label: 'About', icon: User },
-  { path: '/#skills', label: 'Skills', icon: Code },
-  { path: '/#projects', label: 'Projects', icon: Folder },
-  { path: '/#experience', label: 'Experience', icon: Briefcase },
-  { path: '/#contact', label: 'Contact', icon: Mail },
+  { path: '/', label: 'Home' },
+  { path: '/#about', label: 'About' },
+  { path: '/#skills', label: 'Skills' },
+  { path: '/#projects', label: 'Projects' },
+  { path: '/#experience', label: 'Experience' },
+  { path: '/#contact', label: 'Contact' },
 ];
 
 function Navbar({ theme, onToggleTheme }) {
@@ -66,26 +66,17 @@ function Navbar({ theme, onToggleTheme }) {
         <span className="navbar__logo-name">eshome</span>
       </Link>
 
-      {/* Top Navigation Links — 3D Icon Buttons */}
+      {/* Top Navigation Links */}
       <div className={`navbar__links ${mobileOpen ? 'navbar__links--open' : ''}`}>
-        {NAV_LINKS.map((link) => {
-          const IconComponent = link.icon;
-          const content = (
-            <>
-              <span className="navbar__link-icon-3d">
-                <IconComponent size={20} />
-              </span>
-              <span className="navbar__link-label">{link.label}</span>
-            </>
-          );
-          return link.path.startsWith('/#') ? (
+        {NAV_LINKS.map((link) =>
+          link.path.startsWith('/#') ? (
             <a
               key={link.path}
               href={link.path}
-              className="navbar__link navbar__link--3d"
+              className="navbar__link"
               onClick={(e) => handleHashLink(e, link.path)}
             >
-              {content}
+              {link.label}
             </a>
           ) : (
             <NavLink
@@ -93,14 +84,14 @@ function Navbar({ theme, onToggleTheme }) {
               to={link.path}
               end={link.path === '/'}
               className={({ isActive }) =>
-                `navbar__link navbar__link--3d${isActive ? ' navbar__link--active' : ''}`
+                `navbar__link${isActive ? ' navbar__link--active' : ''}`
               }
               onClick={() => setMobileOpen(false)}
             >
-              {content}
+              {link.label}
             </NavLink>
-          );
-        })}
+          )
+        )}
       </div>
 
       {/* Right controls — Theme Toggle + Mobile Menu Trigger */}
