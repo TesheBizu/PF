@@ -98,6 +98,22 @@ function Dashboard({ theme, onToggleTheme }) {
   const [showConfirmPw, setShowConfirmPw] = useState(false);
   const [confirm, setConfirm] = useState(null);
 
+  // 2FA TOTP States
+  const [totpQrCode, setTotpQrCode] = useState('');
+  const [totpManualKey, setTotpManualKey] = useState('');
+  const [totpSetupCode, setTotpSetupCode] = useState('');
+  const [is2faEnabled, setIs2faEnabled] = useState(user?.totpEnabled || false);
+  const [totpLoading, setTotpLoading] = useState(false);
+  const [showDisable2fa, setShowDisable2fa] = useState(false);
+  const [disablePassword, setDisablePassword] = useState('');
+
+  // Sync state if user changes
+  useEffect(() => {
+    if (user) {
+      setIs2faEnabled(user.totpEnabled);
+    }
+  }, [user]);
+
   useEffect(() => {
     dispatch(fetchProjects());
     dispatch(fetchSkills());
@@ -338,6 +354,61 @@ function Dashboard({ theme, onToggleTheme }) {
       toast.error(errMsg);
     } finally {
       setPwdLoading(false);
+    }
+  };
+
+  // ── TOTP 2FA Handlers ───────────────────────────────────────
+  const handleStart2faSetup = async () => {
+    setTotpLoading(true);
+    try {
+      const { data } = await api.post('/auth/totp/setup');
+      setTotpQrCode(data.qrCodeUrl);
+      setTotpManualKey(data.manualKey);
+      setTotpSetupCode('');
+      setModal('setup2fa');
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to initialize 2FA setup');
+    } finally {
+      setTotpLoading(false);
+    }
+  };
+
+  const handleVerify2faSetup = async (e) => {
+    e.preventDefault();
+    if (!totpSetupCode || totpSetupCode.length !== 6) {
+      toast.error('Please enter a 6-digit code');
+      return;
+    }
+    setTotpLoading(true);
+    try {
+      const { data } = await api.post('/auth/totp/verify-setup', { totpCode: totpSetupCode });
+      toast.success(data.message || '2FA enabled successfully!');
+      setIs2faEnabled(true);
+      setModal(null);
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Verification failed');
+    } finally {
+      setTotpLoading(false);
+    }
+  };
+
+  const handleDisable2fa = async (e) => {
+    e.preventDefault();
+    if (!disablePassword) {
+      toast.error('Please enter your password to disable 2FA');
+      return;
+    }
+    setTotpLoading(true);
+    try {
+      const { data } = await api.delete('/auth/totp/disable', { data: { password: disablePassword } });
+      toast.success(data.message || '2FA disabled successfully');
+      setIs2faEnabled(false);
+      setShowDisable2fa(false);
+      setDisablePassword('');
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to disable 2FA');
+    } finally {
+      setTotpLoading(false);
     }
   };
 
@@ -720,6 +791,30 @@ function Dashboard({ theme, onToggleTheme }) {
                     {pwdLoading ? 'Saving...' : 'Update Password'}
                   </button>
                 </form>
+
+                <h4 className="profile-card__section-title" style={{ marginTop: '2.5rem' }}>Two-Factor Authentication (2FA)</h4>
+                <div className="profile-card__2fa" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', padding: '1.25rem', background: 'var(--color-surface-2)', borderRadius: '8px', border: '1px solid var(--color-border)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
+                    <div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ fontWeight: '600' }}>Google Authenticator (TOTP)</span>
+                        <span className="badge" style={{ backgroundColor: is2faEnabled ? '#22c55e' : '#64748b', color: '#fff', padding: '2px 8px', borderRadius: '4px', fontSize: '0.75rem' }}>
+                          {is2faEnabled ? 'Enabled' : 'Disabled'}
+                        </span>
+                      </div>
+                      <p style={{ margin: '6px 0 0', fontSize: '0.875rem', color: 'var(--color-text-muted)', lineHeight: '1.4' }}>
+                        Add an extra layer of security using any standard TOTP authenticator app.
+                      </p>
+                    </div>
+                    {is2faEnabled ? (
+                      <button className="btn btn-ghost dash-btn--danger" style={{ color: '#ef4444' }} onClick={() => setShowDisable2fa(true)}>Disable 2FA</button>
+                    ) : (
+                      <button className="btn btn-primary" onClick={handleStart2faSetup} disabled={totpLoading}>
+                        {totpLoading ? 'Loading...' : 'Enable 2FA'}
+                      </button>
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -961,6 +1056,77 @@ function Dashboard({ theme, onToggleTheme }) {
               </button>
             </div>
           </div>
+        </Modal>
+      )}
+
+      {/* Setup 2FA Modal */}
+      {modal === 'setup2fa' && (
+        <Modal title="Setup Two-Factor Authentication" onClose={() => setModal(null)}>
+          <form onSubmit={handleVerify2faSetup} className="modal-form">
+            <p style={{ fontSize: '0.9rem', color: 'var(--color-text-muted)', marginBottom: '1rem' }}>
+              Scan this QR code with Google Authenticator, Authy, or any compatible TOTP app.
+            </p>
+            {totpQrCode && (
+              <div style={{ display: 'flex', justifyContent: 'center', background: '#fff', padding: '1rem', borderRadius: '8px', margin: '0 auto 1.5rem', width: 'fit-content' }}>
+                <img src={totpQrCode} alt="TOTP QR Code" style={{ width: '180px', height: '180px' }} />
+              </div>
+            )}
+            {totpManualKey && (
+              <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+                <label className="form-label">Manual Setup Key</label>
+                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                  <input type="text" readOnly className="form-input" style={{ fontFamily: 'monospace', fontSize: '0.85rem' }} value={totpManualKey} onClick={(e) => e.target.select()} />
+                </div>
+              </div>
+            )}
+            <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+              <label className="form-label">Enter 6-Digit Authenticator Code</label>
+              <input
+                type="text"
+                maxLength="6"
+                placeholder="000000"
+                className="form-input"
+                style={{ textAlign: 'center', fontSize: '1.5rem', letterSpacing: '0.4rem', fontWeight: 'bold' }}
+                value={totpSetupCode}
+                onChange={(e) => setTotpSetupCode(e.target.value.replace(/\D/g, ''))}
+                required
+              />
+            </div>
+            <div className="modal-footer">
+              <button type="button" className="btn btn-ghost" onClick={() => setModal(null)}>Cancel</button>
+              <button type="submit" className="btn btn-primary" disabled={totpLoading}>
+                {totpLoading ? 'Verifying...' : 'Verify & Enable'}
+              </button>
+            </div>
+          </form>
+        </Modal>
+      )}
+
+      {/* Disable 2FA Modal */}
+      {showDisable2fa && (
+        <Modal title="Disable Two-Factor Authentication" onClose={() => { setShowDisable2fa(false); setDisablePassword(''); }}>
+          <form onSubmit={handleDisable2fa} className="modal-form">
+            <p style={{ fontSize: '0.9rem', color: 'var(--color-text-muted)', marginBottom: '1rem' }}>
+              Are you sure you want to disable 2FA? This will make your account less secure. Please enter your account password to confirm.
+            </p>
+            <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+              <label className="form-label">Confirm Password</label>
+              <input
+                type="password"
+                placeholder="••••••••"
+                className="form-input"
+                value={disablePassword}
+                onChange={(e) => setDisablePassword(e.target.value)}
+                required
+              />
+            </div>
+            <div className="modal-footer">
+              <button type="button" className="btn btn-ghost" onClick={() => { setShowDisable2fa(false); setDisablePassword(''); }}>Cancel</button>
+              <button type="submit" className="btn btn-primary dash-btn--danger" style={{ backgroundColor: '#ef4444', color: '#fff' }} disabled={totpLoading}>
+                {totpLoading ? 'Disabling...' : 'Confirm & Disable'}
+              </button>
+            </div>
+          </form>
         </Modal>
       )}
 

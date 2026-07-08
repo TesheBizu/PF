@@ -31,6 +31,14 @@ const userSchema = new mongoose.Schema(
       type: String,
       select: false,
     },
+    totpSecret: {
+      type: String,
+      select: false,
+    },
+    totpEnabled: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );

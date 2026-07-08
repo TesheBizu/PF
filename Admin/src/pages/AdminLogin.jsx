@@ -15,6 +15,11 @@ function AdminLogin({ theme, onToggleTheme }) {
   const [form, setForm]     = useState({ email: '', password: '' });
   const [showPw, setShowPw] = useState(false);
   const [tab, setTab]       = useState('google'); // 'google' | 'password'
+  
+  // TOTP States
+  const [requiresTotp, setRequiresTotp] = useState(false);
+  const [tempToken, setTempToken] = useState('');
+  const [totpCode, setTotpCode] = useState('');
 
   useEffect(() => {
     if (isAuthenticated) navigate('/', { replace: true });
@@ -29,11 +34,41 @@ function AdminLogin({ theme, onToggleTheme }) {
     dispatch(loginStart());
     try {
       const { data } = await api.post('/auth/login', form);
+      if (data.requiresTOTP) {
+        setRequiresTotp(true);
+        setTempToken(data.tempToken);
+        dispatch(loginFailure('2FA Code Required'));
+        toast.info('Please enter your 2FA Authenticator code');
+      } else {
+        dispatch(loginSuccess(data));
+        toast.success(`Welcome back, ${data.user.name}! 👋`);
+        navigate('/', { replace: true });
+      }
+    } catch (err) {
+      const msg = err.response?.data?.message || 'Login failed';
+      dispatch(loginFailure(msg));
+      toast.error(`❌ ${msg}`);
+    }
+  };
+
+  // ── TOTP verification login ─────────────────────────
+  const handleTotpSubmit = async (e) => {
+    e.preventDefault();
+    if (!totpCode || totpCode.length !== 6) {
+      toast.error('Please enter a 6-digit code');
+      return;
+    }
+    dispatch(loginStart());
+    try {
+      const { data } = await api.post('/auth/totp/verify-login', {
+        tempToken,
+        totpCode,
+      });
       dispatch(loginSuccess(data));
       toast.success(`Welcome back, ${data.user.name}! 👋`);
       navigate('/', { replace: true });
     } catch (err) {
-      const msg = err.response?.data?.message || 'Login failed';
+      const msg = err.response?.data?.message || '2FA Verification failed';
       dispatch(loginFailure(msg));
       toast.error(`❌ ${msg}`);
     }
@@ -76,96 +111,146 @@ function AdminLogin({ theme, onToggleTheme }) {
             </svg>
           </div>
           <h1 className="admin-login__title">Admin Portal</h1>
-          <p className="admin-login__sub">Sign in to manage your portfolio</p>
+          <p className="admin-login__sub">
+            {requiresTotp ? 'Two-Factor Authentication' : 'Sign in to manage your portfolio'}
+          </p>
         </div>
 
-        {/* Tab switcher */}
-        <div className="admin-login__tabs">
-          <button
-            className={`admin-login__tab${tab === 'google' ? ' admin-login__tab--active' : ''}`}
-            onClick={() => setTab('google')}
-          >Google</button>
-          <button
-            className={`admin-login__tab${tab === 'password' ? ' admin-login__tab--active' : ''}`}
-            onClick={() => setTab('password')}
-          >Password</button>
-        </div>
-
-        {/* ── Google tab ── */}
-        {tab === 'google' && (
-          <div className="admin-login__google">
-            
-            <div className="admin-login__google-btn">
-              <GoogleLogin
-                onSuccess={handleGoogleSuccess}
-                onError={handleGoogleError}
-                useOneTap={false}
-                shape="rectangular"
-                size="large"
-                width="100%"
-                text="signin_with"
-                logo_alignment="center"
-              />
-            </div>
-            {!import.meta.env.VITE_GOOGLE_CLIENT_ID ||
-             import.meta.env.VITE_GOOGLE_CLIENT_ID === 'YOUR_GOOGLE_CLIENT_ID_HERE' ? (
-              <div className="admin-login__setup-warn">
-                ⚠️ Google Client ID not configured yet.<br/>
-                <a href="https://console.cloud.google.com" target="_blank" rel="noopener noreferrer">
-                  Set it up in Google Cloud Console →
-                </a>
-              </div>
-            ) : null}
-          </div>
-        )}
-
-        {/* ── Password tab ── */}
-        {tab === 'password' && (
-          <form onSubmit={handleSubmit} id="admin-login-form" noValidate>
-            <div className="form-group" style={{ marginBottom: '1rem' }}>
-              <label htmlFor="admin-email" className="form-label">Email Address</label>
-              <input
-                id="admin-email" name="email" type="email"
-                placeholder="abc123@gmail.com"
-                className="form-input" value={form.email}
-                onChange={handleChange} autoComplete="email" required
-              />
-            </div>
+        {requiresTotp ? (
+          <form onSubmit={handleTotpSubmit} id="admin-totp-form" noValidate>
             <div className="form-group" style={{ marginBottom: '1.5rem' }}>
-              <label htmlFor="admin-password" className="form-label">Password</label>
-              <div className="admin-login__pw-wrap">
-                <input
-                  id="admin-password" name="password"
-                  type={showPw ? 'text' : 'password'}
-                  placeholder="••••••••" className="form-input"
-                  value={form.password} onChange={handleChange}
-                  autoComplete="current-password" required
-                />
-                <button type="button" className="admin-login__pw-toggle"
-                  onClick={() => setShowPw((v) => !v)}
-                  aria-label={showPw ? 'Hide password' : 'Show password'}>
-                  {showPw ? (
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
-                  ) : (
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                  )}
-                </button>
-              </div>
+              <label htmlFor="totp-code" className="form-label">Authenticator Code</label>
+              <input
+                id="totp-code"
+                name="totpCode"
+                type="text"
+                maxLength="6"
+                placeholder="000000"
+                className="form-input"
+                style={{ textAlign: 'center', fontSize: '1.5rem', letterSpacing: '0.4rem', fontWeight: 'bold' }}
+                value={totpCode}
+                onChange={(e) => setTotpCode(e.target.value.replace(/\D/g, ''))}
+                autoComplete="one-time-code"
+                required
+                autoFocus
+              />
             </div>
             <button
-              type="submit" id="admin-login-submit" className="btn btn-primary"
-              style={{ width: '100%', justifyContent: 'center', padding: '0.9rem' }}
-              disabled={loading}>
+              type="submit"
+              className="btn btn-primary"
+              style={{ width: '100%', justifyContent: 'center', padding: '0.9rem', marginBottom: '1rem' }}
+              disabled={loading}
+            >
               {loading ? (
-                <><span className="contact__spinner" /> Signing in...</>
+                <>Verifying...</>
               ) : (
-                <>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
-                  Sign In
-                </>
+                <>Verify & Sign In</>
               )}
             </button>
+            <button
+              type="button"
+              className="btn btn-ghost"
+              style={{ width: '100%', justifyContent: 'center' }}
+              onClick={() => {
+                setRequiresTotp(false);
+                setTempToken('');
+                setTotpCode('');
+              }}
+            >
+              Back to Login
+            </button>
           </form>
+        ) : (
+          <>
+            {/* Tab switcher */}
+            <div className="admin-login__tabs">
+              <button
+                className={`admin-login__tab${tab === 'google' ? ' admin-login__tab--active' : ''}`}
+                onClick={() => setTab('google')}
+              >Google</button>
+              <button
+                className={`admin-login__tab${tab === 'password' ? ' admin-login__tab--active' : ''}`}
+                onClick={() => setTab('password')}
+              >Password</button>
+            </div>
+
+            {/* ── Google tab ── */}
+            {tab === 'google' && (
+              <div className="admin-login__google">
+                
+                <div className="admin-login__google-btn">
+                  <GoogleLogin
+                    onSuccess={handleGoogleSuccess}
+                    onError={handleGoogleError}
+                    useOneTap={false}
+                    shape="rectangular"
+                    size="large"
+                    width="100%"
+                    text="signin_with"
+                    logo_alignment="center"
+                  />
+                </div>
+                {!import.meta.env.VITE_GOOGLE_CLIENT_ID ||
+                 import.meta.env.VITE_GOOGLE_CLIENT_ID === 'YOUR_GOOGLE_CLIENT_ID_HERE' ? (
+                  <div className="admin-login__setup-warn">
+                    ⚠️ Google Client ID not configured yet.<br/>
+                    <a href="https://console.cloud.google.com" target="_blank" rel="noopener noreferrer">
+                      Set it up in Google Cloud Console →
+                    </a>
+                  </div>
+                ) : null}
+              </div>
+            )}
+
+            {/* ── Password tab ── */}
+            {tab === 'password' && (
+              <form onSubmit={handleSubmit} id="admin-login-form" noValidate>
+                <div className="form-group" style={{ marginBottom: '1rem' }}>
+                  <label htmlFor="admin-email" className="form-label">Email Address</label>
+                  <input
+                    id="admin-email" name="email" type="email"
+                    placeholder="abc123@gmail.com"
+                    className="form-input" value={form.email}
+                    onChange={handleChange} autoComplete="email" required
+                  />
+                </div>
+                <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+                  <label htmlFor="admin-password" className="form-label">Password</label>
+                  <div className="admin-login__pw-wrap">
+                    <input
+                      id="admin-password" name="password"
+                      type={showPw ? 'text' : 'password'}
+                      placeholder="••••••••" className="form-input"
+                      value={form.password} onChange={handleChange}
+                      autoComplete="current-password" required
+                    />
+                    <button type="button" className="admin-login__pw-toggle"
+                      onClick={() => setShowPw((v) => !v)}
+                      aria-label={showPw ? 'Hide password' : 'Show password'}>
+                      {showPw ? (
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                      ) : (
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                      )}
+                    </button>
+                  </div>
+                </div>
+                <button
+                  type="submit" id="admin-login-submit" className="btn btn-primary"
+                  style={{ width: '100%', justifyContent: 'center', padding: '0.9rem' }}
+                  disabled={loading}>
+                  {loading ? (
+                    <><span className="contact__spinner" /> Signing in...</>
+                  ) : (
+                    <>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+                      Sign In
+                    </>
+                  )}
+                </button>
+              </form>
+            )}
+          </>
         )}
 
         <p className="admin-login__back">
