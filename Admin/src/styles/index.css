@@ -7,31 +7,31 @@
 
 /* ─── CSS Custom Properties — Dark Theme (default) ──────────── */
 :root {
-  /* Colors — lighter dark theme */
-  --color-bg:           #141829;
-  --color-bg-secondary: #1c2238;
-  --color-surface:      #242b45;
-  --color-surface-2:    #2d3555;
-  --color-border:       rgba(99, 120, 255, 0.22);
+  /* Colors — Monochrome black & white */
+  --color-bg:           #000000;
+  --color-bg-secondary: #0a0a0a;
+  --color-surface:      #111111;
+  --color-surface-2:    #1a1a1a;
+  --color-border:       rgba(255, 255, 255, 0.12);
 
-  --color-primary:      #6d84ff;
-  --color-primary-glow: rgba(109, 132, 255, 0.28);
-  --color-primary-light:#95a8ff;
-  --color-accent:       #1ad4f0;
-  --color-accent-glow:  rgba(26, 212, 240, 0.22);
+  --color-primary:      #ffffff;
+  --color-primary-glow: rgba(255, 255, 255, 0.12);
+  --color-primary-light:#cccccc;
+  --color-accent:       #999999;
+  --color-accent-glow:  rgba(255, 255, 255, 0.06);
 
-  --color-text:         #e8ecf8;
-  --color-text-muted:   #9aa5c4;
-  --color-text-dim:     #6b7694;
-  --color-heading:      #f8f9ff;
+  --color-text:         #ffffff;
+  --color-text-muted:   #999999;
+  --color-text-dim:     #666666;
+  --color-heading:      #ffffff;
 
-  --color-success:      #00c896;
-  --color-error:        #ff5370;
-  --color-warning:      #ffcc00;
+  --color-success:      #ffffff;
+  --color-error:        #ffffff;
+  --color-warning:      #ffffff;
 
   /* Web canvas lines */
-  --web-line-color:     rgba(109, 132, 255, 0.18);
-  --web-dot-color:      rgba(109, 132, 255, 0.5);
+  --web-line-color:     rgba(255, 255, 255, 0.12);
+  --web-dot-color:      rgba(255, 255, 255, 0.5);
 
   /* Typography */
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -73,29 +73,29 @@
 
 /* ─── Light Theme ───────────────────────────────────────────── */
 [data-theme='light'] {
-  --color-bg:           #f2f4ff;
-  --color-bg-secondary: #e8ebfe;
+  --color-bg:           #ffffff;
+  --color-bg-secondary: #f5f5f5;
   --color-surface:      #ffffff;
-  --color-surface-2:    #edf0fe;
-  --color-border:       rgba(79, 99, 232, 0.22);
+  --color-surface-2:    #e5e5e5;
+  --color-border:       rgba(0, 0, 0, 0.1);
 
-  --color-primary:      #4f63e8;
-  --color-primary-glow: rgba(79, 99, 232, 0.2);
-  --color-primary-light:#6378ff;
-  --color-accent:       #0097a7;
-  --color-accent-glow:  rgba(0, 151, 167, 0.15);
+  --color-primary:      #000000;
+  --color-primary-glow: rgba(0, 0, 0, 0.06);
+  --color-primary-light:#333333;
+  --color-accent:       #666666;
+  --color-accent-glow:  rgba(0, 0, 0, 0.04);
 
-  --color-text:         #1a1d2e;
-  --color-text-muted:   #4a5568;
-  --color-text-dim:     #9aa5b4;
-  --color-heading:      #0b0d1a;
+  --color-text:         #000000;
+  --color-text-muted:   #555555;
+  --color-text-dim:     #888888;
+  --color-heading:      #000000;
 
-  --web-line-color:     rgba(79, 99, 232, 0.14);
-  --web-dot-color:      rgba(79, 99, 232, 0.5);
+  --web-line-color:     rgba(0, 0, 0, 0.1);
+  --web-dot-color:      rgba(0, 0, 0, 0.5);
 
-  --shadow-sm:   0 2px 8px rgba(79, 99, 232, 0.1);
-  --shadow-md:   0 8px 24px rgba(79, 99, 232, 0.14);
-  --shadow-lg:   0 20px 60px rgba(79, 99, 232, 0.18);
+  --shadow-sm:   0 2px 8px rgba(0, 0, 0, 0.06);
+  --shadow-md:   0 8px 24px rgba(0, 0, 0, 0.08);
+  --shadow-lg:   0 20px 60px rgba(0, 0, 0, 0.1);
   --shadow-glow: 0 0 30px var(--color-primary-glow);
 }
 

@@ -17,13 +17,13 @@
 }
 
 .navbar--scrolled {
-  background: rgba(15, 19, 30, 0.78);
+  background: rgba(0, 0, 0, 0.85);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(99, 102, 241, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   box-shadow: 
     0 15px 45px rgba(0, 0, 0, 0.5),
-    0 0 25px rgba(99, 102, 241, 0.18),
+    0 0 25px rgba(255, 255, 255, 0.08),
     inset 0 1px 0 rgba(255, 255, 255, 0.12);
   transform: translateY(2px) scale(0.995);
 }
@@ -42,8 +42,8 @@
 .navbar__logo-badge {
   width: 38px;
   height: 38px;
-  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
-  color: #fff;
+  background: var(--color-primary);
+  color: var(--color-bg);
   border-radius: 8px;
   display: flex;
   align-items: center;
@@ -51,10 +51,10 @@
   font-weight: 900;
   font-size: 1.3rem;
   box-shadow: 
-    0 4px 10px rgba(99, 102, 241, 0.4),
+    0 4px 10px rgba(255, 255, 255, 0.15),
     inset 0 1px 0 rgba(255, 255, 255, 0.4),
-    0 2px 0 #312e81,
-    0 3px 0 #1e1b4b;
+    0 2px 0 #333,
+    0 3px 0 #111;
   transform: perspective(400px) rotateY(-15deg) rotateX(10deg);
   transition: all var(--transition-base);
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
@@ -63,68 +63,94 @@
 .navbar__logo:hover .navbar__logo-badge {
   transform: perspective(400px) rotateY(0deg) rotateX(0deg) scale(1.05);
   box-shadow: 
-    0 8px 16px rgba(99, 102, 241, 0.5),
+    0 8px 16px rgba(255, 255, 255, 0.2),
     inset 0 1px 0 rgba(255, 255, 255, 0.6);
 }
 
 .navbar__logo-name {
-  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--color-primary);
   font-family: var(--font-sans);
   font-weight: 700;
   font-size: 1.1rem;
 }
 
-/* ── Top Navigation Links ────────────────────────── */
+/* ── Top Navigation Links — 3D Icon Buttons ──────── */
 .navbar__links {
   display: flex;
   align-items: center;
-  gap: var(--space-lg);
+  gap: var(--space-sm);
 }
 
-.navbar__link {
-  color: var(--color-text-muted);
+.navbar__link--3d {
   text-decoration: none;
-  font-size: 0.95rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 14px;
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  font-size: 0.7rem;
   font-weight: 500;
-  padding: 0.4rem 0.2rem;
+  transition: all var(--transition-base);
   position: relative;
-  transition: color var(--transition-fast);
+  box-shadow:
+    0 4px 0 rgba(0, 0, 0, 0.3),
+    0 6px 12px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  transform: translateY(0);
+  cursor: pointer;
+}
+
+.navbar__link--3d:hover {
+  transform: translateY(-3px);
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+  box-shadow:
+    0 7px 0 rgba(0, 0, 0, 0.3),
+    0 10px 20px rgba(0, 0, 0, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.navbar__link--3d:active {
+  transform: translateY(2px);
+  box-shadow:
+    0 2px 0 rgba(0, 0, 0, 0.3),
+    0 3px 6px rgba(0, 0, 0, 0.2);
+}
+
+.navbar__link--active.navbar__link--3d {
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+  background: var(--color-primary-glow);
+  box-shadow:
+    0 4px 0 rgba(0, 0, 0, 0.3),
+    0 6px 12px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.navbar__link-icon-3d {
   display: flex;
   align-items: center;
-  gap: 6px;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-secondary);
+  transition: all var(--transition-base);
 }
 
-.navbar__link-icon {
-  color: inherit;
-  flex-shrink: 0;
+.navbar__link--3d:hover .navbar__link-icon-3d {
+  background: var(--color-surface-2);
 }
 
-.navbar__link:hover {
-  color: var(--color-primary);
-}
-
-.navbar__link--active {
-  color: var(--color-primary);
-}
-
-.navbar__link::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 0;
-  height: 2px;
-  background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
-  transition: width var(--transition-fast);
-  border-radius: var(--radius-full);
-}
-
-.navbar__link:hover::after,
-.navbar__link--active::after {
-  width: 100%;
+.navbar__link-label {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 /* ── Controls (right side) ────────────────────────── */
@@ -238,17 +264,36 @@
     right: 0;
   }
 
-  .navbar__link {
+  .navbar__link--3d {
     width: 100%;
-    font-size: 1rem;
-    padding: var(--space-sm) 0;
-    min-height: 44px;
-    border-bottom: 1px solid rgba(99, 120, 255, 0.08);
-    -webkit-tap-highlight-color: transparent;
+    flex-direction: row;
+    gap: var(--space-md);
+    padding: var(--space-sm) var(--space-md);
+    min-height: 48px;
+    box-shadow: none;
+    transform: none;
+    border: none;
+    border-bottom: 1px solid var(--color-border);
+    border-radius: 0;
+    background: transparent;
+    font-size: 0.95rem;
   }
 
-  .navbar__link::after {
-    display: none;
+  .navbar__link--3d:hover {
+    transform: none;
+    box-shadow: none;
+    background: var(--color-surface);
+    border-color: var(--color-border);
+  }
+
+  .navbar__link--3d:active {
+    transform: none;
+    box-shadow: none;
+  }
+
+  .navbar__link--active.navbar__link--3d {
+    box-shadow: none;
+    border-color: var(--color-border);
   }
 
   .navbar__theme-btn {

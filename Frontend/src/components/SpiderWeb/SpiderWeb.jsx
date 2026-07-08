@@ -91,12 +91,10 @@ function SpiderWeb() {
             ctx.moveTo(particles[i].x, particles[i].y);
             ctx.lineTo(particles[j].x, particles[j].y);
             
-            // Premium linear gradient lines between nodes
-            const grad = ctx.createLinearGradient(particles[i].x, particles[i].y, particles[j].x, particles[j].y);
-            grad.addColorStop(0, `rgba(99, 102, 241, ${alpha})`);
-            grad.addColorStop(1, `rgba(6, 182, 212, ${alpha})`);
-            
-            ctx.strokeStyle = grad;
+            const lineColor = getComputedStyle(document.documentElement)
+              .getPropertyValue('--web-line-color')
+              .trim();
+            ctx.strokeStyle = lineColor.replace(/[\d.]+\)$/, `${alpha})`);
             ctx.lineWidth = 0.9;
             ctx.stroke();
           }
@@ -113,11 +111,10 @@ function SpiderWeb() {
             ctx.moveTo(particles[i].x, particles[i].y);
             ctx.lineTo(mouse.x, mouse.y);
             
-            const grad = ctx.createLinearGradient(particles[i].x, particles[i].y, mouse.x, mouse.y);
-            grad.addColorStop(0, `rgba(99, 102, 241, ${alpha})`);
-            grad.addColorStop(1, `rgba(6, 182, 212, ${alpha})`);
-            
-            ctx.strokeStyle = grad;
+            const mouseLineColor = getComputedStyle(document.documentElement)
+              .getPropertyValue('--web-line-color')
+              .trim();
+            ctx.strokeStyle = mouseLineColor.replace(/[\d.]+\)$/, `${alpha})`);
             ctx.lineWidth = 1.2;
             ctx.stroke();
           }
