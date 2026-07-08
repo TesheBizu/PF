@@ -180,19 +180,19 @@ function Home() {
   return (
     <>
       <HeroSection />
-      <div id="about">
+      <div id="about" className="animate-fadeInUp">
         <About />
       </div>
-      <div id="skills">
+      <div id="skills" className="animate-fadeInUp delay-100">
         <Skills />
       </div>
-      <div id="projects">
+      <div id="projects" className="animate-fadeInUp delay-200">
         <Projects />
       </div>
-      <div id="experience">
+      <div id="experience" className="animate-fadeInUp delay-300">
         <Experience />
       </div>
-      <div id="contact">
+      <div id="contact" className="animate-fadeInUp delay-400">
         <Contact />
       </div>
     </>
