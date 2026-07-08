@@ -7,7 +7,7 @@
 
 /* ─── CSS Custom Properties — Dark Theme (default) ──────────── */
 :root {
-  /* Colors — Monochrome black & white */
+  /* Colors — Black & white primary with vibrant accents */
   --color-bg:           #000000;
   --color-bg-secondary: #0a0a0a;
   --color-surface:      #111111;
@@ -16,9 +16,9 @@
 
   --color-primary:      #ffffff;
   --color-primary-glow: rgba(255, 255, 255, 0.12);
-  --color-primary-light:#cccccc;
-  --color-accent:       #999999;
-  --color-accent-glow:  rgba(255, 255, 255, 0.06);
+  --color-primary-light:#dddddd;
+  --color-accent:       #ff0066;
+  --color-accent-glow:  rgba(255, 0, 102, 0.2);
 
   --color-text:         #ffffff;
   --color-text-muted:   #999999;
@@ -30,8 +30,8 @@
   --color-warning:      #ffffff;
 
   /* Web canvas lines */
-  --web-line-color:     rgba(255, 255, 255, 0.12);
-  --web-dot-color:      rgba(255, 255, 255, 0.5);
+  --web-line-color:     rgba(255, 255, 255, 0.1);
+  --web-dot-color:      #ff0066;
 
   /* Typography */
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -80,18 +80,18 @@
   --color-border:       rgba(0, 0, 0, 0.1);
 
   --color-primary:      #000000;
-  --color-primary-glow: rgba(0, 0, 0, 0.06);
+  --color-primary-glow: rgba(0, 0, 0, 0.05);
   --color-primary-light:#333333;
-  --color-accent:       #666666;
-  --color-accent-glow:  rgba(0, 0, 0, 0.04);
+  --color-accent:       #cc0052;
+  --color-accent-glow:  rgba(204, 0, 82, 0.1);
 
   --color-text:         #000000;
   --color-text-muted:   #555555;
   --color-text-dim:     #888888;
   --color-heading:      #000000;
 
-  --web-line-color:     rgba(0, 0, 0, 0.1);
-  --web-dot-color:      rgba(0, 0, 0, 0.5);
+  --web-line-color:     rgba(0, 0, 0, 0.08);
+  --web-dot-color:      #cc0052;
 
   --shadow-sm:   0 2px 8px rgba(0, 0, 0, 0.06);
   --shadow-md:   0 8px 24px rgba(0, 0, 0, 0.08);
