@@ -22,6 +22,7 @@ import {
   Edit3,
   Trash2,
   MailOpen,
+  Reply,
   Mail,
   Upload,
   Eye,
@@ -284,6 +285,15 @@ function Dashboard({ theme, onToggleTheme }) {
     setSelected(m);
     dispatch(markMessageRead(m._id));
     setModal('viewMessage');
+  };
+
+  const handleReplyMessage = (m) => {
+    const to = encodeURIComponent(m.email);
+    const subject = encodeURIComponent(`Re: ${m.subject}`);
+    const body = encodeURIComponent(
+      `\n\n---\nOn ${new Date(m.createdAt).toLocaleString()}, ${m.name} <${m.email}> wrote:\n${m.message}`
+    );
+    window.open(`https://mail.google.com/mail/?view=cm&to=${to}&su=${subject}&body=${body}`, '_blank');
   };
 
   const requestDeleteMessage = (id, subject) => {
@@ -600,6 +610,14 @@ function Dashboard({ theme, onToggleTheme }) {
                         <td>
                           <div className="dash-actions">
                             <button className="btn btn-ghost dash-btn" onClick={() => openMessage(m)}>View</button>
+                            <button
+                              className="btn btn-ghost dash-btn dash-btn--reply"
+                              onClick={() => handleReplyMessage(m)}
+                              title={`Reply to ${m.email}`}
+                              style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--color-primary)' }}
+                            >
+                              <Reply size={13} /> Reply
+                            </button>
                             <button className="btn dash-btn dash-btn--danger" onClick={() => requestDeleteMessage(m._id, m.subject)} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                               <Trash2 size={13} /> Delete
                             </button>
@@ -836,6 +854,13 @@ function Dashboard({ theme, onToggleTheme }) {
 
             <div className="modal-footer">
               <button className="btn btn-ghost" onClick={() => setModal(null)}>Close</button>
+              <button
+                className="btn btn-primary"
+                onClick={() => handleReplyMessage(selected)}
+                style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+              >
+                <Reply size={14} /> Reply via Gmail
+              </button>
               <button
                 className="btn dash-btn--danger btn"
                 onClick={() => requestDeleteMessage(selected._id, selected.subject)}
