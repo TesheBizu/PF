@@ -14,7 +14,6 @@ document.documentElement.setAttribute('data-theme', theme);
 
 (function() {
   const img = new Image();
-  img.crossOrigin = 'anonymous';
   img.onload = () => {
     const size = 64;
     const canvas = document.createElement('canvas');

@@ -16,7 +16,8 @@ const quickFacts = [
 
 function setCircularFavicon(src) {
   const img = new Image();
-  img.crossOrigin = 'anonymous';
+  const isCrossOrigin = src.startsWith('http');
+  if (isCrossOrigin) img.crossOrigin = 'anonymous';
   img.onload = () => {
     const size = 64;
     const canvas = document.createElement('canvas');
@@ -32,6 +33,15 @@ function setCircularFavicon(src) {
     if (link) link.href = canvas.toDataURL('image/png');
   };
   img.onerror = () => {
+    if (isCrossOrigin) {
+      img.crossOrigin = null;
+      img.src = src;
+      img.onerror = () => {
+        const link = document.querySelector("link[rel~='icon']");
+        if (link) link.href = src;
+      };
+      return;
+    }
     const link = document.querySelector("link[rel~='icon']");
     if (link) link.href = src;
   };
