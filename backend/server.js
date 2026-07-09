@@ -16,6 +16,7 @@ const messageRoutes = require('./routes/messages');
 const uploadRoutes = require('./routes/upload');
 const experienceRoutes = require('./routes/experiences');
 const siteSettingRoutes = require('./routes/siteSettings');
+const testimonialRoutes = require('./routes/testimonials');
 
 
 // Connect to Database
@@ -79,6 +80,7 @@ app.use('/api/messages', messageRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/experiences', experienceRoutes);
 app.use('/api/settings', siteSettingRoutes);
+app.use('/api/testimonials', testimonialRoutes);
 
 
 // Health check

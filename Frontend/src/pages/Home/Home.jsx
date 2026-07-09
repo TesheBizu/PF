@@ -5,6 +5,7 @@ import Skills from '../Skills/Skills';
 import Projects from '../Projects/Projects';
 import Experience from '../Experience/Experience';
 import Contact from '../Contact/Contact';
+import Testimonials from '../Testimonials/Testimonials';
 import './Home.css';
 
 function Counter({ target, duration = 1200, suffix = '+' }) {
@@ -201,7 +202,10 @@ function Home() {
       <div id="experience" className="animate-fadeInUp delay-300">
         <Experience />
       </div>
-      <div id="contact" className="animate-fadeInUp delay-400">
+      <div id="testimonials" className="animate-fadeInUp delay-400">
+        <Testimonials />
+      </div>
+      <div id="contact" className="animate-fadeInUp delay-500">
         <Contact />
       </div>
     </>

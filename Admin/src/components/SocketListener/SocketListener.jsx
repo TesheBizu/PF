@@ -14,6 +14,9 @@ import {
   messageRealtimeReceived, messageRealtimeRead, messageRealtimeDeleted,
 } from '../../redux/slices/messagesSlice';
 import { profileImageUpdated, profileImageDeleted } from '../../redux/slices/siteSettingsSlice';
+import {
+  testimonialRealtimeAdded, testimonialRealtimeUpdated, testimonialRealtimeRemoved,
+} from '../../redux/slices/testimonialsSlice';
 import { toast } from 'react-toastify';
 
 function SocketListener() {
@@ -43,6 +46,10 @@ function SocketListener() {
 
     socket.on('profileImage:updated', (url) => dispatch(profileImageUpdated(url)));
     socket.on('profileImage:deleted', () => dispatch(profileImageDeleted()));
+
+    socket.on('testimonial:created', (data) => dispatch(testimonialRealtimeAdded(data)));
+    socket.on('testimonial:updated', (data) => dispatch(testimonialRealtimeUpdated(data)));
+    socket.on('testimonial:deleted', (id) => dispatch(testimonialRealtimeRemoved(id)));
 
     return () => {
       socket.disconnect();

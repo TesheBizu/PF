@@ -26,6 +26,16 @@ function SocketListener() {
 
     socket.on('message:created', (data) => dispatch(messageReceived(data)));
 
+    socket.on('testimonial:created', () => {
+      window.dispatchEvent(new CustomEvent('testimonialsChanged'));
+    });
+    socket.on('testimonial:updated', () => {
+      window.dispatchEvent(new CustomEvent('testimonialsChanged'));
+    });
+    socket.on('testimonial:deleted', () => {
+      window.dispatchEvent(new CustomEvent('testimonialsChanged'));
+    });
+
     socket.on('profileImage:updated', (url) => {
       window.dispatchEvent(new CustomEvent('profileImageChanged', { detail: { url } }));
     });

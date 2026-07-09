@@ -8,6 +8,7 @@ import { fetchSkills, createSkill, updateSkill, deleteSkill } from '../redux/sli
 import { fetchMessages, deleteMessage, markMessageRead } from '../redux/slices/messagesSlice';
 import { fetchExperiences, createExperience, updateExperience, deleteExperience } from '../redux/slices/experiencesSlice';
 import { fetchProfileImage, updateProfileImage, deleteProfileImage } from '../redux/slices/siteSettingsSlice';
+import { fetchTestimonials, createTestimonial, updateTestimonial, deleteTestimonial } from '../redux/slices/testimonialsSlice';
 import api from '../services/api';
 import {
   LayoutDashboard,
@@ -29,6 +30,9 @@ import {
   Eye,
   EyeOff,
   History,
+  Star,
+  Check,
+  XCircle,
 } from 'lucide-react';
 import './Admin.css';
 import FooterBar from '../components/Footer/FooterBar';
@@ -71,6 +75,7 @@ function StatCard({ icon, label, value, color }) {
 const initProject = { title: '', description: '', techStack: '', githubUrl: '', liveUrl: '', imageUrl: '', featured: false };
 const initSkill   = { name: '', category: 'Programming', proficiency: 80 };
 const initExperience = { role: '', company: '', period: '', location: '', description: '', iconUrl: '', type: 'work', order: 0 };
+const initTestimonial = { name: '', role: '', photo: '', rating: 5, message: '', published: false, order: 0 };
 
 function Dashboard({ theme, onToggleTheme }) {
   const dispatch   = useDispatch();
@@ -80,6 +85,7 @@ function Dashboard({ theme, onToggleTheme }) {
   const { items: skills,   loading: sLoading } = useSelector((s) => s.skills);
   const { items: messages, loading: mLoading } = useSelector((s) => s.messages);
   const { items: experiences, loading: eLoading } = useSelector((s) => s.experiences);
+  const { items: testimonials, loading: tLoading } = useSelector((s) => s.testimonials);
   const { profileImageUrl } = useSelector((s) => s.siteSettings);
 
   const [tab, setTab]           = useState('overview');
@@ -90,6 +96,7 @@ function Dashboard({ theme, onToggleTheme }) {
   const [pForm, setPForm]       = useState(initProject);
   const [sForm, setSForm]       = useState(initSkill);
   const [eForm, setEForm]       = useState(initExperience);
+  const [tForm, setTForm]       = useState(initTestimonial);
   const [uploading, setUploading] = useState(false);
   const [profileUploading, setProfileUploading] = useState(false);
 
@@ -123,6 +130,7 @@ function Dashboard({ theme, onToggleTheme }) {
     dispatch(fetchMessages());
     dispatch(fetchExperiences());
     dispatch(fetchProfileImage());
+    dispatch(fetchTestimonials());
   }, [dispatch]);
 
   useEffect(() => {
@@ -340,6 +348,62 @@ function Dashboard({ theme, onToggleTheme }) {
     });
   };
 
+  // ── Testimonial handlers ────────────────────────────────────
+  const openAddTestimonial = () => { setTForm(initTestimonial); setModal('addTestimonial'); };
+  const openEditTestimonial = (t) => { setTForm(t); setSelected(t); setModal('editTestimonial'); };
+
+  const handleTestimonialPhotoUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const formData = new FormData();
+    formData.append('image', file);
+    setUploading(true);
+    try {
+      const { data } = await api.post('/upload', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      if (data.success) {
+        setTForm((f) => ({ ...f, photo: data.url }));
+        toast.success('Photo uploaded!');
+      } else {
+        toast.error(data.message || 'Failed to upload photo');
+      }
+    } catch (err) {
+      toast.error('Error uploading photo');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleSaveTestimonial = async () => {
+    if (modal === 'addTestimonial') {
+      await dispatch(createTestimonial(tForm));
+      toast.success('Testimonial added!');
+    } else {
+      await dispatch(updateTestimonial({ id: selected._id, testimonialData: tForm }));
+      toast.success('Testimonial updated!');
+    }
+    setModal(null);
+  };
+
+  const handleDeleteTestimonial = (id, name) => {
+    setConfirm({
+      title: 'Delete testimonial?',
+      message: `Are you sure you want to delete "${name}"? This action cannot be undone.`,
+      confirmLabel: 'Delete',
+      danger: true,
+      onConfirm: async () => {
+        await dispatch(deleteTestimonial(id));
+        toast.success('Testimonial deleted');
+      },
+    });
+  };
+
+  const handleTogglePublish = async (t) => {
+    await dispatch(updateTestimonial({ id: t._id, testimonialData: { published: !t.published } }));
+    toast.success(t.published ? 'Testimonial unpublished' : 'Testimonial published');
+  };
+
   // ── Message handlers ────────────────────────────────────────
   const openMessage = (m) => {
     setSelected(m);
@@ -465,6 +529,7 @@ function Dashboard({ theme, onToggleTheme }) {
     { id: 'skills',    label: 'Skills', icon: Zap },
     { id: 'experiences', label: 'Experiences', icon: History },
     { id: 'messages',  label: 'Messages', icon: MessageSquare, badge: unread },
+    { id: 'testimonials', label: 'Testimonials', icon: Star },
     { id: 'profile',   label: 'Profile', icon: UserIcon },
   ];
 
@@ -734,6 +799,70 @@ function Dashboard({ theme, onToggleTheme }) {
                               <Reply size={13} /> Reply
                             </button>
                             <button className="btn dash-btn dash-btn--danger" onClick={() => requestDeleteMessage(m._id, m.subject)} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                              <Trash2 size={13} /> Delete
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ── TESTIMONIALS ── */}
+        {tab === 'testimonials' && (
+          <div className="dash-content animate-fadeInUp">
+            <div className="dash-toolbar">
+              <h3>All Testimonials ({testimonials.length})</h3>
+              <button id="add-testimonial-btn" className="btn btn-primary" onClick={openAddTestimonial} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <Plus size={16} /> Add Testimonial
+              </button>
+            </div>
+            {tLoading ? <p>Loading…</p> : (
+              <div className="dash-table-wrap">
+                <table className="dash-table dash-table--testimonials">
+                  <thead>
+                    <tr><th>Name</th><th>Role</th><th>Rating</th><th>Status</th><th>Actions</th></tr>
+                  </thead>
+                  <tbody>
+                    {testimonials.map((t) => (
+                      <tr key={t._id}>
+                        <td>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            {t.photo ? (
+                              <img src={t.photo} alt={t.name} style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--color-border)' }} />
+                            ) : (
+                              <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'var(--color-surface-2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: 'bold' }}>{t.name.charAt(0).toUpperCase()}</div>
+                            )}
+                            <strong>{t.name}</strong>
+                          </div>
+                        </td>
+                        <td>{t.role}</td>
+                        <td>
+                          <div style={{ display: 'flex', gap: '2px', color: 'var(--color-primary)' }}>
+                            {Array.from({ length: 5 }, (_, i) => (
+                              <Star key={i} size={14} fill={i < t.rating ? 'var(--color-primary)' : 'none'} />
+                            ))}
+                          </div>
+                        </td>
+                        <td>
+                          <span className={`badge ${t.published ? '' : 'dash-badge--new'}`}>
+                            {t.published ? 'Published' : 'Draft'}
+                          </span>
+                        </td>
+                        <td>
+                          <div className="dash-actions">
+                            <button className="btn btn-ghost dash-btn" onClick={() => openEditTestimonial(t)} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                              <Edit3 size={13} /> Edit
+                            </button>
+                            <button className="btn btn-ghost dash-btn" onClick={() => handleTogglePublish(t)} style={{ display: 'flex', alignItems: 'center', gap: '4px', color: t.published ? '#ef4444' : '#22c55e' }}>
+                              {t.published ? <XCircle size={13} /> : <Check size={13} />}
+                              {t.published ? 'Unpublish' : 'Publish'}
+                            </button>
+                            <button className="btn dash-btn dash-btn--danger" onClick={() => handleDeleteTestimonial(t._id, t.name)} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                               <Trash2 size={13} /> Delete
                             </button>
                           </div>
@@ -1129,6 +1258,84 @@ function Dashboard({ theme, onToggleTheme }) {
               <button className="btn btn-ghost" onClick={() => setModal(null)}>Cancel</button>
               <button className="btn btn-primary" onClick={handleSaveExperience}>
                 {modal === 'addExperience' ? 'Add Experience' : 'Save Changes'}
+              </button>
+            </div>
+          </div>
+        </Modal>
+      )}
+
+      {/* Add / Edit Testimonial */}
+      {(modal === 'addTestimonial' || modal === 'editTestimonial') && (
+        <Modal title={modal === 'addTestimonial' ? 'Add Testimonial' : 'Edit Testimonial'} onClose={() => setModal(null)}>
+          <div className="modal-form">
+            <div className="form-group">
+              <label className="form-label">Reviewer Name</label>
+              <input type="text" className="form-input" placeholder="Jane Doe"
+                value={tForm.name} onChange={(e) => setTForm((f) => ({ ...f, name: e.target.value }))} />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Role / Title</label>
+              <input type="text" className="form-input" placeholder="CEO at Example Corp"
+                value={tForm.role} onChange={(e) => setTForm((f) => ({ ...f, role: e.target.value }))} />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Rating</label>
+              <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button key={star} type="button" onClick={() => setTForm((f) => ({ ...f, rating: star }))}
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '2px', color: star <= tForm.rating ? 'var(--color-primary)' : 'var(--color-text-muted)' }}
+                    aria-label={`${star} star${star > 1 ? 's' : ''}`}>
+                    <Star size={28} fill={star <= tForm.rating ? 'var(--color-primary)' : 'transparent'} />
+                  </button>
+                ))}
+                <span style={{ fontSize: '0.9rem', color: 'var(--color-text-muted)', marginLeft: '8px' }}>{tForm.rating}/5</span>
+              </div>
+            </div>
+            <div className="form-group">
+              <label className="form-label">Message</label>
+              <textarea className="form-textarea" rows={4} placeholder="Their testimonial message…"
+                value={tForm.message} onChange={(e) => setTForm((f) => ({ ...f, message: e.target.value }))} />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Photo</label>
+              <div className="upload-container">
+                <input type="file" accept="image/*" onChange={handleTestimonialPhotoUpload}
+                  style={{ display: 'none' }} id="testimonial-photo-file" disabled={uploading} />
+                <label htmlFor="testimonial-photo-file"
+                  className={`upload-box${uploading ? ' upload-box--uploading' : ''}`}>
+                  <Upload className="upload-box__icon" size={24} />
+                  <span className="upload-box__text">
+                    {uploading ? 'Uploading to Cloudinary...' : 'Select Photo File'}
+                  </span>
+                  <span className="upload-box__hint">PNG, JPG, WEBP — max 5 MB</span>
+                </label>
+              </div>
+              <label className="form-label" style={{ marginTop: '0.75rem' }}>Or paste photo URL</label>
+              <input type="url" className="form-input" placeholder="https://example.com/photo.jpg"
+                value={tForm.photo} onChange={(e) => setTForm((f) => ({ ...f, photo: e.target.value }))}
+                disabled={uploading} />
+              {tForm.photo && (
+                <div className="modal-img-preview" style={{ borderRadius: '50%', width: '80px', height: '80px', overflow: 'hidden' }}>
+                  <img src={tForm.photo} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    onError={(e) => { e.target.style.display = 'none'; }} />
+                  <span className="modal-img-preview__label">Preview</span>
+                </div>
+              )}
+            </div>
+            <div className="form-group" style={{ flexDirection: 'row', alignItems: 'center', gap: '0.5rem' }}>
+              <input type="checkbox" id="testimonial-published" checked={tForm.published}
+                onChange={(e) => setTForm((f) => ({ ...f, published: e.target.checked }))} />
+              <label htmlFor="testimonial-published" className="form-label" style={{ margin: 0 }}>Published</label>
+            </div>
+            <div className="form-group">
+              <label className="form-label">Display Order (lower = first)</label>
+              <input type="number" className="form-input" placeholder="0"
+                value={tForm.order} onChange={(e) => setTForm((f) => ({ ...f, order: Number(e.target.value) }))} />
+            </div>
+            <div className="modal-footer">
+              <button className="btn btn-ghost" onClick={() => setModal(null)}>Cancel</button>
+              <button className="btn btn-primary" onClick={handleSaveTestimonial}>
+                {modal === 'addTestimonial' ? 'Add Testimonial' : 'Save Changes'}
               </button>
             </div>
           </div>
