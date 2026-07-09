@@ -30,11 +30,11 @@ function About() {
         <div className="about__grid">
           {/* Avatar / Profile Image */}
           <div className="about__avatar-col animate-fadeInUp">
-            <div className="about__lego-container">
+            <div className="about__img-wrapper">
               <img
-                src="/lego-profile.png"
+                src="/profile.png"
                 alt="Teshome Bizuayehu — Full Stack Developer"
-                className="about__lego-image"
+                className="about__profile-img"
               />
             </div>
           </div>
