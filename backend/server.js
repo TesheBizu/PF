@@ -15,7 +15,7 @@ const skillRoutes = require('./routes/skills');
 const messageRoutes = require('./routes/messages');
 const uploadRoutes = require('./routes/upload');
 const experienceRoutes = require('./routes/experiences');
-
+const siteSettingRoutes = require('./routes/siteSettings');
 
 
 // Connect to Database
@@ -78,6 +78,7 @@ app.use('/api/skills', skillRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/experiences', experienceRoutes);
+app.use('/api/settings', siteSettingRoutes);
 
 
 // Health check

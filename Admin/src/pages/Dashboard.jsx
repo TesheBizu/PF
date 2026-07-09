@@ -7,6 +7,7 @@ import { fetchProjects, createProject, updateProject, deleteProject } from '../r
 import { fetchSkills, createSkill, updateSkill, deleteSkill } from '../redux/slices/skillsSlice';
 import { fetchMessages, deleteMessage, markMessageRead } from '../redux/slices/messagesSlice';
 import { fetchExperiences, createExperience, updateExperience, deleteExperience } from '../redux/slices/experiencesSlice';
+import { fetchProfileImage, updateProfileImage, deleteProfileImage } from '../redux/slices/siteSettingsSlice';
 import api from '../services/api';
 import {
   LayoutDashboard,
@@ -79,6 +80,7 @@ function Dashboard({ theme, onToggleTheme }) {
   const { items: skills,   loading: sLoading } = useSelector((s) => s.skills);
   const { items: messages, loading: mLoading } = useSelector((s) => s.messages);
   const { items: experiences, loading: eLoading } = useSelector((s) => s.experiences);
+  const { profileImageUrl } = useSelector((s) => s.siteSettings);
 
   const [tab, setTab]           = useState('overview');
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -89,6 +91,7 @@ function Dashboard({ theme, onToggleTheme }) {
   const [sForm, setSForm]       = useState(initSkill);
   const [eForm, setEForm]       = useState(initExperience);
   const [uploading, setUploading] = useState(false);
+  const [profileUploading, setProfileUploading] = useState(false);
 
   // Profile Form State
   const [pwdForm, setPwdForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
@@ -119,6 +122,7 @@ function Dashboard({ theme, onToggleTheme }) {
     dispatch(fetchSkills());
     dispatch(fetchMessages());
     dispatch(fetchExperiences());
+    dispatch(fetchProfileImage());
   }, [dispatch]);
 
   useEffect(() => {
@@ -152,6 +156,46 @@ function Dashboard({ theme, onToggleTheme }) {
       confirmLabel: 'Log out',
       danger: true,
       onConfirm: handleLogout,
+    });
+  };
+
+  // ── Profile image handlers ──────────────────────────────────
+  const handleProfileImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('image', file);
+
+    setProfileUploading(true);
+    try {
+      const { data } = await api.post('/upload', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      if (data.success) {
+        await dispatch(updateProfileImage(data.url));
+        toast.success('Profile image updated!');
+      } else {
+        toast.error(data.message || 'Failed to upload image');
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error('Error uploading profile image');
+    } finally {
+      setProfileUploading(false);
+    }
+  };
+
+  const handleRemoveProfileImage = () => {
+    setConfirm({
+      title: 'Remove profile image?',
+      message: 'This will remove your profile photo from the portfolio site.',
+      confirmLabel: 'Remove',
+      danger: true,
+      onConfirm: async () => {
+        await dispatch(deleteProfileImage());
+        toast.success('Profile image removed');
+      },
     });
   };
 
@@ -719,6 +763,38 @@ function Dashboard({ theme, onToggleTheme }) {
               </div>
 
               <div className="profile-card__body">
+                <h4 className="profile-card__section-title">Profile Image</h4>
+                <div className="profile-image-section">
+                  <div className="profile-image-preview">
+                    {profileImageUrl ? (
+                      <img src={profileImageUrl} alt="Profile" />
+                    ) : (
+                      <div className="profile-image-placeholder">
+                        <UserIcon size={32} />
+                      </div>
+                    )}
+                  </div>
+                  <div className="profile-image-actions">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleProfileImageUpload}
+                      style={{ display: 'none' }}
+                      id="profile-image-file"
+                      disabled={profileUploading}
+                    />
+                    <label htmlFor="profile-image-file" className="btn btn-primary" style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                      <Upload size={14} />
+                      {profileUploading ? 'Uploading...' : (profileImageUrl ? 'Change Photo' : 'Upload Photo')}
+                    </label>
+                    {profileImageUrl && (
+                      <button className="btn btn-ghost dash-btn--danger" onClick={handleRemoveProfileImage} style={{ color: '#ef4444', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                        <Trash2 size={14} /> Remove
+                      </button>
+                    )}
+                  </div>
+                </div>
+
                 <h4 className="profile-card__section-title">Change Password</h4>
                 <form onSubmit={handlePasswordChange} className="profile-form" id="password-change-form">
                   <div className="form-group">

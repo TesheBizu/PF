@@ -4,6 +4,7 @@ import projectsReducer from './slices/projectsSlice';
 import skillsReducer from './slices/skillsSlice';
 import messagesReducer from './slices/messagesSlice';
 import experiencesReducer from './slices/experiencesSlice';
+import siteSettingsReducer from './slices/siteSettingsSlice';
 
 const store = configureStore({
   reducer: {
@@ -12,6 +13,7 @@ const store = configureStore({
     skills: skillsReducer,
     messages: messagesReducer,
     experiences: experiencesReducer,
+    siteSettings: siteSettingsReducer,
   },
   devTools: import.meta.env.MODE !== 'production',
 });

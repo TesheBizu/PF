@@ -1,4 +1,6 @@
+import { useState, useEffect } from 'react';
 import { Cpu, Server, Database, KeyRound, Mail, Download } from 'lucide-react';
+import api from '../../services/api';
 
 import './About.css';
 
@@ -13,6 +15,19 @@ const quickFacts = [
 ];
 
 function About() {
+  const [profileUrl, setProfileUrl] = useState('/profile.png');
+
+  useEffect(() => {
+    api.get('/settings/profile-image').then(({ data }) => {
+      if (data?.url) setProfileUrl(data.url);
+    }).catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    const link = document.querySelector("link[rel~='icon']");
+    if (link) link.href = profileUrl;
+  }, [profileUrl]);
+
   return (
     <section className="about section" id="about">
       <div className="container">
@@ -32,7 +47,7 @@ function About() {
           <div className="about__avatar-col animate-fadeInUp">
             <div className="about__img-wrapper">
               <img
-                src="/profile.png"
+                src={profileUrl}
                 alt="Teshome Bizuayehu — Full Stack Developer"
                 className="about__profile-img"
               />
