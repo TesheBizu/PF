@@ -13,22 +13,8 @@ const theme = localStorage.getItem('theme') || 'dark';
 document.documentElement.setAttribute('data-theme', theme);
 
 (function() {
-  const img = new Image();
-  img.onload = () => {
-    const size = 64;
-    const canvas = document.createElement('canvas');
-    canvas.width = size;
-    canvas.height = size;
-    const ctx = canvas.getContext('2d');
-    ctx.beginPath();
-    ctx.arc(size / 2, size / 2, size / 2 - 1, 0, Math.PI * 2);
-    ctx.closePath();
-    ctx.clip();
-    ctx.drawImage(img, 0, 0, size, size);
-    const link = document.querySelector("link[rel~='icon']");
-    if (link) link.href = canvas.toDataURL('image/png');
-  };
-  img.src = '/profile.png';
+  const link = document.querySelector("link[rel~='icon']");
+  if (link) link.href = '/profile.png';
 })();
 
 createRoot(document.getElementById('root')).render(
