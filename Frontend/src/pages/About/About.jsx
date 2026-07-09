@@ -22,14 +22,24 @@ function setFavicon(src) {
 function About() {
   const [profileUrl, setProfileUrl] = useState('/profile.png');
 
+  const updateFromApi = () => {
+    api.get('/settings/profile-image').then(({ data }) => {
+      const url = data?.url || '/profile.png';
+      setProfileUrl(url);
+      setFavicon(url);
+    }).catch(() => {});
+  };
+
   useEffect(() => {
     setFavicon('/profile.png');
-    api.get('/settings/profile-image').then(({ data }) => {
-      if (data?.url) {
-        setProfileUrl(data.url);
-        setFavicon(data.url);
-      }
-    }).catch(() => {});
+    updateFromApi();
+    const handler = (e) => {
+      const url = e.detail.url || '/profile.png';
+      setProfileUrl(url);
+      setFavicon(url);
+    };
+    window.addEventListener('profileImageChanged', handler);
+    return () => window.removeEventListener('profileImageChanged', handler);
   }, []);
 
   return (

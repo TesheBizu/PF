@@ -13,6 +13,7 @@ import {
 import {
   messageRealtimeReceived, messageRealtimeRead, messageRealtimeDeleted,
 } from '../../redux/slices/messagesSlice';
+import { profileImageUpdated, profileImageDeleted } from '../../redux/slices/siteSettingsSlice';
 import { toast } from 'react-toastify';
 
 function SocketListener() {
@@ -39,6 +40,9 @@ function SocketListener() {
     });
     socket.on('message:read', (data) => dispatch(messageRealtimeRead(data)));
     socket.on('message:deleted', (id) => dispatch(messageRealtimeDeleted(id)));
+
+    socket.on('profileImage:updated', (url) => dispatch(profileImageUpdated(url)));
+    socket.on('profileImage:deleted', () => dispatch(profileImageDeleted()));
 
     return () => {
       socket.disconnect();

@@ -19,7 +19,10 @@ export const deleteProfileImage = createAsyncThunk('siteSettings/deleteProfileIm
 const siteSettingsSlice = createSlice({
   name: 'siteSettings',
   initialState: { profileImageUrl: null, loading: false, error: null },
-  reducers: {},
+  reducers: {
+    profileImageUpdated(state, action) { state.profileImageUrl = action.payload; },
+    profileImageDeleted(state) { state.profileImageUrl = null; },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(fetchProfileImage.fulfilled, (state, action) => { state.profileImageUrl = action.payload; })
@@ -28,4 +31,5 @@ const siteSettingsSlice = createSlice({
   },
 });
 
+export const { profileImageUpdated, profileImageDeleted } = siteSettingsSlice.actions;
 export default siteSettingsSlice.reducer;

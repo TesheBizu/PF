@@ -1,4 +1,5 @@
 const SiteSetting = require('../models/SiteSetting');
+const { getIO } = require('../socket');
 
 const PROFILE_KEY = 'profileImage';
 
@@ -22,6 +23,7 @@ const updateProfileImage = async (req, res) => {
       { value: url },
       { upsert: true, new: true }
     );
+    getIO().emit('profileImage:updated', setting.value);
     res.json({ success: true, url: setting.value });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -31,6 +33,7 @@ const updateProfileImage = async (req, res) => {
 const deleteProfileImage = async (req, res) => {
   try {
     await SiteSetting.findOneAndDelete({ key: PROFILE_KEY });
+    getIO().emit('profileImage:deleted');
     res.json({ success: true, url: null });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });

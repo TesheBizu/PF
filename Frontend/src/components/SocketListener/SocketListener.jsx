@@ -26,6 +26,13 @@ function SocketListener() {
 
     socket.on('message:created', (data) => dispatch(messageReceived(data)));
 
+    socket.on('profileImage:updated', (url) => {
+      window.dispatchEvent(new CustomEvent('profileImageChanged', { detail: { url } }));
+    });
+    socket.on('profileImage:deleted', () => {
+      window.dispatchEvent(new CustomEvent('profileImageChanged', { detail: { url: null } }));
+    });
+
     return () => {
       socket.disconnect();
     };
