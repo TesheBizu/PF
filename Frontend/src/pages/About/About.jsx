@@ -14,19 +14,42 @@ const quickFacts = [
   { label: 'Status',   value: '🟢 Open to opportunities' },
 ];
 
+function setCircularFavicon(src) {
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.onload = () => {
+    const size = 64;
+    const canvas = document.createElement('canvas');
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext('2d');
+    ctx.beginPath();
+    ctx.arc(size / 2, size / 2, size / 2 - 1, 0, Math.PI * 2);
+    ctx.closePath();
+    ctx.clip();
+    ctx.drawImage(img, 0, 0, size, size);
+    const link = document.querySelector("link[rel~='icon']");
+    if (link) link.href = canvas.toDataURL('image/png');
+  };
+  img.onerror = () => {
+    const link = document.querySelector("link[rel~='icon']");
+    if (link) link.href = src;
+  };
+  img.src = src;
+}
+
 function About() {
   const [profileUrl, setProfileUrl] = useState('/profile.png');
 
   useEffect(() => {
+    setCircularFavicon('/profile.png');
     api.get('/settings/profile-image').then(({ data }) => {
-      if (data?.url) setProfileUrl(data.url);
+      if (data?.url) {
+        setProfileUrl(data.url);
+        setCircularFavicon(data.url);
+      }
     }).catch(() => {});
   }, []);
-
-  useEffect(() => {
-    const link = document.querySelector("link[rel~='icon']");
-    if (link) link.href = profileUrl;
-  }, [profileUrl]);
 
   return (
     <section className="about section" id="about">
