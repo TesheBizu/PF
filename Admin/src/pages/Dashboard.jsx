@@ -154,6 +154,13 @@ function Dashboard({ theme, onToggleTheme }) {
         ['hero', 'about', 'navbar', 'footer', 'skills'].forEach((k) => {
           if (sections[k] && !next[k]) next[k] = JSON.parse(JSON.stringify(sections[k]));
         });
+        if (next.about && !next.about.stats?.length) {
+          next.about.stats = [
+            { id: 'exp', label: 'Years Experience', value: 1, suffix: '+' },
+            { id: 'proj', label: 'Projects Done', value: null, suffix: '+' },
+            { id: 'tech', label: 'Tech Skills', value: null, suffix: '+' },
+          ];
+        }
         return next;
       });
     }
@@ -929,26 +936,15 @@ const handleSectionSave = async (key) => {
             </div>
             <div className="form-group" style={{ marginTop: 20, borderTop: '1px solid var(--color-border)', paddingTop: 16 }}>
               <label className="form-label" style={{ fontWeight: 700, fontSize: '0.85rem' }}>Stats</label>
-              {[
-                ...(sectionForms.about?.stats || []),
-                ...(!sectionForms.about?.stats?.length ? [
-                  { id: 'exp', label: 'Years Experience', value: 1, suffix: '+', color: '#3B82F6' },
-                  { id: 'proj', label: 'Projects Done', value: null, suffix: '+', color: '#60A5FA' },
-                  { id: 'tech', label: 'Tech Skills', value: null, suffix: '+', color: '#2563EB' },
-                ] : []),
-              ].map((st, i) => {
-                const statsArr = sectionForms.about?.stats || [];
-                const isDefault = !statsArr.length;
-                return (
-                  <div key={isDefault ? st.id : i} style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 8 }}>
-                    <input type="text" className="form-input" style={{ width: 140 }} placeholder="Label" value={isDefault ? st.label : (st.label || '')} onChange={(e) => { if (isDefault) { const s = [...statsArr, { id: Date.now().toString(36), label: e.target.value, value: st.value ?? null, suffix: st.suffix || '+', color: st.color || '#3B82F6' }]; handleSectionChange('about', 'stats', s); } else { const s = [...statsArr]; s[i] = { ...s[i], label: e.target.value }; handleSectionChange('about', 'stats', s); } }} />
-                    <input type="number" className="form-input" style={{ width: 70 }} placeholder="Value" value={isDefault ? (st.value ?? '') : (st.value ?? '')} onChange={(e) => { if (isDefault) { const s = [...statsArr, { id: Date.now().toString(36), label: st.label || '', value: e.target.value === '' ? null : Number(e.target.value), suffix: st.suffix || '+', color: st.color || '#3B82F6' }]; handleSectionChange('about', 'stats', s); } else { const s = [...statsArr]; s[i] = { ...s[i], value: e.target.value === '' ? null : Number(e.target.value) }; handleSectionChange('about', 'stats', s); } }} />
-                    <input type="text" className="form-input" style={{ width: 50 }} placeholder="+" value={isDefault ? (st.suffix || '+') : (st.suffix || '+')} onChange={(e) => { if (isDefault) { const s = [...statsArr, { id: Date.now().toString(36), label: st.label || '', value: st.value ?? null, suffix: e.target.value, color: st.color || '#3B82F6' }]; handleSectionChange('about', 'stats', s); } else { const s = [...statsArr]; s[i] = { ...s[i], suffix: e.target.value }; handleSectionChange('about', 'stats', s); } }} />
-                    <button className="icon-btn icon-btn--danger" disabled={isDefault} onClick={() => { if (!isDefault) { const s = statsArr.filter((_, j) => j !== i); handleSectionChange('about', 'stats', s.length ? s : null); } }} title="Remove stat"><Trash2 size={13} /></button>
-                  </div>
-                );
-              })}
-              <span onClick={() => { const s = [...(sectionForms.about?.stats || [])]; s.push({ id: Date.now().toString(36), label: '', value: null, suffix: '+', color: '#3B82F6' }); handleSectionChange('about', 'stats', s); }} style={{ cursor: 'pointer', fontSize: '0.78rem', color: 'var(--color-primary)', fontWeight: 600 }}>+ Add stats</span>
+              {(sectionForms.about?.stats || []).map((st, i) => (
+                <div key={st.id || i} style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 8 }}>
+                  <input type="text" className="form-input" style={{ width: 150 }} placeholder="Label" value={st.label || ''} onChange={(e) => { const s = [...(sectionForms.about?.stats || [])]; s[i] = { ...s[i], label: e.target.value }; handleSectionChange('about', 'stats', s); }} />
+                  <input type="number" className="form-input" style={{ width: 75 }} placeholder="Value" value={st.value ?? ''} onChange={(e) => { const s = [...(sectionForms.about?.stats || [])]; s[i] = { ...s[i], value: e.target.value === '' ? null : Number(e.target.value) }; handleSectionChange('about', 'stats', s); }} />
+                  <input type="text" className="form-input" style={{ width: 55 }} placeholder="+" value={st.suffix || '+'} onChange={(e) => { const s = [...(sectionForms.about?.stats || [])]; s[i] = { ...s[i], suffix: e.target.value }; handleSectionChange('about', 'stats', s); }} />
+                  <button className="icon-btn icon-btn--danger" onClick={() => { const s = (sectionForms.about?.stats || []).filter((_, j) => j !== i); handleSectionChange('about', 'stats', s.length ? s : null); }} title="Remove stat"><Trash2 size={13} /></button>
+                </div>
+              ))}
+              <span onClick={() => { const s = [...(sectionForms.about?.stats || [])]; s.push({ id: Date.now().toString(36), label: '', value: null, suffix: '+' }); handleSectionChange('about', 'stats', s); }} style={{ cursor: 'pointer', fontSize: '0.8rem', color: 'var(--color-primary)', fontWeight: 600, display: 'inline-block', marginTop: 2 }}>+ Add stats</span>
             </div>
           </>
         )}
@@ -958,47 +954,6 @@ const handleSectionSave = async (key) => {
                     <div className="form-group"><label className="form-label">Copyright</label><input type="text" className="form-input" value={sectionForms.footer?.copyright || ''} onChange={(e) => handleSectionChange('footer', 'copyright', e.target.value)} /></div>
                   </>
                 )}
-              </div>
-              <div className="editor-preview-panel">
-                <div className="editor-preview-frame">
-                  <div className="editor-preview-frame__header">
-                    <div className="editor-preview-frame__dots"><span className="editor-preview-frame__dot" /><span className="editor-preview-frame__dot" /><span className="editor-preview-frame__dot" /></div>
-                    <span className="editor-preview-frame__label">Live Preview</span>
-                  </div>
-                  <div className="editor-preview-body">
-                    {tab === 'hero-editor' && (
-                      <div className="preview-hero">
-                        <div className="greeting">{sectionForms.hero?.greeting || 'Hi, I am'}</div>
-                        <div className="name">{sectionForms.hero?.name || 'Your Name'}</div>
-                        <div className="role">{sectionForms.hero?.role || 'Your Role'}</div>
-                        <div className="bio">{sectionForms.hero?.bio || 'Your bio will appear here...'}</div>
-                        {sectionForms.hero?.roles && <div style={{ marginTop: 12, display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap' }}>{(Array.isArray(sectionForms.hero.roles) ? sectionForms.hero.roles : []).map((r, i) => <span key={i} style={{ padding: '4px 12px', background: '#eef2ff', color: '#6366f1', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 600 }}>{r}</span>)}</div>}
-                      </div>
-                    )}
-            {tab === 'about-editor' && (
-              <div>
-                <h2 style={{ color: '#6366f1', fontSize: '1.1rem', marginBottom: 4 }}>{sectionForms.about?.title || 'Who I Am'}</h2>
-                <p style={{ fontSize: '0.85rem', color: '#888' }}>{sectionForms.about?.subtitle || 'Your subtitle'}</p>
-                {(sectionForms.about?.stats || []).length > 0 && (
-                  <div style={{ display: 'flex', gap: 16, marginTop: 12 }}>
-                    {sectionForms.about.stats.map((st, i) => (
-                      <div key={i} style={{ textAlign: 'center' }}>
-                        <div style={{ fontSize: '1.5rem', fontWeight: 900, color: st.color || '#3B82F6' }}>{(st.dynamic ? '{auto}' : st.value ?? '?')}{st.suffix || '+'}</div>
-                        <div style={{ fontSize: '0.6rem', textTransform: 'uppercase', color: '#888', letterSpacing: '0.05em' }}>{st.label}</div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-                    {tab === 'footer-editor' && (
-                      <div className="preview-footer">
-                        <p>{sectionForms.footer?.text || 'Your footer text'}</p>
-                        <small>{sectionForms.footer?.copyright || '© 2026'}</small>
-                      </div>
-                    )}
-                  </div>
-                </div>
               </div>
             </div>
           </div>
