@@ -5,6 +5,8 @@ import { skillAdded, skillUpdated, skillRemoved } from '../../redux/slices/skill
 import { projectAdded, projectUpdated, projectRemoved } from '../../redux/slices/projectsSlice';
 import { experienceAdded, experienceUpdated, experienceRemoved } from '../../redux/slices/experiencesSlice';
 import { messageReceived } from '../../redux/slices/messagesSlice';
+import { sectionRealtimeUpdated } from '../../redux/slices/sectionsSlice';
+import { socialLinkCreated, socialLinkUpdated, socialLinkDeleted, socialLinksReordered } from '../../redux/slices/socialLinksSlice';
 
 function SocketListener() {
   const dispatch = useDispatch();
@@ -25,6 +27,14 @@ function SocketListener() {
     socket.on('experience:deleted', (id) => dispatch(experienceRemoved(id)));
 
     socket.on('message:created', (data) => dispatch(messageReceived(data)));
+
+    socket.on('sectionSetting:updated', (data) => dispatch(sectionRealtimeUpdated(data)));
+    socket.on('sectionSetting:deleted', (key) => dispatch(sectionRealtimeUpdated({ key, value: null })));
+
+    socket.on('socialLink:created', (data) => dispatch(socialLinkCreated(data)));
+    socket.on('socialLink:updated', (data) => dispatch(socialLinkUpdated(data)));
+    socket.on('socialLink:deleted', (id) => dispatch(socialLinkDeleted(id)));
+    socket.on('socialLinks:reordered', (data) => dispatch(socialLinksReordered(data)));
 
     socket.on('testimonial:created', () => {
       window.dispatchEvent(new CustomEvent('testimonialsChanged'));
