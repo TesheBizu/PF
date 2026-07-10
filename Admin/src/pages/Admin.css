@@ -3024,7 +3024,15 @@
   font-size: 0.85rem;
   font-weight: 600;
   color: var(--color-text);
-  margin-bottom: 4px;
+  margin-bottom: 2px;
+}
+.skill-card__desc {
+  font-size: 0.68rem;
+  color: var(--color-text-muted);
+  margin-bottom: 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .skill-card__bar-track {
   width: 100%;

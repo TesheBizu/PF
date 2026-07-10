@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, createElement } from 'react';
+import { useState, useEffect, createElement } from 'react';
 import { getSkillIcon } from '../../utils/skillIcons';
 import { CATEGORY_COLORS } from '../../utils/skillCategories';
 import { trackInteraction } from '../../services/analytics';
@@ -33,8 +33,9 @@ export default function SkillsCarousel({ skills }) {
       <div className="skills__carousel-stage">
         {visible.map((idx) => {
           const skill = skills[idx];
-          const Icon = getSkillIcon(skill.name);
-          const color = CATEGORY_COLORS[skill.category] || '#3B82F6';
+          const displayName = skill.title || skill.name;
+          const Icon = skill.icon ? getSkillIcon(skill.icon) : getSkillIcon(skill.name);
+          const color = skill.brandColor || CATEGORY_COLORS[skill.category] || '#3B82F6';
           const offset = ((idx - activeIndex + total) % total);
           const relOffset = offset > 2 ? offset - total : offset;
           const absOff = Math.abs(relOffset);
@@ -62,8 +63,11 @@ export default function SkillsCarousel({ skills }) {
               <div className="skills__carousel-badge">
                 {createElement(Icon, { size: 28 })}
               </div>
-              <div className="skills__carousel-name">{skill.name}</div>
+              <div className="skills__carousel-name">{displayName}</div>
               <div className="skills__carousel-cat" style={{ color }}>{skill.category}</div>
+              {skill.description && (
+                <div className="skills__carousel-desc">{skill.description}</div>
+              )}
               <div className="skills__carousel-bar">
                 <div
                   className="skills__carousel-bar-fill"

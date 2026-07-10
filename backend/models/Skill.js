@@ -19,7 +19,21 @@ const skillSchema = new mongoose.Schema(
       max: 100,
       default: 80,
     },
+    title: {
+      type: String,
+      default: '',
+      trim: true,
+    },
+    description: {
+      type: String,
+      default: '',
+      trim: true,
+    },
     icon: {
+      type: String,
+      default: '',
+    },
+    brandColor: {
       type: String,
       default: '',
     },
