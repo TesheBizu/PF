@@ -187,9 +187,8 @@ function SectionWrapper({ id, delay, children }) {
     return () => observer.disconnect();
   }, []);
   return (
-    <div id={id} ref={ref} className="reveal" style={{ transitionDelay: `${delay}ms`, '--reveal-delay': `${delay}ms` }}>
-      <style>{`.reveal--visible#${id} { animation: fadeInUp 0.6s ease forwards; animation-delay: ${delay}ms; }`}</style>
-      {visible && children}
+    <div id={id} ref={ref} className={`reveal${visible ? ' reveal--visible' : ''}`} style={{ transitionDelay: `${delay}ms` }}>
+      {children}
     </div>
   );
 }
