@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { NavLink, Link, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { Sun, Moon, Menu, X } from 'lucide-react';

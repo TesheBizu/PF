@@ -57,10 +57,9 @@ function HeroSection({ settings }) {
 
   useEffect(() => {
     updateProfile();
-    window.addEventListener('profileImageChanged', (e) => {
-      setProfileUrl(e.detail.url || '/profile.png');
-    });
-    return () => window.removeEventListener('profileImageChanged', updateProfile);
+    const handler = (e) => setProfileUrl(e.detail.url || '/profile.png');
+    window.addEventListener('profileImageChanged', handler);
+    return () => window.removeEventListener('profileImageChanged', handler);
   }, [updateProfile]);
 
   useEffect(() => {
