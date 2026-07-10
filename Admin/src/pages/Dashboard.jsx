@@ -19,6 +19,7 @@ import {
   Plus, X, Edit3, Trash2, MailOpen, Reply, Mail, Upload, Eye, EyeOff, History, Star, Check, XCircle,
   Monitor, Menu as MenuIcon, CreditCard, BarChart3, TrendingUp, Bell, Share2, UserCog, Settings,
   Activity, Users, Globe, Clock, ArrowUp, ArrowDown, GripVertical, Save, RefreshCw, CheckCheck,
+  Search, Calendar,
 } from 'lucide-react';
 import './Admin.css';
 import FooterBar from '../components/Footer/FooterBar';
@@ -405,14 +406,25 @@ function Dashboard({ theme, onToggleTheme }) {
         </div>
       </aside>
 
-      <main className="dash-main">
+      <main className="dash-main-area">
         <div className="dash-topbar">
-          <h2 className="dash-topbar__title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <TabIcon size={20} style={{ color: 'var(--color-primary)' }} />
-            {currentTabObj?.label || 'Dashboard'}
-          </h2>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <button className="btn btn-ghost dash-btn" onClick={() => setTab('overview')} style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.8rem' }}><RefreshCw size={14} /> Quick Actions</button>
+          <div className="dash-topbar__search">
+            <Search size={15} style={{ color: 'var(--color-text-dim)', flexShrink: 0 }} />
+            <input type="text" placeholder="Search across dashboard..." />
+          </div>
+          <div className="dash-topbar__actions">
+            <button className="dash-topbar__action-btn" title="Notifications" onClick={() => setTab('notifications-center')}>
+              <Bell size={16} />
+              {notifUnread > 0 && <span className="dash-topbar__notif-dot" />}
+            </button>
+            <div className="dash-topbar__date-selector" title="Date range">
+              <Calendar size={14} />
+              <span>Last 30 days</span>
+            </div>
+            <div className="dash-topbar__user" title="Profile" onClick={() => setTab('profile')}>
+              <div className="dash-topbar__user-avatar">{user?.name?.[0] ?? 'A'}</div>
+              <span className="dash-topbar__user-name">{user?.name}</span>
+            </div>
             <ThemeToggle theme={theme} onToggle={onToggleTheme} />
           </div>
         </div>
@@ -421,37 +433,169 @@ function Dashboard({ theme, onToggleTheme }) {
 
         {/* ═══ OVERVIEW ═══ */}
         {tab === 'overview' && (
-          <div className="dash-content animate-fadeInUp">
-            <div className="dash-stats">
-              <StatCard icon={<Users size={22} />} label="Total Projects" value={projects.length} color="rgba(99,120,255,0.15)" />
-              <StatCard icon={<Zap size={22} />} label="Total Skills" value={skills.length} color="rgba(0,229,255,0.12)" />
-              <StatCard icon={<History size={22} />} label="Timeline Items" value={experiences.length} color="rgba(167,139,250,0.15)" />
-              <StatCard icon={unread > 0 ? <Mail size={22} /> : <MailOpen size={22} />} label="Unread Messages" value={unread} color="rgba(255,204,0,0.12)" />
+          <div className="dash-overview animate-fadeInUp">
+            <div className="dash-stats-row">
+              <div className="dash-stat"><div className="dash-stat__icon" style={{ background: 'rgba(99,102,241,0.1)', color: '#6366f1' }}><Briefcase size={18} /></div><div><div className="dash-stat__value">{projects.length}</div><div className="dash-stat__label">Projects</div><div className="dash-stat__trend dash-stat__trend--up"><ArrowUp size={10} /> 12%</div></div></div>
+              <div className="dash-stat"><div className="dash-stat__icon" style={{ background: 'rgba(16,185,129,0.1)', color: '#10b981' }}><Zap size={18} /></div><div><div className="dash-stat__value">{skills.length}</div><div className="dash-stat__label">Skills</div></div></div>
+              <div className="dash-stat"><div className="dash-stat__icon" style={{ background: 'rgba(245,158,11,0.1)', color: '#f59e0b' }}><History size={18} /></div><div><div className="dash-stat__value">{experiences.length}</div><div className="dash-stat__label">Timeline</div></div></div>
+              <div className="dash-stat"><div className="dash-stat__icon" style={{ background: 'rgba(236,72,153,0.1)', color: '#ec4899' }}><Star size={18} /></div><div><div className="dash-stat__value">{testimonials.filter(t => t.published).length}</div><div className="dash-stat__label">Testimonials</div><div className="dash-stat__sub">{testimonials.length} total</div></div></div>
+              <div className="dash-stat"><div className="dash-stat__icon" style={{ background: 'rgba(168,85,247,0.1)', color: '#a855f7' }}><MessageSquare size={18} /></div><div><div className="dash-stat__value">{unread}</div><div className="dash-stat__label">Unread</div><div className="dash-stat__sub">{messages.length} messages</div></div></div>
             </div>
-            <div className="dash-welcome card">
-              <h3>Welcome back, {user?.name}</h3>
-              <p>All changes are saved to MongoDB in real time.</p>
-            </div>
-            {analytics && (
-              <div className="dash-metrics-row" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 'var(--space-md)', marginTop: 'var(--space-lg)' }}>
-                <div className="card" style={{ padding: 'var(--space-md)' }}>
-                  <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>Visitors (30d)</div>
-                  <div style={{ fontSize: '1.5rem', fontWeight: 800 }}>{analytics.visitors || 0}</div>
+
+            <div className="dash-panels-row">
+              {/* Analytics Panel */}
+              <div className="dash-panel">
+                <div className="dash-panel__header">
+                  <span className="dash-panel__title"><BarChart3 size={14} style={{ marginRight: 6 }} />Analytics</span>
+                  <button className="dash-panel__action" onClick={() => dispatch(fetchAnalytics())}>Refresh</button>
                 </div>
-                <div className="card" style={{ padding: 'var(--space-md)' }}>
-                  <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>Page Views (30d)</div>
-                  <div style={{ fontSize: '1.5rem', fontWeight: 800 }}>{analytics.pageViews || 0}</div>
+                {analytics ? (
+                  <>
+                    <div className="analytics-kpis">
+                      <div className="analytics-kpi"><div className="analytics-kpi__label">Visitors</div><div className="analytics-kpi__value">{analytics.visitors || 0}</div><div className="analytics-kpi__change analytics-kpi__change--up"><ArrowUp size={10} /> 8.2%</div></div>
+                      <div className="analytics-kpi"><div className="analytics-kpi__label">Page Views</div><div className="analytics-kpi__value">{analytics.pageViews || 0}</div><div className="analytics-kpi__change analytics-kpi__change--up"><ArrowUp size={10} /> 12.5%</div></div>
+                      <div className="analytics-kpi"><div className="analytics-kpi__label">Avg / Day</div><div className="analytics-kpi__value">{analytics.avgVisitorsPerDay || 0}</div></div>
+                      <div className="analytics-kpi"><div className="analytics-kpi__label">Pages / Visit</div><div className="analytics-kpi__value">{analytics.avgPageViewsPerVisitor || '0.0'}</div></div>
+                    </div>
+                    <svg className="mini-chart" viewBox="0 0 200 60" preserveAspectRatio="none">
+                      <path d={(() => {
+                        const entries = analytics.entries || [];
+                        const vals = entries.map(e => e.visitors || 0);
+                        const max = Math.max(...vals, 1);
+                        const pts = vals.map((v, i) => `${(i / Math.max(vals.length - 1, 1)) * 200},${60 - (v / max) * 50}`).join(' ');
+                        return `M${pts}`;
+                      })()} fill="none" stroke="#6366f1" strokeWidth="2" vectorEffect="non-scaling-stroke" />
+                      <path d={(() => {
+                        const entries = analytics.entries || [];
+                        const vals = entries.map(e => e.visitors || 0);
+                        const max = Math.max(...vals, 1);
+                        const pts = vals.map((v, i) => `${(i / Math.max(vals.length - 1, 1)) * 200},${60 - (v / max) * 50}`).join(' ');
+                        return `M${pts} L${((vals.length - 1) / Math.max(vals.length - 1, 1)) * 200},60 L0,60 Z`;
+                      })()} fill="url(#chartGrad)" opacity="0.15" />
+                      <defs><linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#6366f1" /><stop offset="100%" stopColor="#6366f1" stopOpacity="0" /></linearGradient></defs>
+                    </svg>
+                    {analytics.entries?.[0]?.date && (
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.62rem', color: 'var(--color-text-dim)', marginTop: 4 }}>
+                        <span>{analytics.entries[0].date}</span>
+                        <span>{analytics.entries[analytics.entries.length - 1]?.date}</span>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <p style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', padding: '16px 0', textAlign: 'center' }}>No analytics data yet. Visit the public site to generate data.</p>
+                )}
+              </div>
+
+              {/* Recent Activity Panel */}
+              <div className="dash-panel">
+                <div className="dash-panel__header">
+                  <span className="dash-panel__title"><Activity size={14} style={{ marginRight: 6 }} />Recent Activity</span>
+                  <button className="dash-panel__action" onClick={() => setTab('notifications-center')}>View All</button>
                 </div>
-                <div className="card" style={{ padding: 'var(--space-md)' }}>
-                  <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>Avg / Day</div>
-                  <div style={{ fontSize: '1.5rem', fontWeight: 800 }}>{analytics.avgVisitorsPerDay || 0}</div>
-                </div>
-                <div className="card" style={{ padding: 'var(--space-md)' }}>
-                  <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>Pages / Visit</div>
-                  <div style={{ fontSize: '1.5rem', fontWeight: 800 }}>{analytics.avgPageViewsPerVisitor || '0.0'}</div>
+                <div className="activity-feed">
+                  {(notifications.length > 0 ? notifications.slice(0, 5) : messages.slice(0, 5).map(m => ({ title: m.subject || 'New Message', body: `From ${m.name}`, createdAt: m.createdAt, type: 'message' }))).map((item, i) => (
+                    <div key={item._id || i} className="activity-item">
+                      <div className="activity-item__icon">{item.type === 'message' ? <Mail size={12} /> : <Bell size={12} />}</div>
+                      <div className="activity-item__content">
+                        <div className="activity-item__title">{item.title}</div>
+                        {item.body && <div className="activity-item__desc">{item.body}</div>}
+                      </div>
+                      <div className="activity-item__time">{new Date(item.createdAt).toLocaleDateString()}</div>
+                    </div>
+                  ))}
+                  {notifications.length === 0 && messages.length === 0 && (
+                    <p style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', padding: '16px 0', textAlign: 'center' }}>No recent activity.</p>
+                  )}
                 </div>
               </div>
-            )}
+            </div>
+
+            <div className="dash-lower-panels">
+              {/* Quick Actions */}
+              <div className="dash-panel">
+                <div className="dash-panel__header">
+                  <span className="dash-panel__title"><Zap size={14} style={{ marginRight: 6 }} />Quick Actions</span>
+                </div>
+                <div className="dash-quick-actions">
+                  <button className="quick-action-btn" onClick={() => { setTab('projects'); openAddProject(); }}><Plus size={14} /> New Project</button>
+                  <button className="quick-action-btn" onClick={() => { setTab('skills'); openAddSkill(); }}><Plus size={14} /> New Skill</button>
+                  <button className="quick-action-btn" onClick={() => { setTab('experiences'); openAddExperience(); }}><Plus size={14} /> New Experience</button>
+                  <button className="quick-action-btn" onClick={() => { setTab('testimonials'); openAddTestimonial(); }}><Plus size={14} /> New Testimonial</button>
+                  <button className="quick-action-btn" onClick={() => setTab('messages')}><MessageSquare size={14} /> View Inbox</button>
+                  <button className="quick-action-btn" onClick={() => setTab('analytics')}><BarChart3 size={14} /> Full Analytics</button>
+                </div>
+              </div>
+
+              {/* Content Overview */}
+              <div className="dash-panel">
+                <div className="dash-panel__header">
+                  <span className="dash-panel__title"><LayoutDashboard size={14} style={{ marginRight: 6 }} />Content Overview</span>
+                  <button className="dash-panel__action" onClick={() => setTab('projects')}>Manage</button>
+                </div>
+                <div className="content-overview-grid">
+                  <div className="content-overview-item">
+                    <div className="content-overview-item__icon" style={{ background: 'rgba(99,102,241,0.1)', color: '#6366f1' }}><Briefcase size={14} /></div>
+                    <div className="content-overview-item__info"><div className="content-overview-item__count">{projects.length}</div><div className="content-overview-item__label">Projects</div></div>
+                  </div>
+                  <div className="content-overview-item">
+                    <div className="content-overview-item__icon" style={{ background: 'rgba(16,185,129,0.1)', color: '#10b981' }}><Zap size={14} /></div>
+                    <div className="content-overview-item__info"><div className="content-overview-item__count">{skills.length}</div><div className="content-overview-item__label">Skills</div></div>
+                  </div>
+                  <div className="content-overview-item">
+                    <div className="content-overview-item__icon" style={{ background: 'rgba(245,158,11,0.1)', color: '#f59e0b' }}><History size={14} /></div>
+                    <div className="content-overview-item__info"><div className="content-overview-item__count">{experiences.length}</div><div className="content-overview-item__label">Timeline</div></div>
+                  </div>
+                  <div className="content-overview-item">
+                    <div className="content-overview-item__icon" style={{ background: 'rgba(236,72,153,0.1)', color: '#ec4899' }}><Star size={14} /></div>
+                    <div className="content-overview-item__info"><div className="content-overview-item__count">{testimonials.length}</div><div className="content-overview-item__label">Testimonials</div></div>
+                  </div>
+                  <div className="content-overview-item">
+                    <div className="content-overview-item__icon" style={{ background: 'rgba(168,85,247,0.1)', color: '#a855f7' }}><MessageSquare size={14} /></div>
+                    <div className="content-overview-item__info"><div className="content-overview-item__count">{messages.length}</div><div className="content-overview-item__label">Messages</div></div>
+                  </div>
+                  <div className="content-overview-item">
+                    <div className="content-overview-item__icon" style={{ background: 'rgba(239,68,68,0.1)', color: '#ef4444' }}><Bell size={14} /></div>
+                    <div className="content-overview-item__info"><div className="content-overview-item__count">{notifUnread}</div><div className="content-overview-item__label">Unread Notifications</div></div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Section Status */}
+              <div className="dash-panel">
+                <div className="dash-panel__header">
+                  <span className="dash-panel__title"><Monitor size={14} style={{ marginRight: 6 }} />Section Status</span>
+                  <button className="dash-panel__action" onClick={() => setTab('hero-editor')}>Edit</button>
+                </div>
+                <div className="section-status-list">
+                  {['hero', 'about', 'navbar', 'footer'].map((key) => {
+                    const sec = sectionForms[key];
+                    const hasContent = sec && Object.values(sec).some(v => v && (typeof v === 'string' ? v.trim() : Array.isArray(v) ? v.length : true));
+                    return (
+                      <div key={key} className="section-status-item">
+                        <span className="section-status-item__name" style={{ textTransform: 'capitalize' }}>{key}</span>
+                        <span className={`section-status-item__badge section-status-item__badge--${hasContent ? 'published' : 'empty'}`}>
+                          {hasContent ? 'Published' : 'Empty'}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* System Info */}
+              <div className="dash-panel">
+                <div className="dash-panel__header">
+                  <span className="dash-panel__title"><Settings size={14} style={{ marginRight: 6 }} />System Info</span>
+                </div>
+                <div className="system-info-list">
+                  <div className="system-info-item"><span className="system-info-item__label">Environment</span><span className="system-info-item__value">{import.meta.env.MODE || 'production'}</span></div>
+                  <div className="system-info-item"><span className="system-info-item__label">Last Sync</span><span className="system-info-item__value">{new Date().toLocaleString()}</span></div>
+                  <div className="system-info-item"><span className="system-info-item__label">Admin</span><span className="system-info-item__value">{user?.name || '—'}</span></div>
+                  <div className="system-info-item"><span className="system-info-item__label">Role</span><span className="system-info-item__value">{user?.role || 'Admin'}</span></div>
+                  <div className="system-info-item"><span className="system-info-item__label">Auth</span><span className="system-info-item__value">{user?.totpEnabled ? '2FA + JWT' : 'JWT'}</span></div>
+                </div>
+              </div>
+            </div>
           </div>
         )}
 
