@@ -9,7 +9,7 @@ import { fetchMessages, deleteMessage, markMessageRead } from '../redux/slices/m
 import { fetchExperiences, createExperience, updateExperience, deleteExperience } from '../redux/slices/experiencesSlice';
 import { fetchProfileImage, updateProfileImage, deleteProfileImage } from '../redux/slices/siteSettingsSlice';
 import { fetchTestimonials, createTestimonial, updateTestimonial, deleteTestimonial } from '../redux/slices/testimonialsSlice';
-import { fetchAllSections, updateSection, SECTIONS_LIST } from '../redux/slices/sectionsSlice';
+import { fetchAllSections, updateSection } from '../redux/slices/sectionsSlice';
 import { fetchNotifications, markNotificationRead, markAllNotificationsRead, deleteNotification } from '../redux/slices/notificationsSlice';
 import { fetchAnalytics } from '../redux/slices/analyticsSlice';
 import { fetchSocialLinks, createSocialLink, updateSocialLink, reorderSocialLinks, deleteSocialLink, setItems } from '../redux/slices/socialLinksSlice';
@@ -182,7 +182,6 @@ function Dashboard({ theme, onToggleTheme }) {
       { id: 'about-editor', label: 'About', icon: UserIcon },
       { id: 'navbar-editor', label: 'Navbar', icon: MenuIcon },
       { id: 'footer-editor', label: 'Footer', icon: CreditCard },
-      { id: 'visibility-manager', label: 'Visibility', icon: Eye },
     ]},
     { label: 'Engagement', items: [
       { id: 'analytics', label: 'Analytics', icon: BarChart3 },
@@ -320,12 +319,63 @@ function Dashboard({ theme, onToggleTheme }) {
   const handleVerify2faSetup = async (e) => { e.preventDefault(); if (!totpSetupCode || totpSetupCode.length !== 6) { toast.error('Enter 6-digit code'); return; } setTotpLoading(true); try { await api.post('/auth/totp/verify-setup', { totpCode: totpSetupCode }); toast.success('2FA enabled!'); setIs2faEnabled(true); setModal(null); } catch (err) { toast.error(err.response?.data?.message || 'Verification failed'); } finally { setTotpLoading(false); } };
   const handleDisable2fa = async (e) => { e.preventDefault(); if (!disablePassword) { toast.error('Enter your password'); return; } setTotpLoading(true); try { await api.delete('/auth/totp/disable', { data: { password: disablePassword } }); toast.success('2FA disabled'); setIs2faEnabled(false); setShowDisable2fa(false); setDisablePassword(''); } catch (err) { toast.error(err.response?.data?.message || 'Failed'); } finally { setTotpLoading(false); } };
 
+  const DEFAULT_NAV_LINKS = [
+    { id: 'home', label: 'Home', path: '/', visible: true },
+    { id: 'about', label: 'About', path: '/#about', visible: true },
+    { id: 'skills', label: 'Skills', path: '/#skills', visible: true },
+    { id: 'projects', label: 'Projects', path: '/#projects', visible: true },
+    { id: 'experience', label: 'Experience', path: '/#experience', visible: true },
+    { id: 'testimonials', label: 'Testimonials', path: '/#testimonials', visible: true },
+    { id: 'contact', label: 'Contact', path: '/#contact', visible: true },
+  ];
+
   // Section editor handlers
   const handleSectionChange = (key, field, value) => {
     setSectionForms((prev) => ({
       ...prev,
       [key]: { ...(prev[key] || {}), [field]: value },
     }));
+  };
+
+  // Nav link handlers
+  const getNavLinks = () => {
+    const links = sectionForms.navbar?.links;
+    return Array.isArray(links) ? links : DEFAULT_NAV_LINKS;
+  };
+
+  const updateNavLink = (idx, field, value) => {
+    const links = [...getNavLinks()];
+    links[idx] = { ...links[idx], [field]: value };
+    handleSectionChange('navbar', 'links', links);
+  };
+
+  const addNavLink = () => {
+    const links = [...getNavLinks()];
+    const id = 'nav_' + Date.now();
+    links.push({ id, label: 'New Link', path: '/', visible: true });
+    handleSectionChange('navbar', 'links', links);
+  };
+
+  const removeNavLink = (idx) => {
+    const links = [...getNavLinks()];
+    links.splice(idx, 1);
+    handleSectionChange('navbar', 'links', links);
+  };
+
+  const handleNavLinkDragStart = (idx) => setDraggedIdx(idx);
+
+  const handleNavLinkDragOver = (e, idx) => {
+    e.preventDefault();
+    if (draggedIdx === null || draggedIdx === idx) return;
+    const links = [...getNavLinks()];
+    const [moved] = links.splice(draggedIdx, 1);
+    links.splice(idx, 0, moved);
+    setDraggedIdx(idx);
+    handleSectionChange('navbar', 'links', links);
+  };
+
+  const handleNavLinkDragEnd = () => {
+    setDraggedIdx(null);
   };
   const handleSectionSave = async (key) => {
     setSectionSaving(key);
@@ -770,7 +820,33 @@ function Dashboard({ theme, onToggleTheme }) {
                 {tab === 'navbar-editor' && (
                   <>
                     <div className="form-group"><label className="form-label">Logo Text</label><input type="text" className="form-input" value={sectionForms.navbar?.logoText || ''} onChange={(e) => handleSectionChange('navbar', 'logoText', e.target.value)} /></div>
-                    <div className="form-group"><label className="form-label">Nav Links (JSON)</label><textarea className="form-textarea" rows={6} value={typeof sectionForms.navbar?.links === 'string' ? sectionForms.navbar.links : JSON.stringify(sectionForms.navbar?.links || [], null, 2)} onChange={(e) => handleSectionChange('navbar', 'links', e.target.value)} /><small style={{ color: 'var(--color-text-muted)', fontSize: '0.72rem' }}>Array of {`{label, path}`}</small></div>
+                    <div className="form-group">
+                      <label className="form-label">Navigation Links</label>
+                      <div className="nav-links-editor">
+                        {getNavLinks().map((link, idx) => (
+                          <div
+                            key={link.id || idx}
+                            className={`nav-link-item${draggedIdx === idx ? ' nav-link-item--dragging' : ''}`}
+                            draggable
+                            onDragStart={() => handleNavLinkDragStart(idx)}
+                            onDragOver={(e) => handleNavLinkDragOver(e, idx)}
+                            onDragEnd={handleNavLinkDragEnd}
+                          >
+                            <div className="nav-link-item__drag" title="Drag to reorder">
+                              <GripVertical size={14} />
+                            </div>
+                            <label className="toggle-switch nav-link-item__toggle">
+                              <input type="checkbox" checked={link.visible !== false} onChange={() => updateNavLink(idx, 'visible', link.visible === false)} />
+                              <span className="toggle-switch__track"><span className="toggle-switch__thumb" /></span>
+                            </label>
+                            <input type="text" className="form-input nav-link-item__label" value={link.label} placeholder="Label" onChange={(e) => updateNavLink(idx, 'label', e.target.value)} />
+                            <input type="text" className="form-input nav-link-item__path" value={link.path} placeholder="/path" onChange={(e) => updateNavLink(idx, 'path', e.target.value)} />
+                            <button className="icon-btn icon-btn--danger nav-link-item__remove" onClick={() => removeNavLink(idx)} title="Remove link"><X size={13} /></button>
+                          </div>
+                        ))}
+                        <button className="btn btn-ghost" onClick={addNavLink} style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '8px', fontSize: '0.8rem' }}><Plus size={14} /> Add Link</button>
+                      </div>
+                    </div>
                   </>
                 )}
                 {tab === 'footer-editor' && (
@@ -805,7 +881,7 @@ function Dashboard({ theme, onToggleTheme }) {
                     {tab === 'navbar-editor' && (
                       <div className="preview-navbar">
                         <span className="logo">{sectionForms.navbar?.logoText || 'Logo'}</span>
-                        <div className="links">{(Array.isArray(sectionForms.navbar?.links) ? sectionForms.navbar.links : []).map((l, i) => <span key={i}>{l.label || 'Link'}</span>)}</div>
+                        <div className="links">{getNavLinks().filter((l) => l.visible !== false).map((l, i) => <span key={l.id || i}>{l.label || 'Link'}</span>)}</div>
                       </div>
                     )}
                     {tab === 'footer-editor' && (
@@ -1032,43 +1108,7 @@ function Dashboard({ theme, onToggleTheme }) {
           </div>
         )}
 
-        {/* ── VISIBILITY MANAGER ── */}
-        {tab === 'visibility-manager' && (
-          <div>
-            <div className="page-toolbar">
-              <div className="page-toolbar__left">
-                <span className="page-toolbar__title">Section Visibility</span>
-                <span className="page-toolbar__count">Toggle sections on/off</span>
-              </div>
-            </div>
-            <div className="vis-manager">
-              {SECTIONS_LIST.map((sec, idx) => {
-                const visKey = `section_${sec.id}_visible`;
-                const isVisible = sections[visKey] !== false;
-                return (
-                  <div key={sec.id} className="vis-item">
-                    <div className="vis-item__icon" style={{ background: `hsl(${idx * 45}, 55%, 85%)`, color: `hsl(${idx * 45}, 60%, 30%)` }}>
-                      {sec.id === 'hero' && <Monitor size={15} />}
-                      {sec.id === 'about' && <UserIcon size={15} />}
-                      {sec.id === 'skills' && <Zap size={15} />}
-                      {sec.id === 'experience' && <History size={15} />}
-                      {sec.id === 'projects' && <Briefcase size={15} />}
-                      {sec.id === 'testimonials' && <Star size={15} />}
-                      {sec.id === 'contact' && <MessageSquare size={15} />}
-                      {sec.id === 'footer' && <CreditCard size={15} />}
-                    </div>
-                    <span className="vis-item__name">{sec.label}</span>
-                    <span className={`vis-item__badge vis-item__badge--${isVisible ? 'visible' : 'hidden'}`}>{isVisible ? 'Visible' : 'Hidden'}</span>
-                    <label className="toggle-switch">
-                      <input type="checkbox" checked={isVisible} onChange={() => dispatch(updateSection({ key: visKey, value: !isVisible }))} />
-                      <span className="toggle-switch__track"><span className="toggle-switch__thumb" /></span>
-                    </label>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
+
 
         </div>
         <FooterBar variant="dashboard" />

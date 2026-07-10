@@ -1,22 +1,26 @@
 import { useState, useEffect, useCallback } from 'react';
 import { NavLink, Link, useLocation } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import { Sun, Moon, Menu, X } from 'lucide-react';
 import './Navbar.css';
 
-const NAV_LINKS = [
-  { path: '/', label: 'Home' },
-  { path: '/#about', label: 'About' },
-  { path: '/#skills', label: 'Skills' },
-  { path: '/#projects', label: 'Projects' },
-  { path: '/#experience', label: 'Experience' },
-  { path: '/#testimonials', label: 'Testimonials' },
-  { path: '/#contact', label: 'Contact' },
+const DEFAULT_NAV_LINKS = [
+  { id: 'home', label: 'Home', path: '/', visible: true },
+  { id: 'about', label: 'About', path: '/#about', visible: true },
+  { id: 'skills', label: 'Skills', path: '/#skills', visible: true },
+  { id: 'projects', label: 'Projects', path: '/#projects', visible: true },
+  { id: 'experience', label: 'Experience', path: '/#experience', visible: true },
+  { id: 'testimonials', label: 'Testimonials', path: '/#testimonials', visible: true },
+  { id: 'contact', label: 'Contact', path: '/#contact', visible: true },
 ];
 
 function Navbar({ theme, onToggleTheme }) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
+  const navbar = useSelector((s) => s.sections.items.navbar);
+  const navLinks = navbar?.links?.filter((l) => l.visible !== false) || DEFAULT_NAV_LINKS;
+  const logoText = navbar?.logoText || 'Teshome';
 
   const handleScroll = useCallback(() => {
     setScrolled(window.scrollY > 20);
@@ -61,18 +65,18 @@ function Navbar({ theme, onToggleTheme }) {
         />
       )}
 
-      {/* Logo — 3D T badge */}
+      {/* Logo */}
       <Link to="/" className="navbar__logo" onClick={() => setMobileOpen(false)}>
         <div className="navbar__logo-badge">T</div>
-        <span className="navbar__logo-name">Teshome</span>
+        <span className="navbar__logo-name">{logoText}</span>
       </Link>
 
       {/* Top Navigation Links */}
       <div className={`navbar__links ${mobileOpen ? 'navbar__links--open' : ''}`}>
-        {NAV_LINKS.map((link) =>
+        {navLinks.map((link) =>
           link.path.startsWith('/#') ? (
             <a
-              key={link.path}
+              key={link.id || link.path}
               href={link.path}
               className="navbar__link"
               onClick={(e) => handleHashLink(e, link.path)}
@@ -81,7 +85,7 @@ function Navbar({ theme, onToggleTheme }) {
             </a>
           ) : (
             <NavLink
-              key={link.path}
+              key={link.id || link.path}
               to={link.path}
               end={link.path === '/'}
               className={({ isActive }) =>

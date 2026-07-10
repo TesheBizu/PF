@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
-import { fetchAllSections, SECTIONS_LIST } from '../../redux/slices/sectionsSlice';
+import { fetchAllSections } from '../../redux/slices/sectionsSlice';
 import { fetchProjects } from '../../redux/slices/projectsSlice';
 import { fetchSkills } from '../../redux/slices/skillsSlice';
 import { fetchExperiences } from '../../redux/slices/experiencesSlice';
@@ -143,6 +143,7 @@ function Home() {
   const sections = useSelector((s) => s.sections.items);
   const sectionOrder = useSelector((s) => s.sections.order);
   const loading = useSelector((s) => s.sections.loading);
+  const navbarLinks = sections.navbar?.links;
 
   useEffect(() => {
     dispatch(fetchAllSections());
@@ -152,9 +153,9 @@ function Home() {
     dispatch(fetchSocialLinks());
   }, [dispatch]);
 
-  const visibleSections = sectionOrder.length > 0
-    ? sectionOrder.filter((id) => sections[`section_${id}_visible`] !== false)
-    : SECTIONS_LIST.filter((s) => s.id !== 'hero' && s.id !== 'footer' && sections[`section_${s.id}_visible`] !== false).map((s) => s.id);
+  const visibleSections = (navbarLinks || [])
+    .filter((l) => l.visible !== false && l.id !== 'home' && SECTION_COMPONENTS[l.id])
+    .map((l) => l.id);
 
   return (
     <>

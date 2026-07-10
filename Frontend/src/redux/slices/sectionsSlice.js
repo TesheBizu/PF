@@ -21,9 +21,6 @@ export const SECTIONS_LIST = [
   { id: 'footer', label: 'Footer' },
 ];
 
-const defaultVisibility = () =>
-  Object.fromEntries(SECTIONS_LIST.map((s) => [`section_${s.id}_visible`, true]));
-
 const sectionsSlice = createSlice({
   name: 'sections',
   initialState: { items: {}, loading: false, order: [] },
@@ -40,7 +37,7 @@ const sectionsSlice = createSlice({
       .addCase(fetchAllSections.pending, (state) => { state.loading = true; })
       .addCase(fetchAllSections.fulfilled, (state, action) => {
         state.loading = false;
-        state.items = { ...defaultVisibility(), ...action.payload };
+        state.items = action.payload;
         if (action.payload.section_order) {
           state.order = action.payload.section_order;
         }

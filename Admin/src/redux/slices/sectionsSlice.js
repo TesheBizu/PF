@@ -19,20 +19,6 @@ export const updateSection = createAsyncThunk('sections/update', async ({ key, v
   }
 });
 
-const SECTIONS_LIST = [
-  { id: 'hero', label: 'Hero / Home' },
-  { id: 'about', label: 'About' },
-  { id: 'skills', label: 'Skills' },
-  { id: 'experience', label: 'Experience' },
-  { id: 'projects', label: 'Projects' },
-  { id: 'testimonials', label: 'Testimonials' },
-  { id: 'contact', label: 'Contact' },
-  { id: 'footer', label: 'Footer' },
-];
-
-const defaultVisibility = () =>
-  Object.fromEntries(SECTIONS_LIST.map((s) => [`section_${s.id}_visible`, true]));
-
 const sectionsSlice = createSlice({
   name: 'sections',
   initialState: { items: {}, loading: false, error: null },
@@ -46,7 +32,7 @@ const sectionsSlice = createSlice({
       .addCase(fetchAllSections.pending, (state) => { state.loading = true; state.error = null; })
       .addCase(fetchAllSections.fulfilled, (state, action) => {
         state.loading = false;
-        state.items = { ...defaultVisibility(), ...action.payload };
+        state.items = action.payload;
       })
       .addCase(fetchAllSections.rejected, (state, action) => { state.loading = false; state.error = action.payload; })
       .addCase(updateSection.fulfilled, (state, action) => {
@@ -56,5 +42,4 @@ const sectionsSlice = createSlice({
 });
 
 export const { sectionRealtimeUpdated } = sectionsSlice.actions;
-export { SECTIONS_LIST };
 export default sectionsSlice.reducer;
