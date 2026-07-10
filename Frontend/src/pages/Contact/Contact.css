@@ -73,26 +73,6 @@
   color: var(--color-text);
 }
 
-.contact__availability {
-  display: flex;
-  align-items: center;
-  gap: var(--space-sm);
-  font-size: 0.8rem;
-  color: var(--color-text-muted);
-  padding: var(--space-sm) var(--space-md);
-  border-radius: var(--radius-full);
-  background: rgba(16, 185, 129, 0.06);
-  width: fit-content;
-}
-
-.contact__availability-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--color-success);
-  animation: pulse 2s ease-in-out infinite;
-}
-
 .contact__form {
   display: flex;
   flex-direction: column;

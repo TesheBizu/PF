@@ -17,11 +17,14 @@ const DEFAULT_NAV_LINKS = [
 function Navbar({ theme, onToggleTheme }) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState('home');
   const location = useLocation();
   const navbar = useSelector((s) => s.sections.items.navbar);
   const navLinks = navbar?.links?.filter((l) => l.visible !== false) || DEFAULT_NAV_LINKS;
   const logoText = navbar?.logoText || 'Teshome';
+  const linkRefs = useRef({});
 
+  /* ── scroll-based scrolled state ── */
   const handleScroll = useCallback(() => {
     setScrolled(window.scrollY > 30);
   }, []);
@@ -31,6 +34,33 @@ function Navbar({ theme, onToggleTheme }) {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [handleScroll]);
 
+  /* ── IntersectionObserver for active nav section ── */
+  useEffect(() => {
+    const ids = navLinks.map((l) => l.id || l.path.replace('/#', '')).filter(Boolean);
+    const els = ids.map((id) => document.getElementById(id)).filter(Boolean);
+    if (!els.length) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        /* find the section with the largest intersection ratio */
+        let best = null;
+        let bestRatio = 0;
+        entries.forEach((entry) => {
+          if (entry.intersectionRatio > bestRatio) {
+            bestRatio = entry.intersectionRatio;
+            best = entry.target.id;
+          }
+        });
+        if (best) setActiveSection(best);
+      },
+      { threshold: [0, 0.15, 0.3, 0.5, 0.7, 0.9, 1], rootMargin: '-20px 0px -10% 0px' }
+    );
+
+    els.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, [navLinks]);
+
+  /* ── mobile menu lock ── */
   useEffect(() => {
     if (mobileOpen) {
       document.body.style.overflow = 'hidden';
@@ -39,8 +69,6 @@ function Navbar({ theme, onToggleTheme }) {
     }
     return () => { document.body.style.overflow = ''; };
   }, [mobileOpen]);
-
-  const linkRefs = useRef({});
 
   const handleHashLink = (e, path) => {
     e.preventDefault();
@@ -69,6 +97,12 @@ function Navbar({ theme, onToggleTheme }) {
     const el = linkRefs.current[id];
     if (!el) return;
     el.style.transform = 'translate(0, 0)';
+  };
+
+  const isActive = (link) => {
+    if (link.path === '/') return activeSection === 'home';
+    const id = link.path.replace('/#', '');
+    return activeSection === id;
   };
 
   return (
@@ -101,7 +135,7 @@ function Navbar({ theme, onToggleTheme }) {
                 <a
                   key={link.id || link.path}
                   href={link.path}
-                  className="navbar__link"
+                  className={`navbar__link${isActive(link) ? ' navbar__link--active' : ''}`}
                   ref={(el) => { linkRefs.current[link.id || link.path] = el; }}
                   onClick={(e) => handleHashLink(e, link.path)}
                   onMouseMove={(e) => handleMagneticMove(e, link.id || link.path)}

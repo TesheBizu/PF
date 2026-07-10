@@ -157,48 +157,16 @@
   justify-content: center;
 }
 
-.home__profile-wrapper {
-  position: relative;
-  width: 260px;
-  height: 300px;
-  flex-shrink: 0;
-  cursor: default;
-}
-
-.home__profile-glow {
-  position: absolute;
-  inset: -16px;
-  border-radius: var(--radius-lg);
-  background: radial-gradient(circle at center, rgba(59, 130, 246, 0.08), transparent 65%);
-  animation: glowPulse 3s ease-in-out infinite;
-  pointer-events: none;
-  z-index: 0;
-  filter: blur(12px);
-}
-
-.home__profile-frame {
-  width: 100%;
-  height: 100%;
-  border-radius: var(--radius-lg);
+.home__profile-blend {
+  width: 240px;
+  height: 240px;
+  border-radius: 50%;
   overflow: hidden;
-  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.06), 0 0 0 1px rgba(59, 130, 246, 0.04);
-  transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1);
-  transform: perspective(800px) rotateX(0deg) rotateY(0deg);
-  will-change: transform;
-  position: relative;
-  z-index: 2;
-  --glow-x: 50%;
-  --glow-y: 50%;
-}
-
-.home__profile-frame::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background: radial-gradient(circle at var(--glow-x, 50%) var(--glow-y, 50%), rgba(59, 130, 246, 0.06), transparent 60%);
-  pointer-events: none;
-  transition: background 0.15s ease;
+  flex-shrink: 0;
+  box-shadow:
+    0 0 60px rgba(59, 130, 246, 0.08),
+    0 8px 40px rgba(0, 0, 0, 0.04);
+  animation: float 3.5s ease-in-out infinite;
 }
 
 .home__profile-img {
@@ -206,7 +174,6 @@
   height: 100%;
   object-fit: cover;
   display: block;
-  pointer-events: none;
 }
 
 .home__scroll-hint {
@@ -260,7 +227,7 @@
   .home__actions { justify-content: center; }
   .home__socials { justify-content: center; }
   .home__visual { min-height: auto; }
-  .home__profile-wrapper { width: 200px; height: 240px; }
+  .home__profile-blend { width: 180px; height: 180px; }
 
   .home__wordmark-text {
     font-size: clamp(2.5rem, 10vw, 4rem);
@@ -275,5 +242,5 @@
   .home__actions { flex-direction: column; align-items: center; }
   .home__actions .btn { width: 100%; justify-content: center; }
   .home__scroll-hint { display: none; }
-  .home__profile-wrapper { width: 180px; height: 220px; }
+  .home__profile-blend { width: 150px; height: 150px; }
 }

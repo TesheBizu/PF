@@ -7,7 +7,7 @@ import './Contact.css';
 
 const CONTACT_INFO = [
   { icon: <Mail size={20} />, label: 'Email', value: 'teshelin7@gmail.com', href: 'mailto:teshelin7@gmail.com' },
-  { icon: <Phone size={20} />, label: 'Phone', value: '+251988044439', href: 'tel:+251988044439' },
+  { icon: <Phone size={20} />, label: 'Phone', value: '+251988044439', href: null },
   { icon: <MapPin size={20} />, label: 'Location', value: 'Bahir Dar, Ethiopia', href: null },
 ];
 
@@ -94,10 +94,7 @@ function Contact() {
               )}
             </div>
 
-            <div className="contact__availability">
-              <span className="contact__availability-dot" />
-              <span>Available for opportunities</span>
-            </div>
+
           </div>
 
           <div className="contact__form-col animate-fadeInUp delay-100">

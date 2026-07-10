@@ -70,39 +70,44 @@ function SkillNode({ skill, position, color, isHovered, onHover, onLeave, catego
         </mesh>
       </Float>
 
-      {/* Skill icon as sprite */}
-      <Html distanceFactor={8} center>
+      {/* Skill icon as sprite — larger, glossy badge per skill */}
+      <Html distanceFactor={7} center>
         <div style={{
-          transform: 'translateY(-18px)',
+          transform: `translateY(-22px) scale(${isHovered ? 1.15 : 1})`,
           pointerEvents: 'none',
-          opacity: isHovered ? 1 : 0.6,
-          transition: 'opacity 0.3s ease',
+          opacity: isHovered ? 1 : 0.7,
+          transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+          filter: isHovered ? `drop-shadow(0 0 8px ${color}60)` : 'none',
         }}>
           <div style={{
-            width: 28,
-            height: 28,
-            borderRadius: 8,
-            background: `${color}15`,
+            width: 36,
+            height: 36,
+            borderRadius: 10,
+            background: `linear-gradient(145deg, ${color}22, ${color}10)`,
+            border: `1px solid ${color}30`,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             color: color,
-            fontSize: 14,
+            fontSize: 18,
             lineHeight: 1,
+            boxShadow: `0 2px 12px ${color}20, inset 0 1px 0 ${color}15`,
+            backdropFilter: 'blur(4px)',
           }}>
-            {createElement(Icon, { size: 16 })}
+            {createElement(Icon, { size: 18 })}
           </div>
         </div>
       </Html>
 
       {/* Label below */}
       <Text
-        position={[0, -0.6, 0]}
-        fontSize={0.12}
+        position={[0, -0.65, 0]}
+        fontSize={0.13}
         color={color}
-        opacity={isHovered ? 0.9 : 0.4}
+        opacity={isHovered ? 0.95 : 0.45}
         anchorX="center"
         anchorY="top"
+        fontWeight={600}
       >
         {skill.name}
       </Text>

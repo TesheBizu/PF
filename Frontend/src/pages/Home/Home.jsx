@@ -25,7 +25,6 @@ function HeroSection({ settings }) {
   const [isDeleting, setIsDeleting] = useState(false);
   const [profileUrl, setProfileUrl] = useState('/profile.png');
   const tr = useRef(null);
-  const tiltRef = useRef(null);
   const links = useSelector((s) => s.socialLinks.items);
 
   const updateProfile = useCallback(() => {
@@ -58,25 +57,6 @@ function HeroSection({ settings }) {
     }, speed);
     return () => clearTimeout(tr.current);
   }, [displayed, isDeleting, roleIdx]);
-
-  const handleTilt = (e) => {
-    const frame = tiltRef.current;
-    if (!frame) return;
-    const rect = frame.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / rect.width;
-    const y = (e.clientY - rect.top) / rect.height;
-    const tiltX = (y - 0.5) * -16;
-    const tiltY = (x - 0.5) * 16;
-    frame.style.transform = `perspective(800px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) scale(1.02)`;
-    frame.style.setProperty('--glow-x', `${x * 100}%`);
-    frame.style.setProperty('--glow-y', `${y * 100}%`);
-  };
-
-  const handleTiltLeave = () => {
-    if (tiltRef.current) {
-      tiltRef.current.style.transform = 'perspective(800px) rotateX(0deg) rotateY(0deg) scale(1)';
-    }
-  };
 
   return (
     <section className="home" id="home">
@@ -130,11 +110,8 @@ function HeroSection({ settings }) {
         </div>
 
         <div className="home__visual">
-          <div className="home__profile-wrapper" onMouseMove={handleTilt} onMouseLeave={handleTiltLeave}>
-            <div className="home__profile-glow" aria-hidden="true" />
-            <div className="home__profile-frame" ref={tiltRef}>
-              <img src={profileUrl} alt="Teshome Bizuayehu" className="home__profile-img" />
-            </div>
+          <div className="home__profile-blend">
+            <img src={profileUrl} alt="Teshome Bizuayehu" className="home__profile-img" />
           </div>
         </div>
       </div>
