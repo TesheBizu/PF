@@ -25,6 +25,7 @@ import './Admin.css';
 import FooterBar from '../components/Footer/FooterBar';
 import ConfirmDialog from '../components/ConfirmDialog/ConfirmDialog';
 import ThemeToggle from '../components/ThemeToggle/ThemeToggle';
+import { SocialIcon } from '../components/SocialIcons';
 import OverviewPanel from '../components/Analytics/OverviewPanel';
 import AnalyticsPanel from '../components/Analytics/AnalyticsPanel';
 import MetricsPanel from '../components/Analytics/MetricsPanel';
@@ -63,6 +64,21 @@ const initSkill   = { name: '', category: 'Programming', proficiency: 80 };
 const initExperience = { role: '', company: '', period: '', location: '', description: '', iconUrl: '', type: 'work', order: 0 };
 const initTestimonial = { name: '', role: '', photo: '', rating: 5, message: '', published: false, order: 0 };
 const initSocialLink = { platform: '', url: '', icon: '', label: '', order: 0, active: true };
+
+const PLATFORM_OPTIONS = [
+  { value: 'github', label: 'GitHub' },
+  { value: 'linkedin', label: 'LinkedIn' },
+  { value: 'mail', label: 'Email' },
+  { value: 'phone', label: 'Phone' },
+  { value: 'telegram', label: 'Telegram' },
+  { value: 'facebook', label: 'Facebook' },
+  { value: 'instagram', label: 'Instagram' },
+  { value: 'x', label: 'X (Twitter)' },
+  { value: 'discord', label: 'Discord' },
+  { value: 'whatsapp', label: 'WhatsApp' },
+];
+
+const PLATFORM_LABEL_MAP = Object.fromEntries(PLATFORM_OPTIONS.map((p) => [p.value, p.label]));
 
 function Dashboard({ theme, onToggleTheme }) {
   const dispatch = useDispatch();
@@ -115,6 +131,8 @@ function Dashboard({ theme, onToggleTheme }) {
   const [sectionSaving, setSectionSaving] = useState(null);
   const [draggedIdx, setDraggedIdx] = useState(null);
   const [previewDevice, setPreviewDevice] = useState('desktop');
+  const [seeding, setSeeding] = useState(false);
+  const [showCustomPlatform, setShowCustomPlatform] = useState(false);
 
   // Section form state
   useEffect(() => {
@@ -375,8 +393,33 @@ function Dashboard({ theme, onToggleTheme }) {
   };
 
   // Social link handlers
-  const openAddSocialLink = () => { setSlForm(initSocialLink); setModal('addSocialLink'); };
-  const openEditSocialLink = (l) => { setSlForm(l); setSelected(l); setModal('editSocialLink'); };
+  const openAddSocialLink = () => { setSlForm(initSocialLink); setShowCustomPlatform(false); setModal('addSocialLink'); };
+  const openEditSocialLink = (l) => {
+    const isBuiltIn = PLATFORM_OPTIONS.some((p) => p.value === l.icon);
+    setSlForm(l);
+    setSelected(l);
+    setShowCustomPlatform(!isBuiltIn);
+    setModal('editSocialLink');
+  };
+
+  // Seed social links if empty
+  useEffect(() => {
+    if (!slLoading && socialLinks.length === 0 && tab === 'social-links') {
+      const doSeed = async () => {
+        setSeeding(true);
+        try {
+          await api.post('/social-links/seed');
+          dispatch(fetchSocialLinks());
+          toast.success('Default social links added!');
+        } catch (err) {
+          if (err.response?.status !== 401) toast.error('Failed to seed social links');
+        } finally {
+          setSeeding(false);
+        }
+      };
+      doSeed();
+    }
+  }, [slLoading, socialLinks.length, tab]);
   const handleSaveSocialLink = async () => {
     if (modal === 'addSocialLink') { await dispatch(createSocialLink(slForm)); toast.success('Link added!'); }
     else { await dispatch(updateSocialLink({ id: selected._id, linkData: slForm })); toast.success('Link updated!'); }
@@ -994,37 +1037,65 @@ function Dashboard({ theme, onToggleTheme }) {
 
         {/* ── SOCIAL LINKS ── */}
         {tab === 'social-links' && (
-          <div>
+          <div className="social-links-page">
             <div className="page-toolbar">
               <div className="page-toolbar__left"><span className="page-toolbar__title">Social Links</span><span className="page-toolbar__count">{socialLinks.length} platforms</span></div>
               <div className="page-toolbar__right"><button className="btn btn-primary" onClick={openAddSocialLink} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Plus size={15} /> Add Link</button></div>
             </div>
-            {slLoading ? <p style={{ padding: '20px', color: 'var(--color-text-muted)' }}>Loading...</p> : (
-              <>
-                {socialLinks.length === 0 ? (
-                  <div className="empty-state"><div className="empty-state__icon"><Share2 size={22} /></div><div className="empty-state__title">No social links</div><div className="empty-state__desc">Connect your social media profiles.</div></div>
-                ) : (
-                  <div className="social-grid">
-                    {socialLinks.map((link) => (
-                      <div key={link._id} className="social-card">
-                        <div className="social-card__icon" style={{ background: `hsl(${link.platform.length * 30}, 50%, 85%)`, color: `hsl(${link.platform.length * 30}, 60%, 30%)` }}>{link.platform.charAt(0).toUpperCase()}</div>
-                        <div className="social-card__info">
-                          <div className="social-card__platform">{link.platform}</div>
-                          <div className="social-card__url">{link.url}</div>
-                        </div>
-                        <div className="social-card__actions">
-                          <label className="toggle-switch social-card__switch">
+            {slLoading || seeding ? <p style={{ padding: '20px', color: 'var(--color-text-muted)' }}>{seeding ? 'Adding default links...' : 'Loading...'}</p> : (
+              <div className="social-links-layout">
+                <div className="social-links-list">
+                  {socialLinks.length === 0 ? (
+                    <div className="empty-state"><div className="empty-state__icon"><Share2 size={22} /></div><div className="empty-state__title">No social links</div><div className="empty-state__desc">Connect your social media profiles.</div></div>
+                  ) : (
+                    <div className="social-link-items">
+                      {socialLinks.map((link, idx) => (
+                        <div key={link._id} className={`social-link-item${draggedIdx === idx ? ' social-link-item--dragging' : ''}`}
+                          draggable onDragStart={() => handleDragStart(idx)} onDragOver={(e) => handleDragOver(e, idx)} onDragEnd={handleDragEnd}>
+                          <div className="social-link-item__drag" title="Drag to reorder"><GripVertical size={14} /></div>
+                          <div className="social-link-item__icon-wrap">
+                            <SocialIcon platform={link.platform} icon={link.icon} size={18} />
+                          </div>
+                          <div className="social-link-item__info">
+                            <div className="social-link-item__platform">{link.platform}</div>
+                            <div className="social-link-item__url">{link.url || '—'}</div>
+                          </div>
+                          <label className="toggle-switch social-link-item__switch">
                             <input type="checkbox" checked={link.active} onChange={async () => { await dispatch(updateSocialLink({ id: link._id, linkData: { active: !link.active } })); }} />
                             <span className="toggle-switch__track"><span className="toggle-switch__thumb" /></span>
                           </label>
-                          <button className="icon-btn" onClick={() => openEditSocialLink(link)} title="Edit"><Edit3 size={12} /></button>
-                          <button className="icon-btn icon-btn--danger" onClick={() => handleDeleteSocialLink(link._id, link.platform)} title="Delete"><Trash2 size={12} /></button>
+                          <button className="icon-btn" onClick={() => openEditSocialLink(link)} title="Edit"><Edit3 size={13} /></button>
+                          <button className="icon-btn icon-btn--danger" onClick={() => handleDeleteSocialLink(link._id, link.platform)} title="Delete"><Trash2 size={13} /></button>
                         </div>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <div className="social-links-preview">
+                  <div className="social-preview-card">
+                    <div className="social-preview-card__header">Hero Preview</div>
+                    <div className="social-preview-hero">
+                      {socialLinks.filter((l) => l.active).slice(0, 6).map((l) => (
+                        <div key={l._id} className="social-preview-hero__icon" title={l.platform}>
+                          <SocialIcon platform={l.platform} icon={l.icon} size={18} />
+                        </div>
+                      ))}
+                      {socialLinks.filter((l) => l.active).length === 0 && <span className="social-preview__empty">No active links</span>}
+                    </div>
                   </div>
-                )}
-              </>
+                  <div className="social-preview-card">
+                    <div className="social-preview-card__header">Footer Preview</div>
+                    <div className="social-preview-footer">
+                      {socialLinks.filter((l) => l.active).slice(0, 6).map((l) => (
+                        <div key={l._id} className="social-preview-footer__btn" title={l.platform}>
+                          <SocialIcon platform={l.platform} icon={l.icon} size={15} />
+                        </div>
+                      ))}
+                      {socialLinks.filter((l) => l.active).length === 0 && <span className="social-preview__empty">No active links</span>}
+                    </div>
+                  </div>
+                </div>
+              </div>
             )}
           </div>
         )}
@@ -1317,7 +1388,27 @@ function Dashboard({ theme, onToggleTheme }) {
           <div className="modal-form">
             <div className="form-group">
               <label className="form-label">Platform</label>
-              <input type="text" className="form-input" placeholder="GitHub, LinkedIn, Twitter..." value={slForm.platform} onChange={(e) => setSlForm((f) => ({ ...f, platform: e.target.value }))} />
+              <div style={{ display: 'flex', gap: 8, flexDirection: 'column' }}>
+                <select className="form-input" value={showCustomPlatform ? 'custom' : slForm.icon} onChange={(e) => {
+                  if (e.target.value === 'custom') {
+                    setShowCustomPlatform(true);
+                    setSlForm((f) => ({ ...f, platform: '', icon: '' }));
+                  } else {
+                    setShowCustomPlatform(false);
+                    const label = PLATFORM_LABEL_MAP[e.target.value] || e.target.value;
+                    setSlForm((f) => ({ ...f, platform: label, icon: e.target.value }));
+                  }
+                }}>
+                  <option value="">— Select platform —</option>
+                  {PLATFORM_OPTIONS.map((p) => (
+                    <option key={p.value} value={p.value}>{p.label}</option>
+                  ))}
+                  <option value="custom">Custom...</option>
+                </select>
+                {showCustomPlatform && (
+                  <input type="text" className="form-input" placeholder="Custom platform name" value={slForm.platform} onChange={(e) => setSlForm((f) => ({ ...f, platform: e.target.value, icon: e.target.value.toLowerCase().replace(/\s+/g, '') }))} />
+                )}
+              </div>
             </div>
             <div className="form-group">
               <label className="form-label">URL</label>

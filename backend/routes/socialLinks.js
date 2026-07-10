@@ -7,11 +7,13 @@ const {
   updateSocialLink,
   updateSocialLinksOrder,
   deleteSocialLink,
+  seedSocialLinks,
 } = require('../controllers/socialLinkController');
 const { protect } = require('../middleware/auth');
 
 router.get('/active', getActiveSocialLinks);
 router.get('/', protect, getSocialLinks);
+router.post('/seed', protect, seedSocialLinks);
 router.post('/', protect, createSocialLink);
 router.put('/reorder', protect, updateSocialLinksOrder);
 router.put('/:id', protect, updateSocialLink);
