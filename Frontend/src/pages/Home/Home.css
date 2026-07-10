@@ -14,11 +14,12 @@
   position: absolute;
   top: -50%;
   right: -20%;
-  width: 600px;
-  height: 600px;
+  width: 700px;
+  height: 700px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(99, 102, 241, 0.04) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.06) 0%, transparent 70%);
   pointer-events: none;
+  animation: gradientShift 12s ease-in-out infinite;
 }
 
 .home::after {
@@ -26,11 +27,63 @@
   position: absolute;
   bottom: -30%;
   left: -10%;
-  width: 400px;
-  height: 400px;
+  width: 500px;
+  height: 500px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(20, 184, 166, 0.04) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(20, 184, 166, 0.05) 0%, transparent 70%);
   pointer-events: none;
+  animation: gradientShift 15s ease-in-out infinite reverse;
+}
+
+.home__particles {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.home__particle {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0.2;
+}
+
+.home__particle--1 {
+  width: 6px;
+  height: 6px;
+  background: var(--color-primary);
+  top: 15%;
+  left: 10%;
+  animation: floatSlow 6s ease-in-out infinite;
+}
+
+.home__particle--2 {
+  width: 4px;
+  height: 4px;
+  background: var(--color-accent);
+  top: 25%;
+  right: 20%;
+  animation: floatSlow 8s ease-in-out infinite 1s;
+}
+
+.home__particle--3 {
+  width: 8px;
+  height: 8px;
+  background: var(--color-primary);
+  bottom: 30%;
+  left: 5%;
+  animation: floatSlow 7s ease-in-out infinite 0.5s;
+  opacity: 0.1;
+}
+
+.home__particle--4 {
+  width: 5px;
+  height: 5px;
+  background: var(--color-accent);
+  top: 60%;
+  right: 10%;
+  animation: floatSlow 9s ease-in-out infinite 2s;
 }
 
 .home__container {
@@ -152,14 +205,26 @@
   gap: var(--space-xl);
 }
 
-.home__profile-frame {
+.home__profile-wrapper {
+  position: relative;
   width: 200px;
   height: 200px;
+  flex-shrink: 0;
+  cursor: default;
+}
+
+.home__profile-frame {
+  width: 100%;
+  height: 100%;
   border-radius: 50%;
   overflow: hidden;
   border: 3px solid var(--color-primary);
   box-shadow: 0 0 0 6px var(--color-primary-glow), var(--shadow-md);
-  flex-shrink: 0;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease, background 0.2s ease;
+  transform: perspective(600px) rotateX(0deg) rotateY(0deg);
+  will-change: transform;
+  position: relative;
+  z-index: 2;
 }
 
 .home__profile-img {
@@ -167,6 +232,17 @@
   height: 100%;
   object-fit: cover;
   display: block;
+  pointer-events: none;
+}
+
+.home__profile-glow {
+  position: absolute;
+  inset: -12px;
+  border-radius: 50%;
+  background: radial-gradient(circle at center, rgba(99, 102, 241, 0.12), transparent 65%);
+  animation: glowPulse 3s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 1;
 }
 
 .home__stats-panel {
@@ -278,7 +354,7 @@
   .home__actions { justify-content: center; }
   .home__socials { justify-content: center; }
   .home__visual { min-height: auto; }
-  .home__profile-frame { width: 160px; height: 160px; }
+  .home__profile-wrapper { width: 160px; height: 160px; }
 
   .home__stats-panel {
     flex-direction: row;
@@ -335,7 +411,7 @@
   .home__actions { flex-direction: column; align-items: center; }
   .home__actions .btn { width: 100%; justify-content: center; }
   .home__scroll-hint { display: none; }
-  .home__profile-frame { width: 140px; height: 140px; }
+  .home__profile-wrapper { width: 140px; height: 140px; }
   .home__stats-panel { padding: var(--space-md); gap: var(--space-md); }
   .home__stat-row { gap: var(--space-md); }
   .home__stat-num { font-size: 1.5rem; min-width: 44px; }

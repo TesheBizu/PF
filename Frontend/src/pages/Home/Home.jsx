@@ -41,6 +41,8 @@ function HeroSection({ settings }) {
   const [isDeleting, setIsDeleting] = useState(false);
   const [profileUrl, setProfileUrl] = useState('/profile.png');
   const tr = useRef(null);
+  const profileFrameRef = useRef(null);
+  const tiltRef = useRef(null);
   const items = useSelector((s) => s.projects.items);
   const skills = useSelector((s) => s.skills.items);
   const experiences = useSelector((s) => s.experiences.items);
@@ -79,8 +81,39 @@ function HeroSection({ settings }) {
     return () => clearTimeout(tr.current);
   }, [displayed, isDeleting, roleIdx]);
 
+  const handleTilt = (e) => {
+    const frame = profileFrameRef.current;
+    if (!frame) return;
+    const rect = frame.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width;
+    const y = (e.clientY - rect.top) / rect.height;
+    const tiltX = (y - 0.5) * -16;
+    const tiltY = (x - 0.5) * 16;
+    const glowX = x * 100;
+    const glowY = y * 100;
+    if (tiltRef.current) {
+      tiltRef.current.style.transform = `perspective(600px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) scale(1.02)`;
+      tiltRef.current.style.boxShadow = `${(x - 0.5) * 20}px ${(y - 0.5) * 20}px 40px rgba(99,102,241,0.15), 0 0 0 6px var(--color-primary-glow)`;
+      tiltRef.current.style.background = `radial-gradient(circle at ${glowX}% ${glowY}%, rgba(99,102,241,0.08), transparent 70%)`;
+    }
+  };
+
+  const handleTiltLeave = () => {
+    if (tiltRef.current) {
+      tiltRef.current.style.transform = 'perspective(600px) rotateX(0deg) rotateY(0deg) scale(1)';
+      tiltRef.current.style.boxShadow = '';
+      tiltRef.current.style.background = '';
+    }
+  };
+
   return (
     <section className="home" id="home">
+      <div className="home__particles" aria-hidden="true">
+        <div className="home__particle home__particle--1" />
+        <div className="home__particle home__particle--2" />
+        <div className="home__particle home__particle--3" />
+        <div className="home__particle home__particle--4" />
+      </div>
       <div className="container home__container">
         <div className="home__content">
           <div className="home__greeting">
@@ -119,8 +152,11 @@ function HeroSection({ settings }) {
           )}
         </div>
         <div className="home__visual">
-          <div className="home__profile-frame">
-            <img src={profileUrl} alt="Teshome Bizuayehu" className="home__profile-img" />
+          <div className="home__profile-wrapper" ref={profileFrameRef} onMouseMove={handleTilt} onMouseLeave={handleTiltLeave}>
+            <div className="home__profile-frame" ref={tiltRef}>
+              <img src={profileUrl} alt="Teshome Bizuayehu" className="home__profile-img" />
+            </div>
+            <div className="home__profile-glow" aria-hidden="true" />
           </div>
           <div className="home__stats-panel">
             <div className="home__stat-row">

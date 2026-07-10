@@ -40,6 +40,28 @@
   width: 100%;
   position: relative;
   box-shadow: var(--shadow-sm);
+  transition: all var(--transition-base);
+}
+
+.testimonials__card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(135deg, var(--color-primary-glow), transparent 60%);
+  opacity: 0;
+  transition: opacity var(--transition-base);
+  pointer-events: none;
+}
+
+.testimonials__slide:hover .testimonials__card {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--color-primary);
+}
+
+.testimonials__slide:hover .testimonials__card::before {
+  opacity: 1;
 }
 
 .testimonials__quote-icon {
