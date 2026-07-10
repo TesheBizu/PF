@@ -9,7 +9,7 @@ import { fetchMessages, deleteMessage, markMessageRead } from '../redux/slices/m
 import { fetchExperiences, createExperience, updateExperience, deleteExperience } from '../redux/slices/experiencesSlice';
 import { fetchProfileImage, updateProfileImage, deleteProfileImage } from '../redux/slices/siteSettingsSlice';
 import { fetchTestimonials, createTestimonial, updateTestimonial, deleteTestimonial } from '../redux/slices/testimonialsSlice';
-import { fetchAllSections, updateSection } from '../redux/slices/sectionsSlice';
+import { fetchAllSections, updateSection, SECTIONS_LIST } from '../redux/slices/sectionsSlice';
 import { fetchNotifications, markNotificationRead, markAllNotificationsRead, deleteNotification } from '../redux/slices/notificationsSlice';
 import { fetchAnalytics } from '../redux/slices/analyticsSlice';
 import { fetchSocialLinks, createSocialLink, updateSocialLink, reorderSocialLinks, deleteSocialLink, setItems } from '../redux/slices/socialLinksSlice';
@@ -19,7 +19,7 @@ import {
   Plus, X, Edit3, Trash2, MailOpen, Reply, Mail, Upload, Eye, EyeOff, History, Star, Check, XCircle,
   Monitor, Menu as MenuIcon, CreditCard, BarChart3, TrendingUp, Bell, Share2, UserCog, Settings,
   Activity, Users, Globe, Clock, ArrowUp, ArrowDown, GripVertical, Save, RefreshCw, CheckCheck,
-  Search, Calendar,
+  Search, Calendar, Filter, ExternalLink, Hash, AlertTriangle, CheckCircle, Info,
 } from 'lucide-react';
 import './Admin.css';
 import FooterBar from '../components/Footer/FooterBar';
@@ -65,6 +65,21 @@ function MiniChart({ data, color = 'var(--color-primary)', height = 40 }) {
   );
 }
 
+function SlideOver({ open, onClose, title, children }) {
+  return (
+    <>
+      <div className={`slide-over-backdrop${open ? ' slide-over-backdrop--open' : ''}`} onClick={onClose} />
+      <div className={`slide-over${open ? ' slide-over--open' : ''}`}>
+        <div className="slide-over__header">
+          <span className="slide-over__title">{title}</span>
+          <button className="slide-over__close" onClick={onClose}><X size={18} /></button>
+        </div>
+        <div className="slide-over__body">{children}</div>
+      </div>
+    </>
+  );
+}
+
 const initProject = { title: '', description: '', techStack: '', githubUrl: '', liveUrl: '', imageUrl: '', featured: false };
 const initSkill   = { name: '', category: 'Programming', proficiency: 80 };
 const initExperience = { role: '', company: '', period: '', location: '', description: '', iconUrl: '', type: 'work', order: 0 };
@@ -92,6 +107,13 @@ function Dashboard({ theme, onToggleTheme }) {
   const [modal, setModal] = useState(null);
   const [selected, setSelected] = useState(null);
   const [pForm, setPForm] = useState(initProject);
+  const [projSearch, setProjSearch] = useState('');
+  const [projSlideOver, setProjSlideOver] = useState(null);
+  const [skillSearch, setSkillSearch] = useState('');
+  const [msgSearch, setMsgSearch] = useState('');
+  const [msgFilter, setMsgFilter] = useState('all');
+  const [settingsTab, setSettingsTab] = useState('profile');
+  const [notifFilter, setNotifFilter] = useState('all');
   const [sForm, setSForm] = useState(initSkill);
   const [eForm, setEForm] = useState(initExperience);
   const [tForm, setTForm] = useState(initTestimonial);
@@ -182,6 +204,7 @@ function Dashboard({ theme, onToggleTheme }) {
       { id: 'about-editor', label: 'About', icon: UserIcon },
       { id: 'navbar-editor', label: 'Navbar', icon: MenuIcon },
       { id: 'footer-editor', label: 'Footer', icon: CreditCard },
+      { id: 'visibility-manager', label: 'Visibility', icon: Eye },
     ]},
     { label: 'Engagement', items: [
       { id: 'analytics', label: 'Analytics', icon: BarChart3 },
@@ -212,8 +235,14 @@ function Dashboard({ theme, onToggleTheme }) {
   const handleRemoveProfileImage = () => setConfirm({ title: 'Remove profile image?', message: 'This will remove your profile photo.', confirmLabel: 'Remove', danger: true, onConfirm: async () => { await dispatch(deleteProfileImage()); toast.success('Removed'); } });
 
   // Project handlers
-  const openAddProject = () => { setPForm(initProject); setModal('addProject'); };
-  const openEditProject = (p) => { setPForm({ ...p, techStack: p.techStack.join(', ') }); setSelected(p); setModal('editProject'); };
+  const openAddProject = () => { setPForm(initProject); setProjSlideOver('add'); };
+  const openEditProject = (p) => { setPForm({ ...p, techStack: p.techStack.join(', ') }); setSelected(p); setProjSlideOver('edit'); };
+  const handleProjSlideSave = async () => {
+    const payload = { ...pForm, techStack: pForm.techStack.split(',').map((t) => t.trim()).filter(Boolean) };
+    if (projSlideOver === 'add') await dispatch(createProject(payload));
+    else await dispatch(updateProject({ id: selected._id, projectData: payload }));
+    setProjSlideOver(null);
+  };
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -603,53 +632,118 @@ function Dashboard({ theme, onToggleTheme }) {
 
         {/* ── PROJECTS ── */}
         {tab === 'projects' && (
-          <div className="dash-content animate-fadeInUp">
-            <div className="dash-toolbar"><h3>All Projects ({projects.length})</h3>
-              <button id="add-project-btn" className="btn btn-primary" onClick={openAddProject} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Plus size={16} /> Add Project</button>
-            </div>
-            {pLoading ? <p>Loading…</p> : (
-              <div className="dash-table-wrap">
-                <table className="dash-table dash-table--projects">
-                  <thead><tr><th>Title</th><th>Tech Stack</th><th>Featured</th><th>Actions</th></tr></thead>
-                  <tbody>{projects.map((p) => (
-                    <tr key={p._id}>
-                      <td><strong>{p.title}</strong></td>
-                      <td>{p.techStack.slice(0, 3).join(', ')}{p.techStack.length > 3 && '…'}</td>
-                      <td>{p.featured ? '⭐' : '—'}</td>
-                      <td><div className="dash-actions">
-                        <button className="btn btn-ghost dash-btn" onClick={() => openEditProject(p)} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><Edit3 size={13} /> Edit</button>
-                        <button className="btn dash-btn dash-btn--danger" onClick={() => handleDeleteProject(p._id, p.title)} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><Trash2 size={13} /> Delete</button>
-                      </div></td>
-                    </tr>
-                  ))}</tbody>
-                </table>
+          <div>
+            <div className="page-toolbar">
+              <div className="page-toolbar__left">
+                <span className="page-toolbar__title">Projects</span>
+                <span className="page-toolbar__count">{projects.length} total</span>
               </div>
+              <div className="page-toolbar__right">
+                <div className="proj-search">
+                  <Search size={14} style={{ color: 'var(--color-text-dim)', flexShrink: 0 }} />
+                  <input type="text" placeholder="Search projects..." value={projSearch} onChange={(e) => setProjSearch(e.target.value)} />
+                </div>
+                <button className="btn btn-primary" onClick={openAddProject} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Plus size={15} /> New Project</button>
+              </div>
+            </div>
+            {pLoading ? <p style={{ padding: '20px', color: 'var(--color-text-muted)' }}>Loading...</p> : (
+              <>
+                <div className="proj-grid">
+                  {projects.filter((p) => p.title.toLowerCase().includes(projSearch.toLowerCase())).length === 0 && (
+                    <div className="empty-state" style={{ gridColumn: '1 / -1' }}>
+                      <div className="empty-state__icon"><Search size={22} /></div>
+                      <div className="empty-state__title">No projects found</div>
+                      <div className="empty-state__desc">{projSearch ? 'Try a different search term.' : 'Click "New Project" to add your first project.'}</div>
+                    </div>
+                  )}
+                  {projects.filter((p) => p.title.toLowerCase().includes(projSearch.toLowerCase())).map((p) => (
+                    <div key={p._id} className="proj-card">
+                      {p.imageUrl ? <img src={p.imageUrl} alt={p.title} className="proj-card__thumb" /> : <div className="proj-card__thumb"><Briefcase size={28} /></div>}
+                      <div className="proj-card__body">
+                        <div className="proj-card__title">{p.title}</div>
+                        <div className="proj-card__tech">{p.techStack.slice(0, 5).map((t) => <span key={t} className="proj-card__tech-tag">{t}</span>)}</div>
+                      </div>
+                      <div className="proj-card__footer">
+                        <span className={`state-badge state-badge--${p.featured ? 'published' : 'draft'}`}>{p.featured ? 'Featured' : 'Draft'}</span>
+                        <div className="proj-card__actions">
+                          <button className="proj-card__action-btn" onClick={() => { dispatch(updateProject({ id: p._id, projectData: { featured: !p.featured } })); }} title={p.featured ? 'Unfeature' : 'Feature'}><Star size={13} fill={p.featured ? 'var(--color-primary)' : 'none'} /></button>
+                          <button className="proj-card__action-btn" onClick={() => openEditProject(p)} title="Edit"><Edit3 size={13} /></button>
+                          <button className="proj-card__action-btn proj-card__action-btn--danger" onClick={() => handleDeleteProject(p._id, p.title)} title="Delete"><Trash2 size={13} /></button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <SlideOver open={!!projSlideOver} onClose={() => setProjSlideOver(null)} title={projSlideOver === 'add' ? 'New Project' : 'Edit Project'}>
+                  <div className="form-group"><label className="form-label">Title</label><input type="text" className="form-input" placeholder="My Awesome Project" value={pForm.title} onChange={(e) => setPForm((f) => ({ ...f, title: e.target.value }))} /></div>
+                  <div className="form-group"><label className="form-label">Tech Stack (comma-separated)</label><input type="text" className="form-input" placeholder="React, Node.js, MongoDB" value={pForm.techStack} onChange={(e) => setPForm((f) => ({ ...f, techStack: e.target.value }))} /></div>
+                  <div className="form-group"><label className="form-label">GitHub URL</label><input type="url" className="form-input" placeholder="https://github.com/..." value={pForm.githubUrl} onChange={(e) => setPForm((f) => ({ ...f, githubUrl: e.target.value }))} /></div>
+                  <div className="form-group"><label className="form-label">Live URL</label><input type="url" className="form-input" placeholder="https://..." value={pForm.liveUrl} onChange={(e) => setPForm((f) => ({ ...f, liveUrl: e.target.value }))} /></div>
+                  <div className="form-group"><label className="form-label">Description</label><textarea className="form-textarea" rows={4} placeholder="Project description..." value={pForm.description} onChange={(e) => setPForm((f) => ({ ...f, description: e.target.value }))} /></div>
+                  <div className="form-group">
+                    <label className="form-label">Project Image</label>
+                    <div className="upload-container" style={{ marginBottom: '8px' }}>
+                      <input type="file" accept="image/*" onChange={handleImageUpload} style={{ display: 'none' }} id="slide-project-image" disabled={uploading} />
+                      <label htmlFor="slide-project-image" className={`upload-box${uploading ? ' upload-box--uploading' : ''}`}><Upload className="upload-box__icon" size={20} /><span className="upload-box__text">{uploading ? 'Uploading...' : 'Select Image'}</span><span className="upload-box__hint">Max 5MB</span></label>
+                    </div>
+                    <input type="url" className="form-input" placeholder="https://example.com/image.png" value={pForm.imageUrl} onChange={(e) => setPForm((f) => ({ ...f, imageUrl: e.target.value }))} disabled={uploading} />
+                    {pForm.imageUrl && <img src={pForm.imageUrl} alt="" style={{ width: '100%', maxHeight: '120px', objectFit: 'cover', borderRadius: '6px', marginTop: '8px' }} />}
+                  </div>
+                  <div className="form-group" style={{ flexDirection: 'row', alignItems: 'center', gap: '8px' }}>
+                    <input type="checkbox" id="slide-featured" checked={pForm.featured} onChange={(e) => setPForm((f) => ({ ...f, featured: e.target.checked }))} />
+                    <label htmlFor="slide-featured" className="form-label" style={{ margin: 0 }}>Featured project</label>
+                  </div>
+                  <div className="slide-over__footer">
+                    <button className="btn btn-ghost" onClick={() => setProjSlideOver(null)}>Cancel</button>
+                    <button className="btn btn-primary" onClick={handleProjSlideSave}>Save</button>
+                  </div>
+                </SlideOver>
+              </>
             )}
           </div>
         )}
 
         {/* ── SKILLS ── */}
         {tab === 'skills' && (
-          <div className="dash-content animate-fadeInUp">
-            <div className="dash-toolbar"><h3>All Skills ({skills.length})</h3>
-              <button id="add-skill-btn" className="btn btn-primary" onClick={openAddSkill} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Plus size={16} /> Add Skill</button>
+          <div>
+            <div className="page-toolbar">
+              <div className="page-toolbar__left">
+                <span className="page-toolbar__title">Skills</span>
+                <span className="page-toolbar__count">{skills.length} total</span>
+              </div>
+              <div className="page-toolbar__right">
+                <button className="btn btn-primary" onClick={openAddSkill} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Plus size={15} /> Add Skill</button>
+              </div>
             </div>
-            {sLoading ? <p>Loading…</p> : (
-              <div className="dash-table-wrap">
-                <table className="dash-table dash-table--skills">
-                  <thead><tr><th>Name</th><th>Category</th><th>Proficiency</th><th>Actions</th></tr></thead>
-                  <tbody>{skills.map((s) => (
-                    <tr key={s._id}>
-                      <td><strong>{s.name}</strong></td>
-                      <td><span className="badge">{s.category}</span></td>
-                      <td><div className="dash-skill-bar"><div className="dash-skill-fill" style={{ width: `${s.proficiency}%` }} /></div>{s.proficiency}%</td>
-                      <td><div className="dash-actions">
-                        <button className="btn btn-ghost dash-btn" onClick={() => openEditSkill(s)} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><Edit3 size={13} /> Edit</button>
-                        <button className="btn dash-btn dash-btn--danger" onClick={() => handleDeleteSkill(s._id, s.name)} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><Trash2 size={13} /> Delete</button>
-                      </div></td>
-                    </tr>
-                  ))}</tbody>
-                </table>
+            {sLoading ? <p style={{ padding: '20px', color: 'var(--color-text-muted)' }}>Loading...</p> : (
+              <div className="skill-categories">
+                {Array.from(new Set(skills.map((s) => s.category))).map((cat) => {
+                  const catSkills = skills.filter((s) => s.category === cat);
+                  return (
+                    <div key={cat} className="skill-category-group">
+                      <div className="skill-category-group__header">
+                        <span className="skill-category-group__title">{cat}</span>
+                        <span className="skill-category-group__count">{catSkills.length}</span>
+                      </div>
+                      <div className="skill-category-grid">
+                        {catSkills.map((s, idx) => (
+                          <div key={s._id} className="skill-card">
+                            <div className="skill-card__icon" style={{ background: `hsl(${idx * 45}, 50%, 85%)`, color: `hsl(${idx * 45}, 60%, 30%)` }}>{s.name.charAt(0)}</div>
+                            <div className="skill-card__info">
+                              <div className="skill-card__name">{s.name}</div>
+                              <div className="skill-card__bar-track"><div className="skill-card__bar-fill" style={{ width: `${s.proficiency}%`, background: 'var(--color-primary)' }} /></div>
+                            </div>
+                            <span className="skill-card__pct">{s.proficiency}%</span>
+                            <div className="skill-card__actions">
+                              <button className="icon-btn" onClick={() => openEditSkill(s)} title="Edit"><Edit3 size={12} /></button>
+                              <button className="icon-btn icon-btn--danger" onClick={() => handleDeleteSkill(s._id, s.name)} title="Delete"><Trash2 size={12} /></button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             )}
           </div>
@@ -657,91 +751,167 @@ function Dashboard({ theme, onToggleTheme }) {
 
         {/* ── EXPERIENCES ── */}
         {tab === 'experiences' && (
-          <div className="dash-content animate-fadeInUp">
-            <div className="dash-toolbar"><h3>All Timeline Items ({experiences.length})</h3>
-              <button id="add-experience-btn" className="btn btn-primary" onClick={openAddExperience} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Plus size={16} /> Add Experience</button>
-            </div>
-            {eLoading ? <p>Loading…</p> : (
-              <div className="dash-table-wrap">
-                <table className="dash-table dash-table--experiences">
-                  <thead><tr><th>Role</th><th>Company</th><th>Period</th><th>Type</th><th>Actions</th></tr></thead>
-                  <tbody>{experiences.map((exp) => (
-                    <tr key={exp._id}>
-                      <td><strong>{exp.role}</strong><br /><small>{exp.location}</small></td>
-                      <td><div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        {exp.iconUrl ? <img src={exp.iconUrl} alt="" style={{ width: '28px', height: '28px', objectFit: 'contain', background: '#fff', borderRadius: '4px', border: '1px solid var(--color-border)' }} />
-                          : <div style={{ width: '28px', height: '28px', borderRadius: '4px', background: 'var(--color-surface-2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: 'bold' }}>{exp.company.charAt(0)}</div>}
-                        {exp.company}
-                      </div></td>
-                      <td>{exp.period}</td>
-                      <td><span className="badge">{exp.type}</span></td>
-                      <td><div className="dash-actions">
-                        <button className="btn btn-ghost dash-btn" onClick={() => openEditExperience(exp)} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><Edit3 size={13} /> Edit</button>
-                        <button className="btn dash-btn dash-btn--danger" onClick={() => handleDeleteExperience(exp._id, exp.role)} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><Trash2 size={13} /> Delete</button>
-                      </div></td>
-                    </tr>
-                  ))}</tbody>
-                </table>
+          <div>
+            <div className="page-toolbar">
+              <div className="page-toolbar__left">
+                <span className="page-toolbar__title">Timeline</span>
+                <span className="page-toolbar__count">{experiences.length} items</span>
               </div>
+              <div className="page-toolbar__right">
+                <button className="btn btn-primary" onClick={openAddExperience} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Plus size={15} /> Add Experience</button>
+              </div>
+            </div>
+            {eLoading ? <p style={{ padding: '20px', color: 'var(--color-text-muted)' }}>Loading...</p> : (
+              <>
+                {experiences.length === 0 ? (
+                  <div className="empty-state"><div className="empty-state__icon"><History size={22} /></div><div className="empty-state__title">No timeline items</div><div className="empty-state__desc">Add your first work experience or education entry.</div></div>
+                ) : (
+                  <div className="timeline-list">
+                    {[...experiences].sort((a, b) => (a.order || 0) - (b.order || 0)).map((exp) => (
+                      <div key={exp._id} className="timeline-item">
+                        <div className="timeline-item__header">
+                          {exp.iconUrl ? <img src={exp.iconUrl} alt="" className="timeline-item__logo" /> : <div className="timeline-item__logo">{exp.company.charAt(0)}</div>}
+                          <div className="timeline-item__info">
+                            <div className="timeline-item__role">{exp.role}</div>
+                            <div className="timeline-item__company">{exp.company}</div>
+                            <div className="timeline-item__meta">
+                              <span className="timeline-item__period"><Clock size={11} style={{ marginRight: 3 }} />{exp.period}</span>
+                              {exp.location && <span className="timeline-item__location">{exp.location}</span>}
+                              <span className={`state-badge state-badge--${exp.type}`}>{exp.type}</span>
+                            </div>
+                          </div>
+                          <div className="timeline-item__actions">
+                            <button className="icon-btn" onClick={() => openEditExperience(exp)} title="Edit"><Edit3 size={13} /></button>
+                            <button className="icon-btn icon-btn--danger" onClick={() => handleDeleteExperience(exp._id, exp.role)} title="Delete"><Trash2 size={13} /></button>
+                          </div>
+                        </div>
+                        {exp.description && <div className="timeline-item__desc">{exp.description}</div>}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </>
             )}
           </div>
         )}
 
         {/* ── TESTIMONIALS ── */}
         {tab === 'testimonials' && (
-          <div className="dash-content animate-fadeInUp">
-            <div className="dash-toolbar"><h3>All Testimonials ({testimonials.length})</h3>
-              <button id="add-testimonial-btn" className="btn btn-primary" onClick={openAddTestimonial} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Plus size={16} /> Add Testimonial</button>
-            </div>
-            {tLoading ? <p>Loading…</p> : (
-              <div className="dash-table-wrap">
-                <table className="dash-table dash-table--testimonials">
-                  <thead><tr><th>Name</th><th>Role</th><th>Rating</th><th>Status</th><th>Actions</th></tr></thead>
-                  <tbody>{testimonials.map((t) => (
-                    <tr key={t._id}>
-                      <td><div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        {t.photo ? <img src={t.photo} alt="" style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--color-border)' }} />
-                          : <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'var(--color-surface-2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: 'bold' }}>{t.name.charAt(0)}</div>}
-                        <strong>{t.name}</strong>
-                      </div></td>
-                      <td>{t.role}</td>
-                      <td><div style={{ display: 'flex', gap: '2px', color: 'var(--color-primary)' }}>{Array.from({ length: 5 }, (_, i) => <Star key={i} size={14} fill={i < t.rating ? 'var(--color-primary)' : 'none'} />)}</div></td>
-                      <td><span className={`badge ${t.published ? '' : 'dash-badge--new'}`}>{t.published ? 'Published' : 'Draft'}</span></td>
-                      <td><div className="dash-actions">
-                        <button className="btn btn-ghost dash-btn" onClick={() => openEditTestimonial(t)} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><Edit3 size={13} /> Edit</button>
-                        <button className="btn btn-ghost dash-btn" onClick={() => handleTogglePublish(t)} style={{ display: 'flex', alignItems: 'center', gap: '4px', color: t.published ? '#ef4444' : '#22c55e' }}>{t.published ? <XCircle size={13} /> : <Check size={13} />}{t.published ? 'Unpublish' : 'Publish'}</button>
-                        <button className="btn dash-btn dash-btn--danger" onClick={() => handleDeleteTestimonial(t._id, t.name)} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><Trash2 size={13} /> Delete</button>
-                      </div></td>
-                    </tr>
-                  ))}</tbody>
-                </table>
+          <div>
+            <div className="page-toolbar">
+              <div className="page-toolbar__left">
+                <span className="page-toolbar__title">Testimonials</span>
+                <span className="page-toolbar__count">{testimonials.length} total</span>
               </div>
+              <div className="page-toolbar__right">
+                <button className="btn btn-primary" onClick={openAddTestimonial} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Plus size={15} /> Add Testimonial</button>
+              </div>
+            </div>
+            {tLoading ? <p style={{ padding: '20px', color: 'var(--color-text-muted)' }}>Loading...</p> : (
+              <>
+                {testimonials.length === 0 ? (
+                  <div className="empty-state"><div className="empty-state__icon"><Star size={22} /></div><div className="empty-state__title">No testimonials yet</div><div className="empty-state__desc">Add your first testimonial from a client or colleague.</div></div>
+                ) : (
+                  <div className="testi-grid">
+                    {testimonials.map((t) => (
+                      <div key={t._id} className="testi-card">
+                        <div className="testi-card__top">
+                          {t.photo ? <img src={t.photo} alt="" className="testi-card__avatar" /> : <div className="testi-card__avatar">{t.name.charAt(0)}</div>}
+                          <div className="testi-card__info">
+                            <div className="testi-card__name">{t.name}</div>
+                            <div className="testi-card__role">{t.role}</div>
+                          </div>
+                          <div className="testi-card__stars">{Array.from({ length: 5 }, (_, i) => <Star key={i} size={13} fill={i < t.rating ? '#f59e0b' : 'none'} stroke={i < t.rating ? '#f59e0b' : '#d1d5db'} />)}</div>
+                        </div>
+                        <div className="testi-card__message">{t.message}</div>
+                        <div className="testi-card__footer">
+                          <span className={`state-badge state-badge--${t.published ? 'published' : 'draft'}`}>{t.published ? 'Published' : 'Draft'}</span>
+                          <div className="testi-card__actions">
+                            <button className="icon-btn" onClick={() => handleTogglePublish(t)} title={t.published ? 'Unpublish' : 'Publish'}>{t.published ? <XCircle size={13} /> : <Check size={13} />}</button>
+                            <button className="icon-btn" onClick={() => openEditTestimonial(t)} title="Edit"><Edit3 size={13} /></button>
+                            <button className="icon-btn icon-btn--danger" onClick={() => handleDeleteTestimonial(t._id, t.name)} title="Delete"><Trash2 size={13} /></button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </>
             )}
           </div>
         )}
 
         {/* ── MESSAGES ── */}
         {tab === 'messages' && (
-          <div className="dash-content animate-fadeInUp">
-            <div className="dash-toolbar"><h3>Inbox ({messages.length})</h3></div>
-            {mLoading ? <p>Loading…</p> : (
-              <div className="dash-table-wrap">
-                <table className="dash-table dash-table--messages">
-                  <thead><tr><th>From</th><th>Subject</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead>
-                  <tbody>{messages.map((m) => (
-                    <tr key={m._id} className={!m.isRead ? 'dash-row--unread' : ''}>
-                      <td><strong>{m.name}</strong><br /><small>{m.email}</small></td>
-                      <td>{m.subject}</td>
-                      <td>{new Date(m.createdAt).toLocaleDateString()}</td>
-                      <td><span className={`badge ${m.isRead ? '' : 'dash-badge--new'}`}>{m.isRead ? 'Read' : 'New'}</span></td>
-                      <td><div className="dash-actions">
-                        <button className="btn btn-ghost dash-btn" onClick={() => openMessage(m)}>View</button>
-                        <button className="btn btn-ghost dash-btn" onClick={() => handleReplyMessage(m)} style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--color-primary)' }}><Reply size={13} /> Reply</button>
-                        <button className="btn dash-btn dash-btn--danger" onClick={() => requestDeleteMessage(m._id, m.subject)} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><Trash2 size={13} /> Delete</button>
-                      </div></td>
-                    </tr>
-                  ))}</tbody>
-                </table>
+          <div>
+            <div className="page-toolbar">
+              <div className="page-toolbar__left">
+                <span className="page-toolbar__title">Inbox</span>
+                <span className="page-toolbar__count">{messages.length} messages</span>
+              </div>
+            </div>
+            {mLoading ? <p style={{ padding: '20px', color: 'var(--color-text-muted)' }}>Loading...</p> : (
+              <div className="inbox-layout">
+                <div className="inbox-list-panel">
+                  <div className="inbox-list-header">
+                    <span className="inbox-list-header__title">Messages</span>
+                    <span className="state-badge state-badge--new">{unread} unread</span>
+                  </div>
+                  <div className="inbox-search">
+                    <Search size={13} style={{ color: 'var(--color-text-dim)', flexShrink: 0 }} />
+                    <input type="text" placeholder="Search messages..." value={msgSearch} onChange={(e) => setMsgSearch(e.target.value)} />
+                  </div>
+                  <div className="inbox-filters">
+                    {['all', 'unread', 'read'].map((f) => (
+                      <button key={f} className={`inbox-filter-btn${msgFilter === f ? ' inbox-filter-btn--active' : ''}`} onClick={() => setMsgFilter(f)}>
+                        {f.charAt(0).toUpperCase() + f.slice(1)}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="inbox-list">
+                    {messages.filter((m) => msgFilter === 'all' || (msgFilter === 'unread' ? !m.isRead : m.isRead)).filter((m) => m.subject.toLowerCase().includes(msgSearch.toLowerCase()) || m.name.toLowerCase().includes(msgSearch.toLowerCase())).map((m) => (
+                      <div key={m._id} className={`inbox-item${selected?._id === m._id ? ' inbox-item--selected' : ''}${!m.isRead ? ' inbox-item--unread' : ''}`} onClick={() => openMessage(m)}>
+                        <div className="inbox-item__avatar">{m.name.charAt(0)}</div>
+                        <div className="inbox-item__info">
+                          <div className="inbox-item__sender">{m.name}</div>
+                          <div className="inbox-item__subject">{m.subject}</div>
+                          <div className="inbox-item__preview">{m.message?.slice(0, 60)}...</div>
+                        </div>
+                        <div className="inbox-item__date">{new Date(m.createdAt).toLocaleDateString()}</div>
+                      </div>
+                    ))}
+                    {messages.filter((m) => msgFilter === 'all' || (msgFilter === 'unread' ? !m.isRead : m.isRead)).filter((m) => m.subject.toLowerCase().includes(msgSearch.toLowerCase()) || m.name.toLowerCase().includes(msgSearch.toLowerCase())).length === 0 && (
+                      <div className="empty-state"><div className="empty-state__icon"><MailOpen size={22} /></div><div className="empty-state__title">No messages</div><div className="empty-state__desc">No messages match your current filter.</div></div>
+                    )}
+                  </div>
+                </div>
+                {selected ? (
+                  <div className="inbox-conversation">
+                    <div className="inbox-conversation__header">
+                      <div className="inbox-item__avatar" style={{ width: '40px', height: '40px', fontSize: '0.85rem' }}>{selected.name.charAt(0)}</div>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontWeight: 700, fontSize: '0.92rem', color: 'var(--color-heading)' }}>{selected.name}</div>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>{selected.email} — {selected.subject}</div>
+                        <div style={{ fontSize: '0.72rem', color: 'var(--color-text-dim)', marginTop: 2 }}>{new Date(selected.createdAt).toLocaleString()}</div>
+                      </div>
+                      <div className={`state-badge state-badge--${selected.isRead ? 'read' : 'new'}`}>{selected.isRead ? 'Read' : 'New'}</div>
+                    </div>
+                    <div className="inbox-conversation__body">
+                      <div className="inbox-conversation__message">{selected.message}</div>
+                    </div>
+                    <div className="inbox-conversation__footer">
+                      <button className="btn btn-primary" onClick={() => handleReplyMessage(selected)} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Reply size={14} /> Reply via Gmail</button>
+                      <button className="btn btn-ghost" onClick={() => { requestDeleteMessage(selected._id, selected.subject); }} style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#ef4444' }}><Trash2 size={14} /> Delete</button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="inbox-conversation">
+                    <div className="inbox-conversation__empty">
+                      <MailOpen size={36} />
+                      <span>Select a message to view its contents</span>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -749,92 +919,90 @@ function Dashboard({ theme, onToggleTheme }) {
 
         {/* ═══ SECTION EDITORS ═══ */}
 
-        {/* ── HERO EDITOR ── */}
-        {tab === 'hero-editor' && (
-          <div className="dash-content animate-fadeInUp">
-            <div className="dash-toolbar"><h3>Hero Section</h3>
-              <button className="btn btn-primary" onClick={() => handleSectionSave('hero')} disabled={sectionSaving === 'hero'} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <Save size={16} /> {sectionSaving === 'hero' ? 'Saving...' : 'Save Hero'}
-              </button>
+        {['hero-editor', 'about-editor', 'navbar-editor', 'footer-editor'].includes(tab) && (
+          <div>
+            <div className="page-toolbar">
+              <div className="page-toolbar__left">
+                <span className="page-toolbar__title">{tab === 'hero-editor' ? 'Hero' : tab === 'about-editor' ? 'About' : tab === 'navbar-editor' ? 'Navbar' : 'Footer'} Editor</span>
+              </div>
+              <div className="page-toolbar__right">
+                <button className="btn btn-primary" onClick={() => handleSectionSave(tab.replace('-editor', ''))} disabled={sectionSaving === tab.replace('-editor', '')} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <Save size={15} /> {sectionSaving === tab.replace('-editor', '') ? 'Saving...' : 'Save Changes'}
+                </button>
+              </div>
             </div>
-            <div className="card" style={{ maxWidth: '640px', padding: 'var(--space-xl)' }}>
-              {['greeting', 'name', 'role', 'bio'].map((field) => (
-                <div className="form-group" key={field}>
-                  <label className="form-label">{field.charAt(0).toUpperCase() + field.slice(1)}</label>
-                  {field === 'bio' ? (
-                    <textarea className="form-textarea" rows={3} value={sectionForms.hero?.[field] || ''} onChange={(e) => handleSectionChange('hero', field, e.target.value)} />
-                  ) : (
-                    <input type="text" className="form-input" value={sectionForms.hero?.[field] || ''} onChange={(e) => handleSectionChange('hero', field, e.target.value)} />
-                  )}
+            <div className="editor-layout">
+              <div className="editor-form-panel">
+                {tab === 'hero-editor' && (
+                  <>
+                    {['greeting', 'name', 'role', 'bio'].map((field) => (
+                      <div className="form-group" key={field}>
+                        <label className="form-label">{field.charAt(0).toUpperCase() + field.slice(1)}</label>
+                        {field === 'bio' ? <textarea className="form-textarea" rows={3} value={sectionForms.hero?.[field] || ''} onChange={(e) => handleSectionChange('hero', field, e.target.value)} />
+                          : <input type="text" className="form-input" value={sectionForms.hero?.[field] || ''} onChange={(e) => handleSectionChange('hero', field, e.target.value)} />}
+                      </div>
+                    ))}
+                    <div className="form-group">
+                      <label className="form-label">Roles (comma-separated)</label>
+                      <input type="text" className="form-input" placeholder="Web Developer, Designer, ..." value={Array.isArray(sectionForms.hero?.roles) ? sectionForms.hero.roles.join(', ') : sectionForms.hero?.roles || ''} onChange={(e) => handleSectionChange('hero', 'roles', e.target.value.split(',').map((r) => r.trim()))} />
+                    </div>
+                  </>
+                )}
+                {tab === 'about-editor' && (
+                  <>
+                    <div className="form-group"><label className="form-label">Tagline</label><input type="text" className="form-input" value={sectionForms.about?.tagline || ''} onChange={(e) => handleSectionChange('about', 'tagline', e.target.value)} /></div>
+                    <div className="form-group"><label className="form-label">Description</label><textarea className="form-textarea" rows={6} value={sectionForms.about?.description || ''} onChange={(e) => handleSectionChange('about', 'description', e.target.value)} /></div>
+                  </>
+                )}
+                {tab === 'navbar-editor' && (
+                  <>
+                    <div className="form-group"><label className="form-label">Logo Text</label><input type="text" className="form-input" value={sectionForms.navbar?.logoText || ''} onChange={(e) => handleSectionChange('navbar', 'logoText', e.target.value)} /></div>
+                    <div className="form-group"><label className="form-label">Nav Links (JSON)</label><textarea className="form-textarea" rows={6} value={typeof sectionForms.navbar?.links === 'string' ? sectionForms.navbar.links : JSON.stringify(sectionForms.navbar?.links || [], null, 2)} onChange={(e) => handleSectionChange('navbar', 'links', e.target.value)} /><small style={{ color: 'var(--color-text-muted)', fontSize: '0.72rem' }}>Array of {`{label, path}`}</small></div>
+                  </>
+                )}
+                {tab === 'footer-editor' && (
+                  <>
+                    <div className="form-group"><label className="form-label">Footer Text</label><input type="text" className="form-input" value={sectionForms.footer?.text || ''} onChange={(e) => handleSectionChange('footer', 'text', e.target.value)} /></div>
+                    <div className="form-group"><label className="form-label">Copyright</label><input type="text" className="form-input" value={sectionForms.footer?.copyright || ''} onChange={(e) => handleSectionChange('footer', 'copyright', e.target.value)} /></div>
+                  </>
+                )}
+              </div>
+              <div className="editor-preview-panel">
+                <div className="editor-preview-frame">
+                  <div className="editor-preview-frame__header">
+                    <div className="editor-preview-frame__dots"><span className="editor-preview-frame__dot" /><span className="editor-preview-frame__dot" /><span className="editor-preview-frame__dot" /></div>
+                    <span className="editor-preview-frame__label">Live Preview</span>
+                  </div>
+                  <div className="editor-preview-body">
+                    {tab === 'hero-editor' && (
+                      <div className="preview-hero">
+                        <div className="greeting">{sectionForms.hero?.greeting || 'Hi, I am'}</div>
+                        <div className="name">{sectionForms.hero?.name || 'Your Name'}</div>
+                        <div className="role">{sectionForms.hero?.role || 'Your Role'}</div>
+                        <div className="bio">{sectionForms.hero?.bio || 'Your bio will appear here...'}</div>
+                        {sectionForms.hero?.roles && <div style={{ marginTop: 12, display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap' }}>{(Array.isArray(sectionForms.hero.roles) ? sectionForms.hero.roles : []).map((r, i) => <span key={i} style={{ padding: '4px 12px', background: '#eef2ff', color: '#6366f1', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 600 }}>{r}</span>)}</div>}
+                      </div>
+                    )}
+                    {tab === 'about-editor' && (
+                      <div>
+                        <h2 style={{ color: '#6366f1', fontSize: '1.1rem', marginBottom: 4 }}>{sectionForms.about?.tagline || 'Your Tagline'}</h2>
+                        <p>{sectionForms.about?.description || 'Your description will appear here...'}</p>
+                      </div>
+                    )}
+                    {tab === 'navbar-editor' && (
+                      <div className="preview-navbar">
+                        <span className="logo">{sectionForms.navbar?.logoText || 'Logo'}</span>
+                        <div className="links">{(Array.isArray(sectionForms.navbar?.links) ? sectionForms.navbar.links : []).map((l, i) => <span key={i}>{l.label || 'Link'}</span>)}</div>
+                      </div>
+                    )}
+                    {tab === 'footer-editor' && (
+                      <div className="preview-footer">
+                        <p>{sectionForms.footer?.text || 'Your footer text'}</p>
+                        <small>{sectionForms.footer?.copyright || '© 2026'}</small>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              ))}
-              <div className="form-group">
-                <label className="form-label">Roles (comma-separated)</label>
-                <input type="text" className="form-input" placeholder="Web Developer, Designer, ..." value={Array.isArray(sectionForms.hero?.roles) ? sectionForms.hero.roles.join(', ') : sectionForms.hero?.roles || ''} onChange={(e) => handleSectionChange('hero', 'roles', e.target.value.split(',').map((r) => r.trim()))} />
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* ── ABOUT EDITOR ── */}
-        {tab === 'about-editor' && (
-          <div className="dash-content animate-fadeInUp">
-            <div className="dash-toolbar"><h3>About Section</h3>
-              <button className="btn btn-primary" onClick={() => handleSectionSave('about')} disabled={sectionSaving === 'about'} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <Save size={16} /> {sectionSaving === 'about' ? 'Saving...' : 'Save About'}
-              </button>
-            </div>
-            <div className="card" style={{ maxWidth: '640px', padding: 'var(--space-xl)' }}>
-              <div className="form-group">
-                <label className="form-label">Tagline</label>
-                <input type="text" className="form-input" value={sectionForms.about?.tagline || ''} onChange={(e) => handleSectionChange('about', 'tagline', e.target.value)} />
-              </div>
-              <div className="form-group">
-                <label className="form-label">Description</label>
-                <textarea className="form-textarea" rows={5} value={sectionForms.about?.description || ''} onChange={(e) => handleSectionChange('about', 'description', e.target.value)} />
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* ── NAVBAR EDITOR ── */}
-        {tab === 'navbar-editor' && (
-          <div className="dash-content animate-fadeInUp">
-            <div className="dash-toolbar"><h3>Navbar Editor</h3>
-              <button className="btn btn-primary" onClick={() => handleSectionSave('navbar')} disabled={sectionSaving === 'navbar'} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <Save size={16} /> {sectionSaving === 'navbar' ? 'Saving...' : 'Save Navbar'}
-              </button>
-            </div>
-            <div className="card" style={{ maxWidth: '640px', padding: 'var(--space-xl)' }}>
-              <div className="form-group">
-                <label className="form-label">Logo Text</label>
-                <input type="text" className="form-input" value={sectionForms.navbar?.logoText || ''} onChange={(e) => handleSectionChange('navbar', 'logoText', e.target.value)} />
-              </div>
-              <div className="form-group">
-                <label className="form-label">Nav Links (JSON array of &#123;label, path&#125;)</label>
-                <textarea className="form-textarea" rows={6} value={typeof sectionForms.navbar?.links === 'string' ? sectionForms.navbar.links : JSON.stringify(sectionForms.navbar?.links || [], null, 2)} onChange={(e) => handleSectionChange('navbar', 'links', e.target.value)} />
-                <small style={{ color: 'var(--color-text-muted)', fontSize: '0.75rem' }}>Edit as JSON or leave empty for defaults</small>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* ── FOOTER EDITOR ── */}
-        {tab === 'footer-editor' && (
-          <div className="dash-content animate-fadeInUp">
-            <div className="dash-toolbar"><h3>Footer Editor</h3>
-              <button className="btn btn-primary" onClick={() => handleSectionSave('footer')} disabled={sectionSaving === 'footer'} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <Save size={16} /> {sectionSaving === 'footer' ? 'Saving...' : 'Save Footer'}
-              </button>
-            </div>
-            <div className="card" style={{ maxWidth: '640px', padding: 'var(--space-xl)' }}>
-              <div className="form-group">
-                <label className="form-label">Footer Text</label>
-                <input type="text" className="form-input" value={sectionForms.footer?.text || ''} onChange={(e) => handleSectionChange('footer', 'text', e.target.value)} />
-              </div>
-              <div className="form-group">
-                <label className="form-label">Copyright</label>
-                <input type="text" className="form-input" value={sectionForms.footer?.copyright || ''} onChange={(e) => handleSectionChange('footer', 'copyright', e.target.value)} />
               </div>
             </div>
           </div>
@@ -844,71 +1012,62 @@ function Dashboard({ theme, onToggleTheme }) {
 
         {/* ── ANALYTICS ── */}
         {tab === 'analytics' && (
-          <div className="dash-content animate-fadeInUp">
-            <div className="dash-toolbar"><h3>Analytics</h3>
-              <button className="btn btn-ghost dash-btn" onClick={() => dispatch(fetchAnalytics())} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><RefreshCw size={14} /> Refresh</button>
+          <div>
+            <div className="page-toolbar">
+              <div className="page-toolbar__left"><span className="page-toolbar__title">Analytics</span></div>
+              <div className="page-toolbar__right"><button className="btn btn-ghost" onClick={() => dispatch(fetchAnalytics())} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><RefreshCw size={14} /> Refresh</button></div>
             </div>
-            {aLoading ? <p>Loading…</p> : analytics ? (
-              <>
-                <div className="dash-stats">
-                  <StatCard icon={<Users size={22} />} label="Visitors (30d)" value={analytics.visitors} color="rgba(99,120,255,0.15)" />
-                  <StatCard icon={<Globe size={22} />} label="Page Views (30d)" value={analytics.pageViews} color="rgba(0,229,255,0.12)" />
-                  <StatCard icon={<Activity size={22} />} label="Avg Visitors/Day" value={analytics.avgVisitorsPerDay} color="rgba(167,139,250,0.15)" />
-                  <StatCard icon={<BarChart3 size={22} />} label="Pages/Visit" value={analytics.avgPageViewsPerVisitor} color="rgba(255,204,0,0.12)" />
+            {aLoading ? <p style={{ padding: '20px', color: 'var(--color-text-muted)' }}>Loading...</p> : analytics ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div className="dash-stats-row">
+                  <div className="dash-stat"><div className="dash-stat__icon" style={{ background: 'rgba(99,102,241,0.1)', color: '#6366f1' }}><Users size={18} /></div><div><div className="dash-stat__value">{analytics.visitors || 0}</div><div className="dash-stat__label">Visitors (30d)</div></div></div>
+                  <div className="dash-stat"><div className="dash-stat__icon" style={{ background: 'rgba(16,185,129,0.1)', color: '#10b981' }}><Globe size={18} /></div><div><div className="dash-stat__value">{analytics.pageViews || 0}</div><div className="dash-stat__label">Page Views (30d)</div></div></div>
+                  <div className="dash-stat"><div className="dash-stat__icon" style={{ background: 'rgba(245,158,11,0.1)', color: '#f59e0b' }}><TrendingUp size={18} /></div><div><div className="dash-stat__value">{analytics.avgVisitorsPerDay || 0}</div><div className="dash-stat__label">Avg / Day</div></div></div>
+                  <div className="dash-stat"><div className="dash-stat__icon" style={{ background: 'rgba(236,72,153,0.1)', color: '#ec4899' }}><BarChart3 size={18} /></div><div><div className="dash-stat__value">{analytics.avgPageViewsPerVisitor || '0.0'}</div><div className="dash-stat__label">Pages / Visit</div></div></div>
                 </div>
-                <div className="card" style={{ padding: 'var(--space-xl)', marginTop: 'var(--space-lg)' }}>
-                  <h4 style={{ marginBottom: 'var(--space-md)', fontWeight: 600 }}>Daily Visitors (14 days)</h4>
+                <div className="dash-panel">
+                  <div className="dash-panel__header"><span className="dash-panel__title">Daily Visitors (14 days)</span></div>
                   <MiniChart data={analytics.entries?.map((e) => e.visitors)} color="var(--color-primary)" height={80} />
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', color: 'var(--color-text-muted)', marginTop: '4px' }}>
-                    <span>{analytics.entries?.[0]?.date}</span>
-                    <span>{analytics.entries?.[analytics.entries.length - 1]?.date}</span>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.65rem', color: 'var(--color-text-dim)', marginTop: 4 }}>
+                    <span>{analytics.entries?.[0]?.date}</span><span>{analytics.entries?.[analytics.entries.length - 1]?.date}</span>
                   </div>
                 </div>
                 {analytics.entries?.length > 0 && (
-                  <div className="dash-table-wrap" style={{ marginTop: 'var(--space-lg)' }}>
-                    <table className="dash-table">
-                      <thead><tr><th>Date</th><th>Visitors</th><th>Page Views</th><th>Interactions</th></tr></thead>
-                      <tbody>{analytics.entries.slice(-14).map((e) => (
-                        <tr key={e.date}>
-                          <td>{e.date}</td>
-                          <td>{e.visitors}</td>
-                          <td>{e.pageViews}</td>
-                          <td>{e.interactions}</td>
-                        </tr>
-                      ))}</tbody>
+                  <div className="dash-panel" style={{ padding: 0, overflow: 'hidden' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.8rem' }}>
+                      <thead><tr style={{ background: 'var(--color-bg)' }}><th style={{ padding: '10px 14px', textAlign: 'left', fontWeight: 600, color: 'var(--color-text-muted)' }}>Date</th><th style={{ padding: '10px 14px', textAlign: 'left', fontWeight: 600, color: 'var(--color-text-muted)' }}>Visitors</th><th style={{ padding: '10px 14px', textAlign: 'left', fontWeight: 600, color: 'var(--color-text-muted)' }}>Page Views</th><th style={{ padding: '10px 14px', textAlign: 'left', fontWeight: 600, color: 'var(--color-text-muted)' }}>Interactions</th></tr></thead>
+                      <tbody>{analytics.entries.slice(-14).map((e) => (<tr key={e.date} style={{ borderTop: '1px solid var(--color-border)' }}><td style={{ padding: '8px 14px' }}>{e.date}</td><td style={{ padding: '8px 14px' }}>{e.visitors}</td><td style={{ padding: '8px 14px' }}>{e.pageViews}</td><td style={{ padding: '8px 14px' }}>{e.interactions}</td></tr>))}</tbody>
                     </table>
                   </div>
                 )}
-              </>
-            ) : (
-              <p>No analytics data yet. Visit the public site to generate data.</p>
-            )}
+              </div>
+            ) : <p style={{ padding: '20px', color: 'var(--color-text-muted)' }}>No analytics data yet. Visit the public site to generate data.</p>}
           </div>
         )}
 
         {/* ── METRICS ── */}
         {tab === 'metrics' && (
-          <div className="dash-content animate-fadeInUp">
-            <div className="dash-toolbar"><h3>Key Performance Indicators</h3></div>
-            <div className="dash-stats">
-              <StatCard icon={<Briefcase size={22} />} label="Published Projects" value={projects.filter((p) => p.featured).length} sub={`${projects.length} total`} color="rgba(99,120,255,0.15)" />
-              <StatCard icon={<Star size={22} />} label="Published Testimonials" value={testimonials.filter((t) => t.published).length} sub={`${testimonials.length} total`} color="rgba(0,229,255,0.12)" />
-              <StatCard icon={<Activity size={22} />} label="Engagement Rate" value={analytics?.visitors ? ((analytics.interactions / analytics.visitors) * 100).toFixed(1) + '%' : '0%'} sub={`${analytics?.interactions || 0} interactions`} color="rgba(167,139,250,0.15)" />
-              <StatCard icon={<Clock size={22} />} label="Avg Daily Visitors" value={analytics?.avgVisitorsPerDay || 0} sub={`${analytics?.totalDays || 0} days tracked`} color="rgba(255,204,0,0.12)" />
+          <div>
+            <div className="page-toolbar"><div className="page-toolbar__left"><span className="page-toolbar__title">Key Performance Indicators</span></div></div>
+            <div className="dash-stats-row">
+              <div className="dash-stat"><div className="dash-stat__icon" style={{ background: 'rgba(99,102,241,0.1)', color: '#6366f1' }}><Briefcase size={18} /></div><div><div className="dash-stat__value">{projects.filter((p) => p.featured).length}</div><div className="dash-stat__label">Published Projects</div><div className="dash-stat__sub">{projects.length} total</div></div></div>
+              <div className="dash-stat"><div className="dash-stat__icon" style={{ background: 'rgba(16,185,129,0.1)', color: '#10b981' }}><Star size={18} /></div><div><div className="dash-stat__value">{testimonials.filter((t) => t.published).length}</div><div className="dash-stat__label">Published Testimonials</div><div className="dash-stat__sub">{testimonials.length} total</div></div></div>
+              <div className="dash-stat"><div className="dash-stat__icon" style={{ background: 'rgba(245,158,11,0.1)', color: '#f59e0b' }}><Activity size={18} /></div><div><div className="dash-stat__value">{analytics?.visitors ? ((analytics.interactions / analytics.visitors) * 100).toFixed(1) + '%' : '0%'}</div><div className="dash-stat__label">Engagement Rate</div><div className="dash-stat__sub">{analytics?.interactions || 0} interactions</div></div></div>
+              <div className="dash-stat"><div className="dash-stat__icon" style={{ background: 'rgba(236,72,153,0.1)', color: '#ec4899' }}><Clock size={18} /></div><div><div className="dash-stat__value">{analytics?.avgVisitorsPerDay || 0}</div><div className="dash-stat__label">Avg Daily Visitors</div><div className="dash-stat__sub">{analytics?.totalDays || 0} days tracked</div></div></div>
             </div>
             {analytics?.pageViewsByPage && Object.keys(analytics.pageViewsByPage).length > 0 && (
-              <div className="card" style={{ padding: 'var(--space-xl)', marginTop: 'var(--space-lg)' }}>
-                <h4 style={{ marginBottom: 'var(--space-md)', fontWeight: 600 }}>Page Popularity</h4>
+              <div className="dash-panel" style={{ marginTop: 16 }}>
+                <div className="dash-panel__header"><span className="dash-panel__title">Page Popularity</span></div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   {Object.entries(analytics.pageViewsByPage).sort((a, b) => b[1] - a[1]).map(([page, count]) => {
                     const maxCount = Math.max(...Object.values(analytics.pageViewsByPage));
                     return (
                       <div key={page} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        <div style={{ flex: 1, fontSize: '0.85rem', color: 'var(--color-text)' }}>{page}</div>
-                        <div style={{ flex: 2, height: '20px', background: 'var(--color-surface-2)', borderRadius: '4px', overflow: 'hidden' }}>
+                        <span style={{ flex: 1, fontSize: '0.8rem', color: 'var(--color-text)' }}>{page}</span>
+                        <div style={{ flex: 2, height: '18px', background: 'var(--color-surface-2)', borderRadius: '4px', overflow: 'hidden' }}>
                           <div style={{ height: '100%', width: `${(count / maxCount) * 100}%`, background: 'var(--color-primary)', borderRadius: '4px', transition: 'width 0.5s ease' }} />
                         </div>
-                        <div style={{ fontSize: '0.85rem', fontWeight: 600, minWidth: '40px', textAlign: 'right' }}>{count}</div>
+                        <span style={{ fontSize: '0.8rem', fontWeight: 600, minWidth: '36px', textAlign: 'right' }}>{count}</span>
                       </div>
                     );
                   })}
@@ -920,23 +1079,34 @@ function Dashboard({ theme, onToggleTheme }) {
 
         {/* ── NOTIFICATIONS CENTER ── */}
         {tab === 'notifications-center' && (
-          <div className="dash-content animate-fadeInUp">
-            <div className="dash-toolbar"><h3>Notifications ({notifUnread} unread)</h3>
-              {notifUnread > 0 && <button className="btn btn-ghost dash-btn" onClick={handleMarkAllRead} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><CheckCheck size={14} /> Mark All Read</button>}
+          <div>
+            <div className="page-toolbar">
+              <div className="page-toolbar__left"><span className="page-toolbar__title">Notifications</span><span className="page-toolbar__count">{notifUnread} unread</span></div>
+              <div className="page-toolbar__right" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                {['all', 'unread', 'read'].map((f) => (
+                  <button key={f} className={`inbox-filter-btn${notifFilter === f ? ' inbox-filter-btn--active' : ''}`} onClick={() => setNotifFilter(f)}>{f.charAt(0).toUpperCase() + f.slice(1)}</button>
+                ))}
+                {notifUnread > 0 && <button className="btn btn-ghost" onClick={handleMarkAllRead} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><CheckCheck size={14} /> Mark All Read</button>}
+              </div>
             </div>
-            {nLoading ? <p>Loading…</p> : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                {notifications.length === 0 && <p style={{ color: 'var(--color-text-muted)', textAlign: 'center', padding: '2rem' }}>No notifications yet.</p>}
-                {notifications.map((n) => (
-                  <div key={n._id} className="card" style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', padding: 'var(--space-md)', opacity: n.isRead ? 0.6 : 1 }}>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontWeight: n.isRead ? 500 : 700, fontSize: '0.9rem', color: 'var(--color-text)' }}>{n.title}</div>
-                      {n.body && <div style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', marginTop: '2px' }}>{n.body}</div>}
-                      <div style={{ fontSize: '0.7rem', color: 'var(--color-text-dim)', marginTop: '4px' }}>{new Date(n.createdAt).toLocaleString()}</div>
+            {nLoading ? <p style={{ padding: '20px', color: 'var(--color-text-muted)' }}>Loading...</p> : (
+              <div className="notif-feed">
+                {notifications.filter((n) => notifFilter === 'all' || (notifFilter === 'unread' ? !n.isRead : n.isRead)).length === 0 && (
+                  <div className="empty-state"><div className="empty-state__icon"><Bell size={22} /></div><div className="empty-state__title">No notifications</div><div className="empty-state__desc">You're all caught up!</div></div>
+                )}
+                {notifications.filter((n) => notifFilter === 'all' || (notifFilter === 'unread' ? !n.isRead : n.isRead)).map((n) => (
+                  <div key={n._id} className={`notif-item${!n.isRead ? ' notif-item--unread' : ''}`}>
+                    <div className="notif-item__icon" style={{ background: n.type === 'alert' ? 'rgba(239,68,68,0.1)' : n.type === 'message' ? 'rgba(99,102,241,0.1)' : 'rgba(16,185,129,0.1)', color: n.type === 'alert' ? '#ef4444' : n.type === 'message' ? '#6366f1' : '#10b981' }}>
+                      {n.type === 'alert' ? <AlertTriangle size={14} /> : n.type === 'message' ? <MessageSquare size={14} /> : <Info size={14} />}
                     </div>
-                    <div style={{ display: 'flex', gap: '4px', flexShrink: 0 }}>
-                      {!n.isRead && <button className="btn btn-ghost dash-btn" onClick={() => handleMarkRead(n._id)} style={{ fontSize: '0.75rem' }}>Read</button>}
-                      <button className="btn dash-btn dash-btn--danger" onClick={() => handleDeleteNotif(n._id)} style={{ fontSize: '0.75rem' }}><Trash2 size={12} /></button>
+                    <div className="notif-item__content">
+                      <div className="notif-item__title">{n.title}</div>
+                      {n.body && <div className="notif-item__body">{n.body}</div>}
+                      <div className="notif-item__time">{new Date(n.createdAt).toLocaleString()}</div>
+                    </div>
+                    <div className="notif-item__actions">
+                      {!n.isRead && <button className="icon-btn" onClick={() => handleMarkRead(n._id)} title="Mark read"><Check size={12} /></button>}
+                      <button className="icon-btn icon-btn--danger" onClick={() => handleDeleteNotif(n._id)} title="Delete"><Trash2 size={12} /></button>
                     </div>
                   </div>
                 ))}
@@ -947,30 +1117,37 @@ function Dashboard({ theme, onToggleTheme }) {
 
         {/* ── SOCIAL LINKS ── */}
         {tab === 'social-links' && (
-          <div className="dash-content animate-fadeInUp">
-            <div className="dash-toolbar"><h3>Social Links</h3>
-              <button id="add-social-link-btn" className="btn btn-primary" onClick={openAddSocialLink} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Plus size={16} /> Add Link</button>
+          <div>
+            <div className="page-toolbar">
+              <div className="page-toolbar__left"><span className="page-toolbar__title">Social Links</span><span className="page-toolbar__count">{socialLinks.length} platforms</span></div>
+              <div className="page-toolbar__right"><button className="btn btn-primary" onClick={openAddSocialLink} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Plus size={15} /> Add Link</button></div>
             </div>
-            {slLoading ? <p>Loading…</p> : (
-              <div className="card" style={{ padding: 'var(--space-md)' }}>
-                {socialLinks.length === 0 && <p style={{ color: 'var(--color-text-muted)', textAlign: 'center', padding: '2rem' }}>No social links yet.</p>}
-                {socialLinks.map((link, idx) => (
-                  <div key={link._id} draggable onDragStart={() => handleDragStart(idx)} onDragOver={(e) => handleDragOver(e, idx)} onDragEnd={handleDragEnd}
-                    style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: 'var(--space-sm) var(--space-md)', borderBottom: '1px solid var(--color-border)', cursor: 'grab', background: draggedIdx === idx ? 'var(--color-primary-glow)' : 'transparent', borderRadius: 'var(--radius-sm)', marginBottom: '4px' }}>
-                    <GripVertical size={16} style={{ color: 'var(--color-text-muted)', cursor: 'grab', flexShrink: 0 }} />
-                    <div style={{ width: '28px', height: '28px', borderRadius: '4px', background: 'var(--color-surface-2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: 700, color: 'var(--color-text-muted)', flexShrink: 0 }}>{link.platform.charAt(0).toUpperCase()}</div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>{link.platform}</div>
-                      <div style={{ fontSize: '0.78rem', color: 'var(--color-text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{link.url}</div>
-                    </div>
-                    <span className="badge" style={{ backgroundColor: link.active ? '#22c55e' : '#64748b', color: '#fff', fontSize: '0.7rem' }}>{link.active ? 'Active' : 'Inactive'}</span>
-                    <div className="dash-actions">
-                      <button className="btn btn-ghost dash-btn" onClick={() => openEditSocialLink(link)}><Edit3 size={13} /></button>
-                      <button className="btn dash-btn dash-btn--danger" onClick={() => handleDeleteSocialLink(link._id, link.platform)}><Trash2 size={13} /></button>
-                    </div>
+            {slLoading ? <p style={{ padding: '20px', color: 'var(--color-text-muted)' }}>Loading...</p> : (
+              <>
+                {socialLinks.length === 0 ? (
+                  <div className="empty-state"><div className="empty-state__icon"><Share2 size={22} /></div><div className="empty-state__title">No social links</div><div className="empty-state__desc">Connect your social media profiles.</div></div>
+                ) : (
+                  <div className="social-grid">
+                    {socialLinks.map((link) => (
+                      <div key={link._id} className="social-card">
+                        <div className="social-card__icon" style={{ background: `hsl(${link.platform.length * 30}, 50%, 85%)`, color: `hsl(${link.platform.length * 30}, 60%, 30%)` }}>{link.platform.charAt(0).toUpperCase()}</div>
+                        <div className="social-card__info">
+                          <div className="social-card__platform">{link.platform}</div>
+                          <div className="social-card__url">{link.url}</div>
+                        </div>
+                        <div className="social-card__actions">
+                          <label className="toggle-switch social-card__switch">
+                            <input type="checkbox" checked={link.active} onChange={async () => { await dispatch(updateSocialLink({ id: link._id, linkData: { active: !link.active } })); }} />
+                            <span className="toggle-switch__track"><span className="toggle-switch__thumb" /></span>
+                          </label>
+                          <button className="icon-btn" onClick={() => openEditSocialLink(link)} title="Edit"><Edit3 size={12} /></button>
+                          <button className="icon-btn icon-btn--danger" onClick={() => handleDeleteSocialLink(link._id, link.platform)} title="Delete"><Trash2 size={12} /></button>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
+                )}
+              </>
             )}
           </div>
         )}
@@ -979,14 +1156,15 @@ function Dashboard({ theme, onToggleTheme }) {
 
         {/* ── PROFILE ── */}
         {tab === 'profile' && (
-          <div className="dash-content animate-fadeInUp">
+          <div>
+            <div className="page-toolbar"><div className="page-toolbar__left"><span className="page-toolbar__title">Profile</span></div></div>
             <div className="profile-card card">
               <div className="profile-card__header">
                 <div className="profile-card__avatar-large">{user?.name?.[0] ?? 'A'}</div>
                 <div>
                   <h3 className="profile-card__name">{user?.name}</h3>
                   <p className="profile-card__email">{user?.email}</p>
-                  <span className="badge profile-card__role">Role: {user?.role || 'Admin'}</span>
+                  <span className="state-badge state-badge--active">Role: {user?.role || 'Admin'}</span>
                 </div>
               </div>
               <div className="profile-card__body">
@@ -998,7 +1176,7 @@ function Dashboard({ theme, onToggleTheme }) {
                   <div className="profile-image-actions">
                     <input type="file" accept="image/*" onChange={handleProfileImageUpload} style={{ display: 'none' }} id="profile-image-file" disabled={profileUploading} />
                     <label htmlFor="profile-image-file" className="btn btn-primary" style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px' }}><Upload size={14} />{profileUploading ? 'Uploading...' : profileImageUrl ? 'Change Photo' : 'Upload Photo'}</label>
-                    {profileImageUrl && <button className="btn btn-ghost dash-btn--danger" onClick={handleRemoveProfileImage} style={{ color: '#ef4444', display: 'inline-flex', alignItems: 'center', gap: '6px' }}><Trash2 size={14} /> Remove</button>}
+                    {profileImageUrl && <button className="btn btn-ghost" onClick={handleRemoveProfileImage} style={{ color: '#ef4444', display: 'inline-flex', alignItems: 'center', gap: '6px' }}><Trash2 size={14} /> Remove</button>}
                   </div>
                 </div>
                 <h4 className="profile-card__section-title">Change Password</h4>
@@ -1024,11 +1202,11 @@ function Dashboard({ theme, onToggleTheme }) {
                     <div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <span style={{ fontWeight: '600' }}>Google Authenticator (TOTP)</span>
-                        <span className="badge" style={{ backgroundColor: is2faEnabled ? '#22c55e' : '#64748b', color: '#fff', padding: '2px 8px', borderRadius: '4px', fontSize: '0.75rem' }}>{is2faEnabled ? 'Enabled' : 'Disabled'}</span>
+                        <span className={`state-badge state-badge--${is2faEnabled ? 'active' : 'inactive'}`}>{is2faEnabled ? 'Enabled' : 'Disabled'}</span>
                       </div>
                       <p style={{ margin: '6px 0 0', fontSize: '0.875rem', color: 'var(--color-text-muted)' }}>Add an extra layer of security using any standard TOTP authenticator app.</p>
                     </div>
-                    {is2faEnabled ? <button className="btn btn-ghost dash-btn--danger" style={{ color: '#ef4444' }} onClick={() => setShowDisable2fa(true)}>Disable 2FA</button>
+                    {is2faEnabled ? <button className="btn btn-ghost" style={{ color: '#ef4444' }} onClick={() => setShowDisable2fa(true)}>Disable 2FA</button>
                       : <button className="btn btn-primary" onClick={handleStart2faSetup} disabled={totpLoading}>{totpLoading ? 'Loading...' : 'Enable 2FA'}</button>}
                   </div>
                 </div>
@@ -1039,25 +1217,103 @@ function Dashboard({ theme, onToggleTheme }) {
 
         {/* ── SETTINGS ── */}
         {tab === 'settings' && (
-          <div className="dash-content animate-fadeInUp">
-            <div className="dash-toolbar"><h3>System Settings</h3></div>
-            <div className="card" style={{ maxWidth: '640px', padding: 'var(--space-xl)' }}>
-              <h4 className="profile-card__section-title">Site Information</h4>
-              <div className="form-group">
-                <label className="form-label">Site Title</label>
-                <input type="text" className="form-input" placeholder="Teshome Bizuayehu Portfolio" value={sectionForms.settings?.siteTitle || ''} onChange={(e) => handleSectionChange('settings', 'siteTitle', e.target.value)} />
+          <div>
+            <div className="page-toolbar"><div className="page-toolbar__left"><span className="page-toolbar__title">Settings</span></div></div>
+            <div className="settings-layout">
+              <div className="settings-nav">
+                {['profile', 'security', 'appearance', 'system'].map((st) => (
+                  <button key={st} className={`settings-nav-btn${settingsTab === st ? ' settings-nav-btn--active' : ''}`} onClick={() => setSettingsTab(st)}>
+                    {st === 'profile' && <UserIcon size={14} />}{st === 'security' && <Eye size={14} />}{st === 'appearance' && <Monitor size={14} />}{st === 'system' && <Settings size={14} />}
+                    {st.charAt(0).toUpperCase() + st.slice(1)}
+                  </button>
+                ))}
               </div>
-              <div className="form-group">
-                <label className="form-label">Site Description</label>
-                <textarea className="form-textarea" rows={2} placeholder="Full Stack Developer Portfolio" value={sectionForms.settings?.siteDescription || ''} onChange={(e) => handleSectionChange('settings', 'siteDescription', e.target.value)} />
+              <div className="settings-content">
+                {settingsTab === 'profile' && (
+                  <div className="settings-section">
+                    <div className="settings-card">
+                      <span className="settings-card__title">Site Information</span>
+                      <span className="settings-card__desc">Basic information about your portfolio site.</span>
+                      <div className="form-group"><label className="form-label">Site Title</label><input type="text" className="form-input" placeholder="Teshome Bizuayehu Portfolio" value={sectionForms.settings?.siteTitle || ''} onChange={(e) => handleSectionChange('settings', 'siteTitle', e.target.value)} /></div>
+                      <div className="form-group"><label className="form-label">Site Description</label><textarea className="form-textarea" rows={2} placeholder="Full Stack Developer Portfolio" value={sectionForms.settings?.siteDescription || ''} onChange={(e) => handleSectionChange('settings', 'siteDescription', e.target.value)} /></div>
+                      <div className="settings-actions"><button className="btn btn-primary" onClick={() => handleSectionSave('settings')} disabled={sectionSaving === 'settings'} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Save size={14} /> Save</button></div>
+                    </div>
+                  </div>
+                )}
+                {settingsTab === 'security' && (
+                  <div className="settings-section">
+                    <div className="settings-card">
+                      <span className="settings-card__title">Password Policy</span>
+                      <span className="settings-card__desc">Minimum password requirements and session settings.</span>
+                      <div className="form-group"><label className="form-label">Min Password Length</label><input type="number" className="form-input" value="6" readOnly /></div>
+                      <div className="settings-actions"><button className="btn btn-ghost" disabled>Defaults</button></div>
+                    </div>
+                  </div>
+                )}
+                {settingsTab === 'appearance' && (
+                  <div className="settings-section">
+                    <div className="settings-card">
+                      <span className="settings-card__title">Theme</span>
+                      <span className="settings-card__desc">Choose between light and dark mode. Toggle is in the topbar.</span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <span style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>Current: <strong style={{ color: 'var(--color-text)', textTransform: 'capitalize' }}>{theme}</strong></span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                {settingsTab === 'system' && (
+                  <div className="settings-section">
+                    <div className="settings-card">
+                      <span className="settings-card__title">Environment</span>
+                      <span className="settings-card__desc">System information and configuration.</span>
+                      <div className="system-info-list">
+                        <div className="system-info-item"><span className="system-info-item__label">Mode</span><span className="system-info-item__value">{import.meta.env.MODE || 'production'}</span></div>
+                        <div className="system-info-item"><span className="system-info-item__label">API URL</span><span className="system-info-item__value">/api</span></div>
+                        <div className="system-info-item"><span className="system-info-item__label">Auth</span><span className="system-info-item__value">{user?.totpEnabled ? '2FA + JWT' : 'JWT'}</span></div>
+                        <div className="system-info-item"><span className="system-info-item__label">Database</span><span className="system-info-item__value">MongoDB</span></div>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
-              <div className="form-group">
-                <label className="form-label">Timezone</label>
-                <input type="text" className="form-input" placeholder="UTC" value={sectionForms.settings?.timezone || ''} onChange={(e) => handleSectionChange('settings', 'timezone', e.target.value)} />
+            </div>
+          </div>
+        )}
+
+        {/* ── VISIBILITY MANAGER ── */}
+        {tab === 'visibility-manager' && (
+          <div>
+            <div className="page-toolbar">
+              <div className="page-toolbar__left">
+                <span className="page-toolbar__title">Section Visibility</span>
+                <span className="page-toolbar__count">Toggle sections on/off</span>
               </div>
-              <button className="btn btn-primary" onClick={() => handleSectionSave('settings')} disabled={sectionSaving === 'settings'} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <Save size={16} /> {sectionSaving === 'settings' ? 'Saving...' : 'Save Settings'}
-              </button>
+            </div>
+            <div className="vis-manager">
+              {SECTIONS_LIST.map((sec, idx) => {
+                const visKey = `section_${sec.id}_visible`;
+                const isVisible = sections[visKey] !== false;
+                return (
+                  <div key={sec.id} className="vis-item">
+                    <div className="vis-item__icon" style={{ background: `hsl(${idx * 45}, 55%, 85%)`, color: `hsl(${idx * 45}, 60%, 30%)` }}>
+                      {sec.id === 'hero' && <Monitor size={15} />}
+                      {sec.id === 'about' && <UserIcon size={15} />}
+                      {sec.id === 'skills' && <Zap size={15} />}
+                      {sec.id === 'experience' && <History size={15} />}
+                      {sec.id === 'projects' && <Briefcase size={15} />}
+                      {sec.id === 'testimonials' && <Star size={15} />}
+                      {sec.id === 'contact' && <MessageSquare size={15} />}
+                      {sec.id === 'footer' && <CreditCard size={15} />}
+                    </div>
+                    <span className="vis-item__name">{sec.label}</span>
+                    <span className={`vis-item__badge vis-item__badge--${isVisible ? 'visible' : 'hidden'}`}>{isVisible ? 'Visible' : 'Hidden'}</span>
+                    <label className="toggle-switch">
+                      <input type="checkbox" checked={isVisible} onChange={() => dispatch(updateSection({ key: visKey, value: !isVisible }))} />
+                      <span className="toggle-switch__track"><span className="toggle-switch__thumb" /></span>
+                    </label>
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}
@@ -1067,48 +1323,6 @@ function Dashboard({ theme, onToggleTheme }) {
       </main>
 
       {/* ═══ MODALS ═══ */}
-
-      {/* Add / Edit Project */}
-      {(modal === 'addProject' || modal === 'editProject') && (
-        <Modal title={modal === 'addProject' ? 'Add Project' : 'Edit Project'} onClose={() => setModal(null)}>
-          <div className="modal-form">
-            {[
-              { label: 'Title', key: 'title', type: 'text', placeholder: 'My Awesome Project' },
-              { label: 'Tech Stack (comma-separated)', key: 'techStack', type: 'text', placeholder: 'React, Node.js, MongoDB' },
-              { label: 'GitHub URL', key: 'githubUrl', type: 'url', placeholder: 'https://github.com/...' },
-              { label: 'Live URL', key: 'liveUrl', type: 'url', placeholder: 'https://...' },
-            ].map(({ label, key, type, placeholder }) => (
-              <div className="form-group" key={key}>
-                <label className="form-label">{label}</label>
-                <input type={type} className="form-input" placeholder={placeholder} value={pForm[key]} onChange={(e) => setPForm((f) => ({ ...f, [key]: e.target.value }))} />
-              </div>
-            ))}
-            <div className="form-group">
-              <label className="form-label">Description</label>
-              <textarea className="form-textarea" placeholder="Project description…" value={pForm.description} onChange={(e) => setPForm((f) => ({ ...f, description: e.target.value }))} />
-            </div>
-            <div className="form-group">
-              <label className="form-label">Project Image</label>
-              <div className="upload-container">
-                <input type="file" accept="image/*" onChange={handleImageUpload} style={{ display: 'none' }} id="project-image-file" disabled={uploading} />
-                <label htmlFor="project-image-file" className={`upload-box${uploading ? ' upload-box--uploading' : ''}`}>
-                  <Upload className="upload-box__icon" size={24} />
-                  <span className="upload-box__text">{uploading ? 'Uploading...' : 'Select Image File'}</span>
-                  <span className="upload-box__hint">Max size 5MB (PNG, JPG, WEBP)</span>
-                </label>
-              </div>
-              <label className="form-label" style={{ marginTop: '0.75rem' }}>Or paste image URL</label>
-              <input type="url" className="form-input" placeholder="https://example.com/screenshot.png" value={pForm.imageUrl} onChange={(e) => setPForm((f) => ({ ...f, imageUrl: e.target.value }))} disabled={uploading} />
-              {pForm.imageUrl && (<div className="modal-img-preview"><img src={pForm.imageUrl} alt="Preview" onError={(e) => { e.target.style.display = 'none'; }} /><span className="modal-img-preview__label">Preview</span></div>)}
-            </div>
-            <div className="form-group" style={{ flexDirection: 'row', alignItems: 'center', gap: '0.5rem' }}>
-              <input type="checkbox" id="featured-check" checked={pForm.featured} onChange={(e) => setPForm((f) => ({ ...f, featured: e.target.checked }))} />
-              <label htmlFor="featured-check" className="form-label" style={{ margin: 0 }}>Featured project</label>
-            </div>
-            <div className="modal-footer"><button className="btn btn-ghost" onClick={() => setModal(null)}>Cancel</button><button className="btn btn-primary" onClick={handleSaveProject}>Save</button></div>
-          </div>
-        </Modal>
-      )}
 
       {/* Add / Edit Skill */}
       {(modal === 'addSkill' || modal === 'editSkill') && (
