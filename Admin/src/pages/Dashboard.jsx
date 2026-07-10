@@ -667,7 +667,7 @@ function Dashboard({ theme, onToggleTheme }) {
                 <input type="text" className="form-input" value={sectionForms.navbar?.logoText || ''} onChange={(e) => handleSectionChange('navbar', 'logoText', e.target.value)} />
               </div>
               <div className="form-group">
-                <label className="form-label">Nav Links (JSON array of {label, path})</label>
+                <label className="form-label">Nav Links (JSON array of &#123;label, path&#125;)</label>
                 <textarea className="form-textarea" rows={6} value={typeof sectionForms.navbar?.links === 'string' ? sectionForms.navbar.links : JSON.stringify(sectionForms.navbar?.links || [], null, 2)} onChange={(e) => handleSectionChange('navbar', 'links', e.target.value)} />
                 <small style={{ color: 'var(--color-text-muted)', fontSize: '0.75rem' }}>Edit as JSON or leave empty for defaults</small>
               </div>
