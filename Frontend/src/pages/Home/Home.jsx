@@ -139,6 +139,15 @@ const SECTION_COMPONENTS = {
   contact: Contact,
 };
 
+const DEFAULT_NAV_LINKS = [
+  { id: 'about', label: 'About', path: '/#about', visible: true },
+  { id: 'skills', label: 'Skills', path: '/#skills', visible: true },
+  { id: 'projects', label: 'Projects', path: '/#projects', visible: true },
+  { id: 'experience', label: 'Experience', path: '/#experience', visible: true },
+  { id: 'testimonials', label: 'Testimonials', path: '/#testimonials', visible: true },
+  { id: 'contact', label: 'Contact', path: '/#contact', visible: true },
+];
+
 function Home() {
   const dispatch = useDispatch();
   const sections = useSelector((s) => s.sections.items);
@@ -154,7 +163,8 @@ function Home() {
     dispatch(fetchSocialLinks());
   }, [dispatch]);
 
-  const visibleSections = (navbarLinks || [])
+  const navLinks = navbarLinks || DEFAULT_NAV_LINKS;
+  const visibleSections = navLinks
     .filter((l) => l.visible !== false && l.id !== 'home' && SECTION_COMPONENTS[l.id])
     .map((l) => l.id);
 
