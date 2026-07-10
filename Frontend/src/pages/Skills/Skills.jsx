@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { CATEGORIES, CATEGORY_COLORS } from '../../utils/skillCategories';
 import { fetchSkills } from '../../redux/slices/skillsSlice';
+import { trackInteraction } from '../../services/analytics';
 import SkillsCarousel from '../../components/ThreeD/SkillsCarousel';
 import './Skills.css';
 
@@ -44,7 +45,7 @@ function Skills() {
             <div className="skills__filter">
               <button
                 className={`skills__filter-btn${activeCat === 'All' ? ' skills__filter-btn--active' : ''}`}
-                onClick={() => setActiveCat('All')}
+                onClick={() => { setActiveCat('All'); trackInteraction('skill_filter', { category: 'All' }); }}
               >
                 All
               </button>
@@ -52,7 +53,7 @@ function Skills() {
                 <button
                   key={cat}
                   className={`skills__filter-btn${activeCat === cat ? ' skills__filter-btn--active' : ''}`}
-                  onClick={() => setActiveCat(cat)}
+                  onClick={() => { setActiveCat(cat); trackInteraction('skill_filter', { category: cat }); }}
                 >
                   <span className="skills__filter-dot" style={{ background: CATEGORY_COLORS[cat] }} />
                   {cat}

@@ -121,6 +121,16 @@ export async function trackSocialClick(platform) {
   }
 }
 
+export async function trackTestimonialConversion() {
+  try {
+    log('trackTestimonialConversion');
+    const { data } = await api.post('/analytics/record', { type: 'testimonialConversion' });
+    return data;
+  } catch (err) {
+    if (DEBUG) console.warn('[Analytics] testimonialConversion failed:', err.message);
+  }
+}
+
 export async function trackContactSubmission() {
   try {
     log('trackContactSubmission');

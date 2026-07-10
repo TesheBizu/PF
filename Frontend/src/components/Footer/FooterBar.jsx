@@ -1,5 +1,6 @@
 import { useSelector } from 'react-redux';
 import { SocialIcon } from '../Icons';
+import { trackSocialClick } from '../../services/analytics';
 import './Footer.css';
 
 function FooterBar({ variant = 'site' }) {
@@ -25,6 +26,7 @@ function FooterBar({ variant = 'site' }) {
                     rel="noopener noreferrer"
                     aria-label={s.platform}
                     title={s.platform}
+                    onClick={() => trackSocialClick(s.platform)}
                   >
                     <SocialIcon platform={s.platform} icon={s.icon} size={16} />
                   </a>

@@ -260,6 +260,11 @@ const recordEvent = async (req, res, next) => {
         console.log(`${LOG_PREFIX} Contact submission (total:${entry.contactSubmissions})`);
         break;
       }
+      case 'testimonialConversion': {
+        entry.testimonialConversions = (entry.testimonialConversions || 0) + 1;
+        console.log(`${LOG_PREFIX} Testimonial conversion (total:${entry.testimonialConversions})`);
+        break;
+      }
       default:
         console.log(`${LOG_PREFIX} Unknown event type: ${type}`);
         return res.status(400).json({ success: false, message: `Unknown event type: ${type}` });

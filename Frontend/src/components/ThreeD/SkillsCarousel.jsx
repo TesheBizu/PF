@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, createElement } from 'react';
 import { getSkillIcon } from '../../utils/skillIcons';
 import { CATEGORY_COLORS } from '../../utils/skillCategories';
+import { trackInteraction } from '../../services/analytics';
 
 export default function SkillsCarousel({ skills }) {
   const [activeIndex, setActiveIndex] = useState(0);
@@ -56,7 +57,7 @@ export default function SkillsCarousel({ skills }) {
                 zIndex: isCenter ? 10 : 5 - absOff,
                 '--card-color': color,
               }}
-              onClick={() => setActiveIndex(idx)}
+              onClick={() => { setActiveIndex(idx); trackInteraction('skill_click', { skillId: skill._id, skillName: skill.name, category: skill.category }); }}
             >
               <div className="skills__carousel-badge">
                 {createElement(Icon, { size: 28 })}

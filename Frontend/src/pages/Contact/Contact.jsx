@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 import { sendMessage, resetSent } from '../../redux/slices/messagesSlice';
 import { Mail, Send, Phone, MapPin } from 'lucide-react';
+import { trackContactSubmission } from '../../services/analytics';
 import './Contact.css';
 
 const CONTACT_INFO = [
@@ -51,6 +52,7 @@ function Contact() {
     const e_ = validate();
     if (Object.keys(e_).length > 0) { setErrors(e_); return; }
     dispatch(sendMessage(form));
+    trackContactSubmission();
   };
 
   return (

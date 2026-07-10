@@ -2,8 +2,8 @@ import { useState, useEffect, useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import {
   Users, Eye, MessageSquare, Star, MousePointerClick, BarChart3, Activity, Bell, Mail,
-  Briefcase, Zap, History, Monitor, CreditCard, Plus, X, Calendar as CalendarIcon,
-  ArrowUp, ArrowDown, TrendingUp, Clock, RefreshCw, LayoutDashboard, Settings,
+  Briefcase, Zap, History, Monitor, Plus, ArrowUp, ArrowDown, TrendingUp, Clock,
+  RefreshCw, LayoutDashboard,
 } from 'lucide-react';
 import { fetchAnalytics } from '../../redux/slices/analyticsSlice';
 import './AnalyticsPanels.css';
@@ -46,13 +46,6 @@ const KPI_CARDS = [
   { key: 'testimonialConversions', label: 'Testimonial Conversions', icon: Star, color: '#f43f5e', bg: 'rgba(244,63,94,0.1)' },
 ];
 
-const CALENDAR_EVENTS = [
-  { date: '2026-07-15', title: 'Review portfolio projects', type: 'task' },
-  { date: '2026-07-18', title: 'Update social links', type: 'reminder' },
-  { date: '2026-07-22', title: 'Monthly analytics report', type: 'task' },
-  { date: '2026-07-25', title: 'Backup database', type: 'reminder' },
-];
-
 const QUICK_ACTIONS = [
   { id: 'projects', label: 'New Project', icon: Plus },
   { id: 'skills', label: 'New Skill', icon: Plus },
@@ -93,8 +86,8 @@ export default function OverviewPanel({ onNavigate }) {
   const { items: messages, loading: mLoading } = useSelector((s) => s.messages);
   const { items: notifications, totalUnread: notifUnread } = useSelector((s) => s.notifications);
   const { items: socialLinks } = useSelector((s) => s.socialLinks);
+  const sections = useSelector((s) => s.sections?.items) || {};
   const [weekDays] = useState(() => getWeekDates());
-  const [calendarOpen, setCalendarOpen] = useState(false);
 
   const weekDates = weekDays.map((d) => d.toISOString().slice(0, 10));
 
@@ -226,13 +219,10 @@ export default function OverviewPanel({ onNavigate }) {
           </div>
         </div>
 
-        {/* Calendar Widget */}
+        {/* Week Calendar */}
         <div className="panel-card">
           <div className="panel-card__header">
-            <span className="panel-card__title"><CalendarIcon size={14} /> Upcoming</span>
-            <button className="panel-card__action" onClick={() => setCalendarOpen((o) => !o)}>
-              {calendarOpen ? 'Hide' : 'Show All'}
-            </button>
+            <span className="panel-card__title"><Clock size={14} /> This Week</span>
           </div>
           <div className="calendar-mini">
             <div className="calendar-mini__header">
@@ -243,26 +233,14 @@ export default function OverviewPanel({ onNavigate }) {
             <div className="calendar-mini__grid">
               {weekDays.map((d) => {
                 const ds = d.toISOString().slice(0, 10);
-                const events = CALENDAR_EVENTS.filter((e) => e.date === ds);
+                const isToday = ds === new Date().toISOString().slice(0, 10);
                 return (
-                  <div key={ds} className={`calendar-mini__cell${events.length > 0 ? ' calendar-mini__cell--has-event' : ''}${ds === new Date().toISOString().slice(0, 10) ? ' calendar-mini__cell--today' : ''}`}>
+                  <div key={ds} className={`calendar-mini__cell${isToday ? ' calendar-mini__cell--today' : ''}`}>
                     <span className="calendar-mini__date">{d.getDate()}</span>
-                    {events.length > 0 && <span className="calendar-mini__dot" />}
                   </div>
                 );
               })}
             </div>
-            {calendarOpen && (
-              <div className="calendar-mini__events" style={{ marginTop: 8 }}>
-                {CALENDAR_EVENTS.map((ev, i) => (
-                  <div key={i} className="calendar-mini__event">
-                    <span className={`calendar-mini__event-badge calendar-mini__event-badge--${ev.type}`} />
-                    <span className="calendar-mini__event-title">{ev.title}</span>
-                    <span className="calendar-mini__event-date">{new Date(ev.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span>
-                  </div>
-                ))}
-              </div>
-            )}
           </div>
         </div>
       </div>
@@ -326,7 +304,8 @@ export default function OverviewPanel({ onNavigate }) {
           </div>
           <div className="section-mini-list">
             {['hero', 'about', 'navbar', 'footer'].map((key) => {
-              const hasContent = true;
+              const sectionData = sections[key];
+              const hasContent = sectionData && Object.keys(sectionData).some((k) => k !== '_id' && k !== 'type' && sectionData[k]);
               return (
                 <div key={key} className="section-mini-item">
                   <span className="section-mini-item__name">{key.charAt(0).toUpperCase() + key.slice(1)}</span>

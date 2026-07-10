@@ -59,6 +59,10 @@ const analyticsSchema = new mongoose.Schema({
     type: Number,
     default: 0,
   },
+  isSeedData: {
+    type: Boolean,
+    default: false,
+  },
 }, { timestamps: true });
 
 module.exports = mongoose.model('Analytics', analyticsSchema);
