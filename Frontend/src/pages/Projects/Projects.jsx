@@ -8,7 +8,7 @@ import './Projects.css';
 function ProjectDefaultBanner() {
   return (
     <div className="project-card__img-default">
-      <Monitor size={48} strokeWidth={1} style={{ color: 'var(--color-text-muted)', marginBottom: '0.5rem' }} />
+      <Monitor size={44} strokeWidth={1} style={{ color: 'var(--color-text-muted)', marginBottom: '0.4rem' }} />
       <div className="project-card__img-code">
         <span style={{color:'var(--color-accent)'}}>const</span>
         <span style={{color:'var(--color-primary)'}}> project</span>
@@ -48,26 +48,14 @@ function ProjectCard({ project }) {
 
         <div className="project-card__links">
           {project.githubUrl && (
-            <a
-              href={project.githubUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn btn-ghost project-card__btn"
-              aria-label={`View ${project.title} on GitHub`}
-            >
-              <Github size={15} />
+            <a href={project.githubUrl} target="_blank" rel="noopener noreferrer" className="btn btn-ghost project-card__btn" aria-label={`View ${project.title} on GitHub`}>
+              <Github size={14} />
               GitHub
             </a>
           )}
           {project.liveUrl && (
-            <a
-              href={project.liveUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn btn-primary project-card__btn"
-              aria-label={`View ${project.title} live`}
-            >
-              <ExternalLink size={15} />
+            <a href={project.liveUrl} target="_blank" rel="noopener noreferrer" className="btn btn-primary project-card__btn" aria-label={`View ${project.title} live`}>
+              <ExternalLink size={14} />
               Live Demo
             </a>
           )}
@@ -87,15 +75,12 @@ function Projects() {
   }, [dispatch, projects.length]);
 
   const allTechs = ['All', ...new Set(projects.flatMap((p) => p.techStack))];
-
-  const filtered =
-    filter === 'All' ? projects : projects.filter((p) => p.techStack.includes(filter));
+  const filtered = filter === 'All' ? projects : projects.filter((p) => p.techStack.includes(filter));
 
   return (
     <section className="projects section" id="projects">
       <div className="container">
         <div className="section-header animate-fadeInUp">
-          <span className="section-tag">// projects</span>
           <h2 className="section-title">
             My <span>Projects</span>
           </h2>
@@ -121,7 +106,7 @@ function Projects() {
         {loading && (
           <div className="projects__grid">
             {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="skeleton" style={{ height: 340, borderRadius: 20 }} />
+              <div key={i} className="skeleton" style={{ height: 320, borderRadius: 16 }} />
             ))}
           </div>
         )}
@@ -146,13 +131,8 @@ function Projects() {
 
         <div className="projects__cta animate-fadeInUp">
           <p>Want to see more? Visit my GitHub for all repositories.</p>
-          <a
-            href="https://github.com/TesheBizu"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn btn-primary"
-          >
-            <Github size={18} />
+          <a href="https://github.com/TesheBizu" target="_blank" rel="noopener noreferrer" className="btn btn-primary">
+            <Github size={16} />
             View All on GitHub
           </a>
         </div>

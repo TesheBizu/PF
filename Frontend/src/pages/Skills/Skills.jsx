@@ -33,12 +33,11 @@ function Skills() {
     <section className="skills section" id="skills">
       <div className="container">
         <div className="section-header animate-fadeInUp">
-          <span className="section-tag">// skills</span>
           <h2 className="section-title">
             Technical <span>Skills</span>
           </h2>
           <p className="section-desc">
-            My toolkit for building full-stack web applications from idea to deployment.
+            My toolkit for building full-stack web applications.
           </p>
         </div>
 
@@ -48,17 +47,15 @@ function Skills() {
               <button
                 className={`skills__view-btn${viewMode === '3d' ? ' skills__view-btn--active' : ''}`}
                 onClick={() => setViewMode('3d')}
-                aria-label="3D constellation view"
               >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
                 3D
               </button>
               <button
                 className={`skills__view-btn${viewMode === 'grid' ? ' skills__view-btn--active' : ''}`}
                 onClick={() => setViewMode('grid')}
-                aria-label="Grid view"
               >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
                 Grid
               </button>
             </div>
@@ -73,7 +70,6 @@ function Skills() {
                 <button
                   key={cat}
                   className={`skills__filter-btn${activeCat === cat ? ' skills__filter-btn--active' : ''}`}
-                  style={activeCat === cat ? { '--filter-color': CATEGORY_COLORS[cat] } : {}}
                   onClick={() => setActiveCat(cat)}
                 >
                   <span className="skills__filter-dot" style={{ background: CATEGORY_COLORS[cat] }} />
@@ -85,9 +81,7 @@ function Skills() {
         )}
 
         {loading && (
-          <div className="skills__skeleton">
-            <div className="skeleton" style={{ height: 400, borderRadius: 20 }} />
-          </div>
+          <div className="skeleton" style={{ height: 400, borderRadius: 16, marginBottom: 'var(--space-xl)' }} />
         )}
 
         {error && (
@@ -99,7 +93,7 @@ function Skills() {
         {!loading && !error && skills.length > 0 && (
           <div className="skills__scene animate-fadeInUp delay-200">
             {viewMode === '3d' ? (
-              <Suspense fallback={<div className="skeleton" style={{ height: 450, borderRadius: 20 }} />}>
+              <Suspense fallback={<div className="skeleton" style={{ height: 440, borderRadius: 16 }} />}>
                 <SkillsConstellation skills={filteredSkills} />
               </Suspense>
             ) : (

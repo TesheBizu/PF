@@ -17,24 +17,6 @@ import './Home.css';
 
 const HeroBackground = lazy(() => import('../../components/ThreeD/SceneBackground'));
 
-function Counter({ target, duration = 1200, suffix = '+' }) {
-  const [count, setCount] = useState(0);
-  useEffect(() => {
-    let start = 0;
-    const end = parseInt(target, 10);
-    if (start === end) return;
-    const total = duration;
-    const incTime = Math.max(Math.floor(total / end), 25);
-    const timer = setInterval(() => {
-      start += 1;
-      setCount(start);
-      if (start === end) clearInterval(timer);
-    }, incTime);
-    return () => clearInterval(timer);
-  }, [target, duration]);
-  return <>{count}{suffix}</>;
-}
-
 const LINES = ['Web Developer', 'Team Player', 'React Specialist'];
 
 function HeroSection({ settings }) {
@@ -44,9 +26,6 @@ function HeroSection({ settings }) {
   const [profileUrl, setProfileUrl] = useState('/profile.png');
   const tr = useRef(null);
   const tiltRef = useRef(null);
-  const items = useSelector((s) => s.projects.items);
-  const skills = useSelector((s) => s.skills.items);
-  const experiences = useSelector((s) => s.experiences.items);
   const links = useSelector((s) => s.socialLinks.items);
 
   const updateProfile = useCallback(() => {
@@ -86,20 +65,16 @@ function HeroSection({ settings }) {
     const rect = frame.getBoundingClientRect();
     const x = (e.clientX - rect.left) / rect.width;
     const y = (e.clientY - rect.top) / rect.height;
-    const tiltX = (y - 0.5) * -20;
-    const tiltY = (x - 0.5) * 20;
-    const glowX = x * 100;
-    const glowY = y * 100;
-    frame.style.transform = `perspective(800px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) scale(1.03)`;
-    frame.style.boxShadow = `${(x - 0.5) * 30}px ${(y - 0.5) * 30}px 50px rgba(59,130,246,0.15), 0 0 0 6px rgba(59,130,246,0.1)`;
-    frame.style.setProperty('--glow-x', `${glowX}%`);
-    frame.style.setProperty('--glow-y', `${glowY}%`);
+    const tiltX = (y - 0.5) * -16;
+    const tiltY = (x - 0.5) * 16;
+    frame.style.transform = `perspective(800px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) scale(1.02)`;
+    frame.style.setProperty('--glow-x', `${x * 100}%`);
+    frame.style.setProperty('--glow-y', `${y * 100}%`);
   };
 
   const handleTiltLeave = () => {
     if (tiltRef.current) {
       tiltRef.current.style.transform = 'perspective(800px) rotateX(0deg) rotateY(0deg) scale(1)';
-      tiltRef.current.style.boxShadow = '';
     }
   };
 
@@ -111,7 +86,6 @@ function HeroSection({ settings }) {
 
       <div className="home__gradient-blob home__gradient-blob--1" aria-hidden="true" />
       <div className="home__gradient-blob home__gradient-blob--2" aria-hidden="true" />
-      <div className="home__gradient-blob home__gradient-blob--3" aria-hidden="true" />
 
       <div className="container home__container">
         <div className="home__content">
@@ -120,10 +94,9 @@ function HeroSection({ settings }) {
             <span className="home__greeting-text">{settings?.greeting || "Hello, I'm"}</span>
           </div>
 
-          <h1 className="home__name">
-            <span className="home__name-first">{settings?.name?.split(' ')[0] || 'Teshome'}</span>
-            <span className="home__name-last">{settings?.name?.split(' ').slice(1).join(' ') || 'Bizuayehu'}</span>
-          </h1>
+          <div className="home__wordmark">
+            <span className="home__wordmark-text">TESHOME</span>
+          </div>
 
           <div className="home__role">
             <span className="home__role-prefix">&lt; </span>
@@ -136,11 +109,11 @@ function HeroSection({ settings }) {
 
           <div className="home__actions">
             <a href="#projects" className="btn btn-primary" onClick={(e) => { e.preventDefault(); document.getElementById('projects')?.scrollIntoView({ behavior: 'smooth' }); }}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
               View Projects
             </a>
             <a href="#contact" className="btn btn-secondary" onClick={(e) => { e.preventDefault(); document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' }); }}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
               Get In Touch
             </a>
           </div>
@@ -148,8 +121,8 @@ function HeroSection({ settings }) {
           {links.length > 0 && (
             <div className="home__socials">
               {links.map((l) => (
-                <a key={l._id} href={l.url} target="_blank" rel="noopener noreferrer" className="home__social-link" aria-label={l.platform} onClick={() => { try { fetch('/api/analytics/record', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'socialClick', platform: l.platform }) }).catch(() => {}); } catch (e) {} }}>
-                  <SocialIcon platform={l.platform} icon={l.icon} size={18} />
+                <a key={l._id} href={l.url} target="_blank" rel="noopener noreferrer" className="home__social-link" aria-label={l.platform}>
+                  <SocialIcon platform={l.platform} icon={l.icon} size={16} />
                 </a>
               ))}
             </div>
@@ -161,24 +134,6 @@ function HeroSection({ settings }) {
             <div className="home__profile-glow" aria-hidden="true" />
             <div className="home__profile-frame" ref={tiltRef}>
               <img src={profileUrl} alt="Teshome Bizuayehu" className="home__profile-img" />
-            </div>
-          </div>
-
-          <div className="home__stats-panel">
-            <div className="home__stat-row">
-              <div className="home__stat-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div>
-              <div className="home__stat-num"><Counter target={Math.min(experiences.length, 5) || 1} /></div>
-              <div className="home__stat-info"><h4>Years Active</h4><p>Professional exp.</p></div>
-            </div>
-            <div className="home__stat-row">
-              <div className="home__stat-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
-              <div className="home__stat-num"><Counter target={items.length || 0} /></div>
-              <div className="home__stat-info"><h4>Projects</h4><p>Completed works</p></div>
-            </div>
-            <div className="home__stat-row">
-              <div className="home__stat-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
-              <div className="home__stat-num"><Counter target={skills.length || 0} /></div>
-              <div className="home__stat-info"><h4>Tech Skills</h4><p>Frameworks & tools</p></div>
             </div>
           </div>
         </div>
@@ -213,7 +168,6 @@ const DEFAULT_NAV_LINKS = [
 function Home() {
   const dispatch = useDispatch();
   const sections = useSelector((s) => s.sections.items);
-  const sectionOrder = useSelector((s) => s.sections.order);
   const loading = useSelector((s) => s.sections.loading);
   const navbarLinks = sections.navbar?.links;
 
@@ -233,12 +187,12 @@ function Home() {
   return (
     <>
       <HeroSection settings={sections.hero} />
-      {loading && <div className="page-loader" style={{ padding: '40px', textAlign: 'center' }}><div className="page-loader__dot" /><div className="page-loader__dot" /><div className="page-loader__dot" /></div>}
+      {loading && <div className="page-loader" style={{ padding: '30px', textAlign: 'center' }}><div className="page-loader__dot" /><div className="page-loader__dot" /><div className="page-loader__dot" /></div>}
       {visibleSections.map((secId, i) => {
         const Comp = SECTION_COMPONENTS[secId];
         if (!Comp) return null;
         return (
-          <SectionWrapper key={secId} id={secId} delay={i * 80}>
+          <SectionWrapper key={secId} id={secId} delay={i * 60}>
             <Comp />
           </SectionWrapper>
         );

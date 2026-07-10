@@ -48,7 +48,6 @@ function Testimonials() {
       <section className="testimonials section" id="testimonials">
         <div className="container">
           <div className="section-header animate-fadeInUp">
-            <span className="section-tag">// testimonials</span>
             <h2 className="section-title">What People Say</h2>
           </div>
           <div className="testimonials__loader">
@@ -71,7 +70,6 @@ function Testimonials() {
     <section className="testimonials section" id="testimonials">
       <div className="container">
         <div className="section-header animate-fadeInUp">
-          <span className="section-tag">// testimonials</span>
           <h2 className="section-title">What People Say</h2>
         </div>
 
@@ -85,11 +83,11 @@ function Testimonials() {
                 role="group" aria-roledescription="slide"
                 aria-label={`Testimonial ${idx + 1} of ${testimonials.length}`}>
                 <div className="testimonials__card">
-                  <Quote className="testimonials__quote-icon" size={36} />
+                  <Quote className="testimonials__quote-icon" size={32} />
                   <p className="testimonials__message">&ldquo;{item.message}&rdquo;</p>
                   <div className="testimonials__rating">
                     {Array.from({ length: 5 }, (_, i) => (
-                      <Star key={i} size={16} fill={i < item.rating ? 'var(--color-primary)' : 'none'}
+                      <Star key={i} size={14} fill={i < item.rating ? 'var(--color-primary)' : 'none'}
                         stroke={i < item.rating ? 'var(--color-primary)' : 'var(--color-text-muted)'} />
                     ))}
                   </div>
@@ -115,7 +113,7 @@ function Testimonials() {
         {testimonials.length > 1 && (
           <div className="testimonials__controls animate-fadeInUp delay-200">
             <button className="testimonials__arrow" onClick={goPrev} aria-label="Previous testimonial">
-              <ChevronLeft size={22} />
+              <ChevronLeft size={20} />
             </button>
             <div className="testimonials__dots" role="tablist" aria-label="Testimonial navigation">
               {testimonials.map((_, idx) => (
@@ -126,7 +124,7 @@ function Testimonials() {
               ))}
             </div>
             <button className="testimonials__arrow" onClick={goNext} aria-label="Next testimonial">
-              <ChevronRight size={22} />
+              <ChevronRight size={20} />
             </button>
           </div>
         )}

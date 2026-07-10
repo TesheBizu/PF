@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { NavLink, Link, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { Sun, Moon, Menu, X } from 'lucide-react';
-import { SocialIcon } from '../Icons';
 import './Navbar.css';
 
 const DEFAULT_NAV_LINKS = [
@@ -22,10 +21,6 @@ function Navbar({ theme, onToggleTheme }) {
   const navbar = useSelector((s) => s.sections.items.navbar);
   const navLinks = navbar?.links?.filter((l) => l.visible !== false) || DEFAULT_NAV_LINKS;
   const logoText = navbar?.logoText || 'Teshome';
-  const socialLinks = useSelector((s) => s.socialLinks?.items) || [];
-  const activeSocialLinks = socialLinks.filter((l) => l.active);
-  const indicatorRef = useRef(null);
-  const navRef = useRef(null);
 
   const handleScroll = useCallback(() => {
     setScrolled(window.scrollY > 30);
@@ -67,28 +62,21 @@ function Navbar({ theme, onToggleTheme }) {
     const dist = Math.sqrt(x * x + y * y);
     const maxDist = 100;
     const strength = Math.min(dist / maxDist, 1);
-    const moveX = x * 0.2 * strength;
-    const moveY = y * 0.2 * strength;
-    el.style.transform = `translate(${moveX}px, ${moveY}px)`;
-    el.style.color = 'var(--color-primary)';
+    el.style.transform = `translate(${x * 0.2 * strength}px, ${y * 0.2 * strength}px)`;
   };
 
   const handleMagneticLeave = (id) => {
     const el = linkRefs.current[id];
     if (!el) return;
     el.style.transform = 'translate(0, 0)';
-    el.style.color = '';
   };
 
   return (
     <nav
-      ref={navRef}
       className={`navbar${scrolled ? ' navbar--scrolled' : ''}${mobileOpen ? ' navbar--open' : ''}`}
       role="navigation"
       aria-label="Main navigation"
     >
-      <div className="navbar__glow" aria-hidden="true" />
-
       {mobileOpen && (
         <button
           type="button"
@@ -101,9 +89,7 @@ function Navbar({ theme, onToggleTheme }) {
       <div className="container navbar__container">
         <Link to="/" className="navbar__logo" onClick={() => setMobileOpen(false)}>
           <div className="navbar__logo-icon">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-            </svg>
+            <span className="navbar__logo-mono">T</span>
           </div>
           <span className="navbar__logo-name">{logoText}</span>
         </Link>
@@ -121,7 +107,6 @@ function Navbar({ theme, onToggleTheme }) {
                   onMouseMove={(e) => handleMagneticMove(e, link.id || link.path)}
                   onMouseLeave={() => handleMagneticLeave(link.id || link.path)}
                 >
-                  <span className="navbar__link-dot" />
                   {link.label}
                 </a>
               ) : (
@@ -137,7 +122,6 @@ function Navbar({ theme, onToggleTheme }) {
                   onMouseMove={(e) => handleMagneticMove(e, link.id || link.path)}
                   onMouseLeave={() => handleMagneticLeave(link.id || link.path)}
                 >
-                  <span className="navbar__link-dot" />
                   {link.label}
                 </NavLink>
               )
@@ -146,33 +130,13 @@ function Navbar({ theme, onToggleTheme }) {
         </div>
 
         <div className="navbar__controls">
-          {activeSocialLinks.length > 0 && (
-            <div className="navbar__socials">
-              {activeSocialLinks.map((s) => (
-                <a
-                  key={s._id}
-                  href={s.url}
-                  className="navbar__social-link"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={s.platform}
-                  title={s.platform}
-                >
-                  <SocialIcon platform={s.platform} icon={s.icon} size={14} />
-                </a>
-              ))}
-            </div>
-          )}
-
           <button
             id="theme-toggle"
             className="navbar__theme-btn"
             onClick={onToggleTheme}
             aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
           >
-            <div className="navbar__theme-icon">
-              {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
-            </div>
+            {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
           </button>
 
           <button

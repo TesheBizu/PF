@@ -1,4 +1,3 @@
-import { Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { SocialIcon } from '../Icons';
 import './Footer.css';
@@ -13,10 +12,6 @@ function FooterBar({ variant = 'site' }) {
     <footer className={isDashboard ? 'footer footer--dash' : 'footer'}>
       <div className={isDashboard ? 'footer__shell footer__shell--dash' : 'container footer__shell'}>
         <div className="footer__inner">
-          <Link to="/" className="footer__logo">
-            <span className="footer__logo-badge">T</span>
-          </Link>
-
           {activeLinks.length > 0 && (
             <div className="footer__connect">
               <span className="footer__nav-title">Connect</span>

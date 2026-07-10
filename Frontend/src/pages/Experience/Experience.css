@@ -14,8 +14,8 @@
   left: 50%;
   transform: translateX(-50%);
   width: 2px;
-  background: linear-gradient(180deg, var(--color-primary-glow), var(--color-primary), var(--color-primary-glow));
-  opacity: 0.3;
+  background: linear-gradient(180deg, transparent, var(--color-primary), transparent);
+  opacity: 0.25;
 }
 
 .timeline__item {
@@ -27,31 +27,23 @@
 
 .timeline__item:last-child { margin-bottom: 0; }
 
-.timeline__item--left {
-  flex-direction: row;
-  padding-right: calc(50% + var(--space-xl));
-}
-
-.timeline__item--right {
-  flex-direction: row-reverse;
-  padding-left: calc(50% + var(--space-xl));
-}
+.timeline__item--left { flex-direction: row; padding-right: calc(50% + var(--space-xl)); }
+.timeline__item--right { flex-direction: row-reverse; padding-left: calc(50% + var(--space-xl)); }
 
 .timeline__node {
   position: absolute;
   left: 50%;
   top: 24px;
   transform: translateX(-50%);
-  width: 44px;
-  height: 44px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   background: var(--color-surface);
-  border: 2px solid var(--color-primary);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 3;
-  box-shadow: 0 0 0 4px var(--color-primary-glow), var(--shadow-md);
+  box-shadow: 0 0 0 4px var(--color-primary-glow), 0 2px 8px rgba(0, 0, 0, 0.06);
   overflow: hidden;
 }
 
@@ -71,16 +63,11 @@
   height: 100%;
 }
 
-.timeline__content {
-  flex: 1;
-  min-width: 0;
-  transition: all var(--transition-base);
-}
+.timeline__content { flex: 1; min-width: 0; }
 
 .timeline__content:hover {
-  transform: translateY(-4px);
+  transform: translateY(-3px);
   box-shadow: var(--shadow-lg);
-  border-color: var(--color-primary);
 }
 
 .timeline__item--left .timeline__content { text-align: right; }
@@ -97,27 +84,22 @@
 .timeline__item--right .timeline__header { flex-direction: row; }
 
 .timeline__card-logo {
-  width: 48px;
-  height: 48px;
+  width: 44px;
+  height: 44px;
   border-radius: var(--radius-md);
   overflow: hidden;
   background: var(--color-bg-secondary);
-  border: 1px solid var(--color-border);
   flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.timeline__card-logo img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
+.timeline__card-logo img { width: 100%; height: 100%; object-fit: cover; }
 
 .timeline__card-logo--placeholder {
   font-family: var(--font-display);
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   font-weight: 700;
   color: var(--color-primary);
 }
@@ -125,21 +107,21 @@
 .timeline__titles { flex: 1; }
 
 .timeline__role {
-  font-size: 1.05rem;
+  font-size: 1rem;
   font-weight: 700;
   color: var(--color-heading);
   margin-bottom: 2px;
 }
 
 .timeline__company {
-  font-size: 0.88rem;
+  font-size: 0.85rem;
   font-weight: 600;
   color: var(--color-primary);
   margin-bottom: 4px;
 }
 
 .timeline__meta {
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   font-family: var(--font-mono);
   color: var(--color-text-dim);
 }
@@ -156,7 +138,7 @@
 .timeline__desc-list li {
   position: relative;
   padding-left: var(--space-lg);
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   color: var(--color-text-muted);
   line-height: 1.65;
 }
@@ -170,9 +152,9 @@
   content: '';
   position: absolute;
   left: 0;
-  top: 9px;
-  width: 5px;
-  height: 5px;
+  top: 8px;
+  width: 4px;
+  height: 4px;
   border-radius: 50%;
   background: var(--color-primary);
 }
@@ -183,29 +165,21 @@
 }
 
 @media (max-width: 768px) {
-  .timeline__line { left: 24px; }
+  .timeline__line { left: 22px; }
 
   .timeline__item {
     flex-direction: row !important;
     padding: 0 !important;
-    padding-left: 52px !important;
+    padding-left: 50px !important;
   }
 
-  .timeline__node {
-    left: 24px;
-    width: 36px;
-    height: 36px;
-  }
+  .timeline__node { left: 22px; width: 34px; height: 34px; }
 
   .timeline__item--left .timeline__content,
-  .timeline__item--right .timeline__content {
-    text-align: left;
-  }
+  .timeline__item--right .timeline__content { text-align: left; }
 
   .timeline__item--left .timeline__header,
-  .timeline__item--right .timeline__header {
-    flex-direction: row;
-  }
+  .timeline__item--right .timeline__header { flex-direction: row; }
 
   .timeline__item--left .timeline__desc-list li {
     padding-left: var(--space-lg);
