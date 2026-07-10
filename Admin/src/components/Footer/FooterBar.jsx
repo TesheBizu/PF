@@ -34,14 +34,7 @@ function FooterBar({ variant = 'site' }) {
     <footer className={isDashboard ? 'footer footer--dash' : 'footer'}>
       <div className={isDashboard ? 'footer__shell footer__shell--dash' : 'container footer__shell'}>
         <div className="footer__inner">
-          <a
-            href={import.meta.env.VITE_PUBLIC_SITE_URL || 'http://localhost:5173'}
-            className="footer__logo"
-          >
-            <span className="footer__logo-bracket">&lt;</span>
-            <span className="footer__logo-name">Teshome</span>
-            <span className="footer__logo-bracket"> /&gt;</span>
-          </a>
+          
 
           <div className="footer__connect">
             <span className="footer__nav-title">Connect</span>

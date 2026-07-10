@@ -31,30 +31,6 @@
   gap: var(--space-md);
 }
 
-.footer__logo {
-  font-family: var(--font-mono);
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: var(--color-heading);
-  text-decoration: none;
-  display: flex;
-  align-items: center;
-  gap: 2px;
-  flex-shrink: 0;
-}
-
-.footer__logo-bracket {
-  color: var(--color-primary);
-  font-size: 0.85rem;
-}
-
-.footer__logo-name {
-  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
 .footer__connect {
   display: flex;
   align-items: center;
