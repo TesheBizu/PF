@@ -1,20 +1,14 @@
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Swiper, SwiperSlide } from 'swiper/react';
-import { Autoplay, Navigation, Pagination } from 'swiper/modules';
 import { fetchProjects } from '../../redux/slices/projectsSlice';
 import { Monitor, ExternalLink } from 'lucide-react';
 import { Github } from '../../components/Icons';
-import 'swiper/css';
-import 'swiper/css/navigation';
-import 'swiper/css/pagination';
 import './Projects.css';
 
-/* Default project icon banner */
 function ProjectDefaultBanner() {
   return (
     <div className="project-card__img-default">
-      <Monitor size={52} strokeWidth={1} style={{ color: 'var(--color-text-muted)', marginBottom: '0.5rem' }} />
+      <Monitor size={48} strokeWidth={1} style={{ color: 'var(--color-text-muted)', marginBottom: '0.5rem' }} />
       <div className="project-card__img-code">
         <span style={{color:'var(--color-accent)'}}>const</span>
         <span style={{color:'var(--color-primary)'}}> project</span>
@@ -24,47 +18,34 @@ function ProjectDefaultBanner() {
   );
 }
 
-function ProjectCard({ project, onHover, onLeave }) {
+function ProjectCard({ project }) {
   return (
-    <div
-      className="project-card card"
-      style={{ padding: 0, overflow: 'hidden' }}
-      onMouseEnter={() => onHover(project._id)}
-      onMouseLeave={onLeave}
-    >
-      {/* Image or default banner */}
+    <div className="project-card card" style={{ padding: 0, overflow: 'hidden' }}>
       {project.imageUrl ? (
-        <img
-          src={project.imageUrl}
-          alt={project.title}
-          className="project-card__img"
-        />
+        <img src={project.imageUrl} alt={project.title} className="project-card__img" />
       ) : (
         <ProjectDefaultBanner />
       )}
 
       <div className="project-card__body">
-        {/* Top bar */}
         <div className="project-card__top">
           <div className="project-card__dots">
             <span /><span /><span />
           </div>
           {project.featured && (
-            <span className="project-card__featured">⭐ Featured</span>
+            <span className="project-card__featured">Featured</span>
           )}
         </div>
 
         <h3 className="project-card__title">{project.title}</h3>
         <p className="project-card__desc">{project.description}</p>
 
-        {/* Tech stack */}
         <div className="project-card__stack">
           {project.techStack.map((tech) => (
             <span key={tech} className="badge">{tech}</span>
           ))}
         </div>
 
-        {/* Links */}
         <div className="project-card__links">
           {project.githubUrl && (
             <a
@@ -74,7 +55,7 @@ function ProjectCard({ project, onHover, onLeave }) {
               className="btn btn-ghost project-card__btn"
               aria-label={`View ${project.title} on GitHub`}
             >
-              <Github size={16} />
+              <Github size={15} />
               GitHub
             </a>
           )}
@@ -86,7 +67,7 @@ function ProjectCard({ project, onHover, onLeave }) {
               className="btn btn-primary project-card__btn"
               aria-label={`View ${project.title} live`}
             >
-              <ExternalLink size={16} />
+              <ExternalLink size={15} />
               Live Demo
             </a>
           )}
@@ -96,18 +77,15 @@ function ProjectCard({ project, onHover, onLeave }) {
   );
 }
 
-
 function Projects() {
   const dispatch = useDispatch();
   const { items: projects, loading, error } = useSelector((s) => s.projects);
   const [filter, setFilter] = useState('All');
-  const [hoveredId, setHoveredId] = useState(null);
 
   useEffect(() => {
     if (projects.length === 0) dispatch(fetchProjects());
   }, [dispatch, projects.length]);
 
-  // Collect unique techs for filter
   const allTechs = ['All', ...new Set(projects.flatMap((p) => p.techStack))];
 
   const filtered =
@@ -126,7 +104,6 @@ function Projects() {
           </p>
         </div>
 
-        {/* Filter */}
         {!loading && projects.length > 0 && (
           <div className="projects__filter animate-fadeInUp">
             {allTechs.map((tech) => (
@@ -143,8 +120,8 @@ function Projects() {
 
         {loading && (
           <div className="projects__grid">
-            {Array.from({ length: 2 }).map((_, i) => (
-              <div key={i} className="skeleton" style={{ height: 320, borderRadius: 20 }} />
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="skeleton" style={{ height: 340, borderRadius: 20 }} />
             ))}
           </div>
         )}
@@ -155,54 +132,18 @@ function Projects() {
           </p>
         )}
 
-        {!loading && !error && (
-          <div className={`projects__carousel-wrap${hoveredId ? ' projects__carousel-wrap--hovering' : ''}`}>
-            {filtered.length > 0 ? (
-              <Swiper
-                key={filter}
-                className="projects__swiper"
-                modules={[Autoplay, Navigation, Pagination]}
-                slidesPerView={1.08}
-                centeredSlides
-                spaceBetween={16}
-                speed={900}
-                loop={filtered.length > 3}
-                watchSlidesProgress
-                grabCursor
-                autoplay={{
-                  delay: 3500,
-                  disableOnInteraction: false,
-                  pauseOnMouseEnter: true,
-                }}
-                navigation
-                pagination={{ clickable: true }}
-                breakpoints={{
-                  480: { slidesPerView: 1.15, spaceBetween: 18, centeredSlides: true },
-                  640: { slidesPerView: 1.25, spaceBetween: 20, centeredSlides: true },
-                  768: { slidesPerView: 2.05, spaceBetween: 24, centeredSlides: true },
-                  1024: { slidesPerView: 3, spaceBetween: 28, centeredSlides: false },
-                }}
-              >
-                {filtered.map((p) => (
-                  <SwiperSlide
-                    key={p._id}
-                    className={hoveredId === p._id ? 'projects__slide--focused' : ''}
-                  >
-                    <ProjectCard
-                      project={p}
-                      onHover={setHoveredId}
-                      onLeave={() => setHoveredId(null)}
-                    />
-                  </SwiperSlide>
-                ))}
-              </Swiper>
-            ) : (
-              <p className="projects__empty">No projects match this filter.</p>
-            )}
+        {!loading && !error && filtered.length > 0 && (
+          <div className="projects__grid">
+            {filtered.map((p) => (
+              <ProjectCard key={p._id} project={p} />
+            ))}
           </div>
         )}
 
-        {/* GitHub CTA */}
+        {!loading && !error && filtered.length === 0 && (
+          <p className="projects__empty">No projects match this filter.</p>
+        )}
+
         <div className="projects__cta animate-fadeInUp">
           <p>Want to see more? Visit my GitHub for all repositories.</p>
           <a

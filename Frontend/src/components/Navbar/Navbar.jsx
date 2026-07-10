@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { NavLink, Link, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { Sun, Moon, Menu, X } from 'lucide-react';
+import { SocialIcon } from '../Icons';
 import './Navbar.css';
 
 const DEFAULT_NAV_LINKS = [
@@ -21,6 +22,8 @@ function Navbar({ theme, onToggleTheme }) {
   const navbar = useSelector((s) => s.sections.items.navbar);
   const navLinks = navbar?.links?.filter((l) => l.visible !== false) || DEFAULT_NAV_LINKS;
   const logoText = navbar?.logoText || 'Teshome';
+  const socialLinks = useSelector((s) => s.socialLinks?.items) || [];
+  const activeSocialLinks = socialLinks.filter((l) => l.active);
 
   const handleScroll = useCallback(() => {
     setScrolled(window.scrollY > 20);
@@ -31,7 +34,6 @@ function Navbar({ theme, onToggleTheme }) {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [handleScroll]);
 
-  // Lock body scroll when mobile menu is open
   useEffect(() => {
     if (mobileOpen) {
       document.body.style.overflow = 'hidden';
@@ -65,13 +67,11 @@ function Navbar({ theme, onToggleTheme }) {
         />
       )}
 
-      {/* Logo */}
       <Link to="/" className="navbar__logo" onClick={() => setMobileOpen(false)}>
         <div className="navbar__logo-badge">T</div>
         <span className="navbar__logo-name">{logoText}</span>
       </Link>
 
-      {/* Top Navigation Links */}
       <div className={`navbar__links ${mobileOpen ? 'navbar__links--open' : ''}`}>
         {navLinks.map((link) =>
           link.path.startsWith('/#') ? (
@@ -99,15 +99,32 @@ function Navbar({ theme, onToggleTheme }) {
         )}
       </div>
 
-      {/* Right controls — Theme Toggle + Mobile Menu Trigger */}
       <div className="navbar__controls">
+        {activeSocialLinks.length > 0 && (
+          <div className="navbar__socials">
+            {activeSocialLinks.map((s) => (
+              <a
+                key={s._id}
+                href={s.url}
+                className="navbar__social-link"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={s.platform}
+                title={s.platform}
+              >
+                <SocialIcon platform={s.platform} icon={s.icon} size={15} />
+              </a>
+            ))}
+          </div>
+        )}
+
         <button
           id="theme-toggle"
           className="navbar__theme-btn"
           onClick={onToggleTheme}
           aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
         >
-          {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+          {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
         </button>
 
         <button
@@ -117,7 +134,7 @@ function Navbar({ theme, onToggleTheme }) {
           aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
           aria-expanded={mobileOpen}
         >
-          {mobileOpen ? <X size={24} /> : <Menu size={24} />}
+          {mobileOpen ? <X size={22} /> : <Menu size={22} />}
         </button>
       </div>
     </nav>
@@ -125,4 +142,3 @@ function Navbar({ theme, onToggleTheme }) {
 }
 
 export default Navbar;
-

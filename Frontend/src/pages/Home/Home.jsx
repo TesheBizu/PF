@@ -1,12 +1,12 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { Link } from 'react-router-dom';
 import { fetchAllSections } from '../../redux/slices/sectionsSlice';
 import { fetchProjects } from '../../redux/slices/projectsSlice';
 import { fetchSkills } from '../../redux/slices/skillsSlice';
 import { fetchExperiences } from '../../redux/slices/experiencesSlice';
 import { fetchSocialLinks } from '../../redux/slices/socialLinksSlice';
 import { SocialIcon } from '../../components/Icons';
+import api from '../../services/api';
 import About from '../About/About';
 import Skills from '../Skills/Skills';
 import Projects from '../Projects/Projects';
@@ -39,11 +39,27 @@ function HeroSection({ settings }) {
   const [roleIdx, setRoleIdx] = useState(0);
   const [displayed, setDisplayed] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
+  const [profileUrl, setProfileUrl] = useState('/profile.png');
   const tr = useRef(null);
   const items = useSelector((s) => s.projects.items);
   const skills = useSelector((s) => s.skills.items);
   const experiences = useSelector((s) => s.experiences.items);
   const links = useSelector((s) => s.socialLinks.items);
+
+  const updateProfile = useCallback(() => {
+    api.get('/settings/profile-image').then(({ data }) => {
+      const url = data?.url || '/profile.png';
+      setProfileUrl(url);
+    }).catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    updateProfile();
+    window.addEventListener('profileImageChanged', (e) => {
+      setProfileUrl(e.detail.url || '/profile.png');
+    });
+    return () => window.removeEventListener('profileImageChanged', updateProfile);
+  }, [updateProfile]);
 
   useEffect(() => {
     const current = LINES[roleIdx];
@@ -103,6 +119,9 @@ function HeroSection({ settings }) {
           )}
         </div>
         <div className="home__visual">
+          <div className="home__profile-frame">
+            <img src={profileUrl} alt="Teshome Bizuayehu" className="home__profile-img" />
+          </div>
           <div className="home__stats-panel">
             <div className="home__stat-row">
               <div className="home__stat-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div>
