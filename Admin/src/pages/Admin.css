@@ -3426,6 +3426,36 @@
   flex-shrink: 0;
 }
 
+/* ── Editor Section Card (Skills/Fallback) ────────── */
+.editor-section-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.editor-section-card__header {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-bg);
+}
+.editor-section-card__title {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--color-heading);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.editor-section-card__body {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.editor-section-card .form-row {
+  display: flex;
+  gap: 14px;
+}
+
 /* ── Section Editor with Preview ──────────────────── */
 .editor-layout {
   display: grid;

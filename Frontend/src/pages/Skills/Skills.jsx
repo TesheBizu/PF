@@ -9,6 +9,8 @@ import './Skills.css';
 function Skills() {
   const dispatch = useDispatch();
   const { items: skills, loading, error } = useSelector((s) => s.skills);
+  const sections = useSelector((s) => s.sections?.items || {});
+  const skillsSection = sections.skills || {};
   const [activeCat, setActiveCat] = useState('All');
 
   useEffect(() => {
@@ -32,11 +34,11 @@ function Skills() {
     <section className="skills section" id="skills">
       <div className="container">
         <div className="section-header animate-fadeInUp">
-          <h2 className="section-title">
-            Technical <span>Skills</span>
-          </h2>
+          <h2 className="section-title"
+            dangerouslySetInnerHTML={{ __html: skillsSection.title || 'Technical <span>Skills</span>' }}
+          />
           <p className="section-desc">
-            My toolkit for building full-stack web applications.
+            {skillsSection.description || 'My toolkit for building full-stack web applications.'}
           </p>
         </div>
 

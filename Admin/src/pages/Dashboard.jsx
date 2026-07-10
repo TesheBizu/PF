@@ -139,7 +139,7 @@ function Dashboard({ theme, onToggleTheme }) {
     if (Object.keys(sections).length > 0) {
       setSectionForms((prev) => {
         const next = { ...prev };
-        ['hero', 'about', 'navbar', 'footer'].forEach((k) => {
+        ['hero', 'about', 'navbar', 'footer', 'skills'].forEach((k) => {
           if (sections[k] && !next[k]) next[k] = JSON.parse(JSON.stringify(sections[k]));
         });
         return next;
@@ -619,9 +619,36 @@ function Dashboard({ theme, onToggleTheme }) {
                 <span className="page-toolbar__count">{skills.length} total</span>
               </div>
               <div className="page-toolbar__right">
+                <button className="btn btn-primary" onClick={() => handleSectionSave('skills')} disabled={sectionSaving === 'skills'} style={{ display: 'flex', alignItems: 'center', gap: '6px', marginRight: 8 }}>
+                  <Save size={15} /> {sectionSaving === 'skills' ? 'Saving...' : 'Save Section'}
+                </button>
                 <button className="btn btn-primary" onClick={openAddSkill} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Plus size={15} /> Add Skill</button>
               </div>
             </div>
+
+            {/* Section Settings Card */}
+            <div className="editor-section-card" style={{ marginBottom: 20 }}>
+              <div className="editor-section-card__header">
+                <span className="editor-section-card__title">Section Settings</span>
+              </div>
+              <div className="editor-section-card__body">
+                <div className="form-row">
+                  <div className="form-group" style={{ flex: 1 }}>
+                    <label className="form-label">Section Title</label>
+                    <input type="text" className="form-input" placeholder="Technical Skills"
+                      value={sectionForms.skills?.title ?? ''}
+                      onChange={(e) => handleSectionChange('skills', 'title', e.target.value)} />
+                  </div>
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Section Description</label>
+                  <textarea className="form-textarea" rows={2} placeholder="My toolkit for building full-stack web applications."
+                    value={sectionForms.skills?.description ?? ''}
+                    onChange={(e) => handleSectionChange('skills', 'description', e.target.value)} />
+                </div>
+              </div>
+            </div>
+
             {sLoading ? <p style={{ padding: '20px', color: 'var(--color-text-muted)' }}>Loading...</p> : (
               <div className="skill-categories">
                 {Array.from(new Set(skills.map((s) => s.category))).map((cat) => {
@@ -633,12 +660,13 @@ function Dashboard({ theme, onToggleTheme }) {
                         <span className="skill-category-group__count">{catSkills.length}</span>
                       </div>
                       <div className="skill-category-grid">
-                        {catSkills.map((s, idx) => (
+                        {catSkills.map((s) => (
                           <div key={s._id} className="skill-card">
-                            <div className="skill-card__icon" style={{ background: `hsl(${idx * 45}, 50%, 85%)`, color: `hsl(${idx * 45}, 60%, 30%)` }}>{s.name.charAt(0)}</div>
+                            <div className="skill-card__icon" style={{ background: s.brandColor ? `${s.brandColor}18` : 'var(--color-surface-2)', color: s.brandColor || 'var(--color-text-dim)' }}>{s.name.charAt(0)}</div>
                             <div className="skill-card__info">
-                              <div className="skill-card__name">{s.name}</div>
-                              <div className="skill-card__bar-track"><div className="skill-card__bar-fill" style={{ width: `${s.proficiency}%`, background: 'var(--color-primary)' }} /></div>
+                              <div className="skill-card__name">{s.title || s.name}</div>
+                              {s.description && <div className="skill-card__desc">{s.description}</div>}
+                              <div className="skill-card__bar-track"><div className="skill-card__bar-fill" style={{ width: `${s.proficiency}%`, background: s.brandColor || 'var(--color-primary)' }} /></div>
                             </div>
                             <span className="skill-card__pct">{s.proficiency}%</span>
                             <div className="skill-card__actions">
