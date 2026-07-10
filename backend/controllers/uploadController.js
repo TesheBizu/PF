@@ -1,21 +1,20 @@
 const cloudinary = require('../config/cloudinary');
 
-// @desc    Upload image to Cloudinary
+// @desc    Upload file (image/PDF) to Cloudinary
 // @route   POST /api/upload
 // @access  Private (Admin)
 const uploadImage = async (req, res, next) => {
   try {
     if (!req.file) {
-      return res.status(400).json({ success: false, message: 'Please select an image file to upload' });
+      return res.status(400).json({ success: false, message: 'Please select a file to upload' });
     }
 
-    // Convert buffer to base64 data URI
-    const base64Image = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
+    const folderMap = { cv: 'portfolio_cvs', project: 'portfolio_projects', profile: 'portfolio_profile' };
+    const folder = folderMap[req.body.type] || 'portfolio_projects';
 
-    // Upload to Cloudinary
-    const result = await cloudinary.uploader.upload(base64Image, {
-      folder: 'portfolio_projects',
-    });
+    const base64 = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
+
+    const result = await cloudinary.uploader.upload(base64, { folder });
 
     res.status(200).json({
       success: true,
@@ -26,7 +25,7 @@ const uploadImage = async (req, res, next) => {
     console.error('Cloudinary upload error details:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to upload image to Cloudinary',
+      message: 'Failed to upload file to Cloudinary',
       error: error.message || error,
       details: typeof error === 'object' ? JSON.stringify(error) : error,
     });

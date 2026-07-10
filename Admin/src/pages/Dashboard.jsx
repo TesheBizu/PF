@@ -140,6 +140,7 @@ function Dashboard({ theme, onToggleTheme }) {
   const [disablePassword, setDisablePassword] = useState('');
   const [sectionForms, setSectionForms] = useState({});
   const [sectionSaving, setSectionSaving] = useState(null);
+  const [cvUploading, setCvUploading] = useState(false);
   const [draggedIdx, setDraggedIdx] = useState(null);
   const [previewDevice, setPreviewDevice] = useState('desktop');
   const [seeding, setSeeding] = useState(false);
@@ -230,7 +231,7 @@ function Dashboard({ theme, onToggleTheme }) {
     const file = e.target.files[0];
     if (!file) return;
     const formData = new FormData();
-    formData.append('image', file);
+    formData.append('file', file);
     setProfileUploading(true);
     try {
       const { data } = await api.post('/upload', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
@@ -254,7 +255,7 @@ function Dashboard({ theme, onToggleTheme }) {
     const file = e.target.files[0];
     if (!file) return;
     const formData = new FormData();
-    formData.append('image', file);
+    formData.append('file', file);
     setUploading(true);
     try {
       const { data } = await api.post('/upload', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
@@ -288,7 +289,7 @@ function Dashboard({ theme, onToggleTheme }) {
     const file = e.target.files[0];
     if (!file) return;
     const formData = new FormData();
-    formData.append('image', file);
+    formData.append('file', file);
     setUploading(true);
     try {
       const { data } = await api.post('/upload', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
@@ -311,7 +312,7 @@ function Dashboard({ theme, onToggleTheme }) {
     const file = e.target.files[0];
     if (!file) return;
     const formData = new FormData();
-    formData.append('image', file);
+    formData.append('file', file);
     setUploading(true);
     try {
       const { data } = await api.post('/upload', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
@@ -407,7 +408,22 @@ function Dashboard({ theme, onToggleTheme }) {
     links.splice(idx, 1);
     handleSectionChange('navbar', 'links', links);
   };
-  const handleSectionSave = async (key) => {
+  const handleCvUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('type', 'cv');
+    setCvUploading(true);
+    try {
+      const { data } = await api.post('/upload', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+      if (data.success) { handleSectionChange('about', 'cvUrl', data.url); toast.success('CV uploaded!'); }
+      else toast.error(data.message || 'Failed');
+    } catch (err) { toast.error('Error uploading CV'); }
+    finally { setCvUploading(false); }
+  };
+
+const handleSectionSave = async (key) => {
     setSectionSaving(key);
     try {
       await dispatch(updateSection({ key, value: sectionForms[key] }));
@@ -899,25 +915,40 @@ function Dashboard({ theme, onToggleTheme }) {
             <div className="form-group"><label className="form-label">Subtitle</label><input type="text" className="form-input" value={sectionForms.about?.subtitle || ''} onChange={(e) => handleSectionChange('about', 'subtitle', e.target.value)} /></div>
             <div className="form-group"><label className="form-label">Description</label><input type="text" className="form-input" value={sectionForms.about?.description || ''} onChange={(e) => handleSectionChange('about', 'description', e.target.value)} /></div>
             <div className="form-group"><label className="form-label">Contact Link</label><input type="text" className="form-input" placeholder="mailto:teshelin7@gmail.com" value={sectionForms.about?.contactLink || ''} onChange={(e) => handleSectionChange('about', 'contactLink', e.target.value)} /></div>
-            <div className="form-group"><label className="form-label">CV URL</label><input type="text" className="form-input" placeholder="/cv.pdf" value={sectionForms.about?.cvUrl || ''} onChange={(e) => handleSectionChange('about', 'cvUrl', e.target.value)} /></div>
+            <div className="form-group">
+              <label className="form-label">CV File</label>
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                <input type="file" accept=".pdf" onChange={handleCvUpload} style={{ display: 'none' }} id="cv-file-upload" disabled={cvUploading} />
+                <label htmlFor="cv-file-upload" className={`upload-box${cvUploading ? ' upload-box--uploading' : ''}`} style={{ margin: 0 }}>
+                  <Upload className="upload-box__icon" size={18} />
+                  <span className="upload-box__text">{cvUploading ? 'Uploading...' : 'Upload CV'}</span>
+                </label>
+                {sectionForms.about?.cvUrl && <button className="icon-btn icon-btn--danger" onClick={() => handleSectionChange('about', 'cvUrl', '')} title="Remove CV"><Trash2 size={14} /></button>}
+              </div>
+              {sectionForms.about?.cvUrl && <span style={{ fontSize: '0.72rem', color: 'var(--color-text-muted)', marginTop: 4, display: 'block' }}>{sectionForms.about.cvUrl}</span>}
+            </div>
             <div className="form-group" style={{ marginTop: 20, borderTop: '1px solid var(--color-border)', paddingTop: 16 }}>
               <label className="form-label" style={{ fontWeight: 700, fontSize: '0.85rem' }}>Stats</label>
-              {(sectionForms.about?.stats || []).map((st, i) => (
-                <div key={st.id || i} style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 8, flexWrap: 'wrap' }}>
-                  <input type="text" className="form-input" style={{ width: 90 }} placeholder="Label" value={st.label || ''} onChange={(e) => { const s = [...(sectionForms.about?.stats || [])]; s[i] = { ...s[i], label: e.target.value }; handleSectionChange('about', 'stats', s); }} />
-                  <input type="number" className="form-input" style={{ width: 65 }} placeholder="Value" value={st.value ?? ''} onChange={(e) => { const s = [...(sectionForms.about?.stats || [])]; s[i] = { ...s[i], value: e.target.value === '' ? null : Number(e.target.value) }; handleSectionChange('about', 'stats', s); }} />
-                  <input type="text" className="form-input" style={{ width: 80 }} placeholder="Color" value={st.color || '#3B82F6'} onChange={(e) => { const s = [...(sectionForms.about?.stats || [])]; s[i] = { ...s[i], color: e.target.value }; handleSectionChange('about', 'stats', s); }} />
-                  <input type="text" className="form-input" style={{ width: 50 }} placeholder="+" value={st.suffix || '+'} onChange={(e) => { const s = [...(sectionForms.about?.stats || [])]; s[i] = { ...s[i], suffix: e.target.value }; handleSectionChange('about', 'stats', s); }} />
-                  <select className="form-input" style={{ width: 100 }} value={st.dynamic || ''} onChange={(e) => { const s = [...(sectionForms.about?.stats || [])]; s[i] = { ...s[i], dynamic: e.target.value || null }; handleSectionChange('about', 'stats', s); }}>
-                    <option value="">Static</option>
-                    <option value="projects">Projects</option>
-                    <option value="skills">Skills</option>
-                    <option value="experiences">Experiences</option>
-                  </select>
-                  <button className="icon-btn icon-btn--danger" onClick={() => { const s = (sectionForms.about?.stats || []).filter((_, j) => j !== i); handleSectionChange('about', 'stats', s.length ? s : null); }} title="Remove stat"><Trash2 size={13} /></button>
-                </div>
-              ))}
-              <button className="btn btn-ghost" style={{ fontSize: '0.75rem', padding: '4px 12px', marginTop: 4 }} onClick={() => { const s = [...(sectionForms.about?.stats || [])]; s.push({ id: Date.now().toString(36), label: '', value: null, color: '#3B82F6', suffix: '+', dynamic: null }); handleSectionChange('about', 'stats', s); }}><Plus size={13} style={{ marginRight: 4 }} />Add Stat</button>
+              {[
+                ...(sectionForms.about?.stats || []),
+                ...(!sectionForms.about?.stats?.length ? [
+                  { id: 'exp', label: 'Years Experience', value: 1, suffix: '+', color: '#3B82F6' },
+                  { id: 'proj', label: 'Projects Done', value: null, suffix: '+', color: '#60A5FA' },
+                  { id: 'tech', label: 'Tech Skills', value: null, suffix: '+', color: '#2563EB' },
+                ] : []),
+              ].map((st, i) => {
+                const statsArr = sectionForms.about?.stats || [];
+                const isDefault = !statsArr.length;
+                return (
+                  <div key={isDefault ? st.id : i} style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 8 }}>
+                    <input type="text" className="form-input" style={{ width: 140 }} placeholder="Label" value={isDefault ? st.label : (st.label || '')} onChange={(e) => { if (isDefault) { const s = [...statsArr, { id: Date.now().toString(36), label: e.target.value, value: st.value ?? null, suffix: st.suffix || '+', color: st.color || '#3B82F6' }]; handleSectionChange('about', 'stats', s); } else { const s = [...statsArr]; s[i] = { ...s[i], label: e.target.value }; handleSectionChange('about', 'stats', s); } }} />
+                    <input type="number" className="form-input" style={{ width: 70 }} placeholder="Value" value={isDefault ? (st.value ?? '') : (st.value ?? '')} onChange={(e) => { if (isDefault) { const s = [...statsArr, { id: Date.now().toString(36), label: st.label || '', value: e.target.value === '' ? null : Number(e.target.value), suffix: st.suffix || '+', color: st.color || '#3B82F6' }]; handleSectionChange('about', 'stats', s); } else { const s = [...statsArr]; s[i] = { ...s[i], value: e.target.value === '' ? null : Number(e.target.value) }; handleSectionChange('about', 'stats', s); } }} />
+                    <input type="text" className="form-input" style={{ width: 50 }} placeholder="+" value={isDefault ? (st.suffix || '+') : (st.suffix || '+')} onChange={(e) => { if (isDefault) { const s = [...statsArr, { id: Date.now().toString(36), label: st.label || '', value: st.value ?? null, suffix: e.target.value, color: st.color || '#3B82F6' }]; handleSectionChange('about', 'stats', s); } else { const s = [...statsArr]; s[i] = { ...s[i], suffix: e.target.value }; handleSectionChange('about', 'stats', s); } }} />
+                    <button className="icon-btn icon-btn--danger" disabled={isDefault} onClick={() => { if (!isDefault) { const s = statsArr.filter((_, j) => j !== i); handleSectionChange('about', 'stats', s.length ? s : null); } }} title="Remove stat"><Trash2 size={13} /></button>
+                  </div>
+                );
+              })}
+              <span onClick={() => { const s = [...(sectionForms.about?.stats || [])]; s.push({ id: Date.now().toString(36), label: '', value: null, suffix: '+', color: '#3B82F6' }); handleSectionChange('about', 'stats', s); }} style={{ cursor: 'pointer', fontSize: '0.78rem', color: 'var(--color-primary)', fontWeight: 600 }}>+ Add stats</span>
             </div>
           </>
         )}
