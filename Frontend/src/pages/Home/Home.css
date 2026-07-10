@@ -158,13 +158,13 @@
 }
 
 .home__profile-img {
-  width: 200px;
+  width: 300px;
   height: auto;
   display: block;
-  animation: float 4s ease-in-out infinite;
-  box-shadow:
-    0 0 80px rgba(59, 130, 246, 0.06),
-    0 12px 48px rgba(0, 0, 0, 0.04);
+  animation: float 5s ease-in-out infinite;
+  mask-image: radial-gradient(ellipse at center, black 55%, transparent 100%);
+  -webkit-mask-image: radial-gradient(ellipse at center, black 55%, transparent 100%);
+  filter: drop-shadow(0 0 60px rgba(59, 130, 246, 0.1));
 }
 
 .home__scroll-hint {
@@ -218,7 +218,7 @@
   .home__actions { justify-content: center; }
   .home__socials { justify-content: center; }
   .home__visual { min-height: auto; }
-  .home__profile-img { width: 150px; }
+  .home__profile-img { width: 220px; }
 
   .home__wordmark-text {
     font-size: clamp(2.5rem, 10vw, 4rem);
@@ -233,5 +233,5 @@
   .home__actions { flex-direction: column; align-items: center; }
   .home__actions .btn { width: 100%; justify-content: center; }
   .home__scroll-hint { display: none; }
-  .home__profile-img { width: 130px; }
+  .home__profile-img { width: 180px; }
 }

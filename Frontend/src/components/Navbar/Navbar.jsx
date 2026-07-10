@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { NavLink, Link, useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { Sun, Moon, Menu, X } from 'lucide-react';
 import './Navbar.css';
@@ -73,6 +73,11 @@ function Navbar({ theme, onToggleTheme }) {
   const handleHashLink = (e, path) => {
     e.preventDefault();
     setMobileOpen(false);
+    if (path === '/') {
+      setActiveSection('home');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
     const id = path.replace('/#', '');
     setActiveSection(id);
     if (location.pathname !== '/') {
@@ -131,8 +136,21 @@ function Navbar({ theme, onToggleTheme }) {
 
         <div className={`navbar__links${mobileOpen ? ' navbar__links--open' : ''}`}>
           <div className="navbar__links-inner">
-            {navLinks.map((link) =>
-              link.path.startsWith('/#') ? (
+            {navLinks.map((link) => {
+              const isExternal = !link.path.startsWith('/#') && link.path !== '/';
+              return isExternal ? (
+                <a
+                  key={link.id || link.path}
+                  href={link.path}
+                  className="navbar__link"
+                  ref={(el) => { linkRefs.current[link.id || link.path] = el; }}
+                  onClick={() => setMobileOpen(false)}
+                  onMouseMove={(e) => handleMagneticMove(e, link.id || link.path)}
+                  onMouseLeave={() => handleMagneticLeave(link.id || link.path)}
+                >
+                  {link.label}
+                </a>
+              ) : (
                 <a
                   key={link.id || link.path}
                   href={link.path}
@@ -144,23 +162,8 @@ function Navbar({ theme, onToggleTheme }) {
                 >
                   {link.label}
                 </a>
-              ) : (
-                <NavLink
-                  key={link.id || link.path}
-                  to={link.path}
-                  end={link.path === '/'}
-                  className={({ isActive }) =>
-                    `navbar__link${isActive ? ' navbar__link--active' : ''}`
-                  }
-                  ref={(el) => { linkRefs.current[link.id || link.path] = el; }}
-                  onClick={() => setMobileOpen(false)}
-                  onMouseMove={(e) => handleMagneticMove(e, link.id || link.path)}
-                  onMouseLeave={() => handleMagneticLeave(link.id || link.path)}
-                >
-                  {link.label}
-                </NavLink>
-              )
-            )}
+              );
+            })}
           </div>
         </div>
 
