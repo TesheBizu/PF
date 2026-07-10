@@ -44,6 +44,12 @@ function About() {
   const experiences = useSelector((s) => s.experiences.items);
   const sections = useSelector((s) => s.sections?.items || {});
   const about = sections.about || {};
+  const dynMap = { projects: items.length, skills: skills.length, experiences: Math.min(experiences.length, 5) || 1 };
+  const stats = about.stats?.length ? about.stats : [
+    { id: 'exp', label: 'Years Experience', value: dynMap.experiences, color: '#3B82F6', suffix: '+', dynamic: 'experiences' },
+    { id: 'proj', label: 'Projects Done', value: dynMap.projects, color: '#60A5FA', suffix: '+', dynamic: 'projects' },
+    { id: 'tech', label: 'Tech Skills', value: dynMap.skills, color: '#2563EB', suffix: '+', dynamic: 'skills' },
+  ];
 
   useEffect(() => {
     setCircularFavicon('/profile.png');
@@ -56,40 +62,41 @@ function About() {
     <section className="about section" id="about">
       <div className="container">
         <div className="section-header animate-fadeInUp">
-          <h2 className="section-title"
-            dangerouslySetInnerHTML={{ __html: about.title || 'Who <span>I Am</span>' }}
-          />
-          {about.description && <p className="section-desc">{about.description}</p>}
+          <h2 className="section-title">
+            Who <span>I Am</span>
+          </h2>
+
         </div>
 
         <div className="about__grid animate-fadeInUp">
           <div className="about__stats-col">
             <div className="about__stats-label">By the numbers</div>
             <div className="about__stats">
-              <div className="about__stat-float" style={{ '--stat-color': '#3B82F6' }}>
-                <div className="about__stat-num"><AnimatedNumber target={1} /></div>
-                <div className="about__stat-label">Years Experience</div>
-              </div>
-              <div className="about__stat-float" style={{ '--stat-color': '#60A5FA' }}>
-                <div className="about__stat-num"><AnimatedNumber target={items.length || 0} /></div>
-                <div className="about__stat-label">Projects Done</div>
-              </div>
-              <div className="about__stat-float" style={{ '--stat-color': '#2563EB' }}>
-                <div className="about__stat-num"><AnimatedNumber target={skills.length || 0} /></div>
-                <div className="about__stat-label">Tech Skills</div>
-              </div>
+              {stats.map((st) => (
+                <div key={st.id} className="about__stat-float" style={{ '--stat-color': st.color }}>
+                  <div className="about__stat-num"><AnimatedNumber target={st.dynamic ? dynMap[st.dynamic] : (st.value || 0)} suffix={st.suffix || '+'} /></div>
+                  <div className="about__stat-label">{st.label}</div>
+                </div>
+              ))}
             </div>
           </div>
 
           <div className="about__bio-col">
-            {about.subtitle && <h3 className="about__subtitle">{about.subtitle}</h3>}
-            {about.bio && <p className="about__text">{about.bio}</p>}
+            <h3 className="about__subtitle">
+              Full Stack Developer &amp; Problem Solver
+            </h3>
+            <p className="about__text">
+              I'm <strong>Teshome Bizuayehu</strong> — an Information Systems Student at Bahir Dar University and passionate Full Stack Developer focused on building modern, responsive, and scalable web applications. I love turning complex problems into elegant, user-friendly digital experiences.
+            </p>
+            <p className="about__text">
+              When I'm not coding, I'm exploring new technologies, contributing to open-source projects, and building tools that make a real difference.
+            </p>
             <div className="about__cta">
-              <a href="mailto:teshelin7@gmail.com" className="btn btn-primary">
+              <a href={about.contactLink || 'mailto:teshelin7@gmail.com'} className="btn btn-primary">
                 <Mail size={15} />
                 Contact Me
               </a>
-              <a href="/cv.pdf" download="Teshome_Bizuayehu_CV.pdf" className="btn btn-ghost">
+              <a href={about.cvUrl || '/cv.pdf'} download="Teshome_Bizuayehu_CV.pdf" className="btn btn-ghost">
                 <Download size={15} />
                 Download CV
               </a>

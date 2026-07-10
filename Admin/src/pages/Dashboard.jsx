@@ -898,7 +898,27 @@ function Dashboard({ theme, onToggleTheme }) {
             <div className="form-group"><label className="form-label">Title</label><input type="text" className="form-input" value={sectionForms.about?.title || ''} onChange={(e) => handleSectionChange('about', 'title', e.target.value)} /></div>
             <div className="form-group"><label className="form-label">Subtitle</label><input type="text" className="form-input" value={sectionForms.about?.subtitle || ''} onChange={(e) => handleSectionChange('about', 'subtitle', e.target.value)} /></div>
             <div className="form-group"><label className="form-label">Description</label><input type="text" className="form-input" value={sectionForms.about?.description || ''} onChange={(e) => handleSectionChange('about', 'description', e.target.value)} /></div>
-            <div className="form-group"><label className="form-label">Bio</label><textarea className="form-textarea" rows={6} value={sectionForms.about?.bio || ''} onChange={(e) => handleSectionChange('about', 'bio', e.target.value)} /></div>
+            <div className="form-group"><label className="form-label">Contact Link</label><input type="text" className="form-input" placeholder="mailto:teshelin7@gmail.com" value={sectionForms.about?.contactLink || ''} onChange={(e) => handleSectionChange('about', 'contactLink', e.target.value)} /></div>
+            <div className="form-group"><label className="form-label">CV URL</label><input type="text" className="form-input" placeholder="/cv.pdf" value={sectionForms.about?.cvUrl || ''} onChange={(e) => handleSectionChange('about', 'cvUrl', e.target.value)} /></div>
+            <div className="form-group" style={{ marginTop: 20, borderTop: '1px solid var(--color-border)', paddingTop: 16 }}>
+              <label className="form-label" style={{ fontWeight: 700, fontSize: '0.85rem' }}>Stats</label>
+              {(sectionForms.about?.stats || []).map((st, i) => (
+                <div key={st.id || i} style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 8, flexWrap: 'wrap' }}>
+                  <input type="text" className="form-input" style={{ width: 90 }} placeholder="Label" value={st.label || ''} onChange={(e) => { const s = [...(sectionForms.about?.stats || [])]; s[i] = { ...s[i], label: e.target.value }; handleSectionChange('about', 'stats', s); }} />
+                  <input type="number" className="form-input" style={{ width: 65 }} placeholder="Value" value={st.value ?? ''} onChange={(e) => { const s = [...(sectionForms.about?.stats || [])]; s[i] = { ...s[i], value: e.target.value === '' ? null : Number(e.target.value) }; handleSectionChange('about', 'stats', s); }} />
+                  <input type="text" className="form-input" style={{ width: 80 }} placeholder="Color" value={st.color || '#3B82F6'} onChange={(e) => { const s = [...(sectionForms.about?.stats || [])]; s[i] = { ...s[i], color: e.target.value }; handleSectionChange('about', 'stats', s); }} />
+                  <input type="text" className="form-input" style={{ width: 50 }} placeholder="+" value={st.suffix || '+'} onChange={(e) => { const s = [...(sectionForms.about?.stats || [])]; s[i] = { ...s[i], suffix: e.target.value }; handleSectionChange('about', 'stats', s); }} />
+                  <select className="form-input" style={{ width: 100 }} value={st.dynamic || ''} onChange={(e) => { const s = [...(sectionForms.about?.stats || [])]; s[i] = { ...s[i], dynamic: e.target.value || null }; handleSectionChange('about', 'stats', s); }}>
+                    <option value="">Static</option>
+                    <option value="projects">Projects</option>
+                    <option value="skills">Skills</option>
+                    <option value="experiences">Experiences</option>
+                  </select>
+                  <button className="icon-btn icon-btn--danger" onClick={() => { const s = (sectionForms.about?.stats || []).filter((_, j) => j !== i); handleSectionChange('about', 'stats', s.length ? s : null); }} title="Remove stat"><Trash2 size={13} /></button>
+                </div>
+              ))}
+              <button className="btn btn-ghost" style={{ fontSize: '0.75rem', padding: '4px 12px', marginTop: 4 }} onClick={() => { const s = [...(sectionForms.about?.stats || [])]; s.push({ id: Date.now().toString(36), label: '', value: null, color: '#3B82F6', suffix: '+', dynamic: null }); handleSectionChange('about', 'stats', s); }}><Plus size={13} style={{ marginRight: 4 }} />Add Stat</button>
+            </div>
           </>
         )}
                 {tab === 'footer-editor' && (
@@ -928,7 +948,16 @@ function Dashboard({ theme, onToggleTheme }) {
               <div>
                 <h2 style={{ color: '#6366f1', fontSize: '1.1rem', marginBottom: 4 }}>{sectionForms.about?.title || 'Who I Am'}</h2>
                 <p style={{ fontSize: '0.85rem', color: '#888' }}>{sectionForms.about?.subtitle || 'Your subtitle'}</p>
-                <p>{sectionForms.about?.bio || 'Your bio will appear here...'}</p>
+                {(sectionForms.about?.stats || []).length > 0 && (
+                  <div style={{ display: 'flex', gap: 16, marginTop: 12 }}>
+                    {sectionForms.about.stats.map((st, i) => (
+                      <div key={i} style={{ textAlign: 'center' }}>
+                        <div style={{ fontSize: '1.5rem', fontWeight: 900, color: st.color || '#3B82F6' }}>{(st.dynamic ? '{auto}' : st.value ?? '?')}{st.suffix || '+'}</div>
+                        <div style={{ fontSize: '0.6rem', textTransform: 'uppercase', color: '#888', letterSpacing: '0.05em' }}>{st.label}</div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
                     {tab === 'footer-editor' && (
