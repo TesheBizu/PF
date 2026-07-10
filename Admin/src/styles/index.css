@@ -338,6 +338,12 @@ a:hover { color: var(--color-primary-light); }
   font-weight: 500;
   color: var(--color-text);
 }
+.form-label__hint {
+  font-size: 0.7rem;
+  font-weight: 400;
+  color: var(--color-text-dim);
+  margin-left: 4px;
+}
 
 .form-input,
 .form-textarea {

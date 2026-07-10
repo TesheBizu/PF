@@ -60,7 +60,7 @@ function SlideOver({ open, onClose, title, children }) {
 }
 
 const initProject = { title: '', description: '', techStack: '', githubUrl: '', liveUrl: '', imageUrl: '', featured: false };
-const initSkill   = { name: '', category: 'Programming', proficiency: 80 };
+const initSkill   = { name: '', category: 'Programming', proficiency: 80, title: '', description: '', icon: '', brandColor: '' };
 const initExperience = { role: '', company: '', period: '', location: '', description: '', iconUrl: '', type: 'work', order: 0 };
 const initTestimonial = { name: '', role: '', photo: '', rating: 5, message: '', published: false, order: 0 };
 const initSocialLink = { platform: '', url: '', icon: '', label: '', order: 0, active: true };
@@ -633,12 +633,13 @@ function Dashboard({ theme, onToggleTheme }) {
                         <span className="skill-category-group__count">{catSkills.length}</span>
                       </div>
                       <div className="skill-category-grid">
-                        {catSkills.map((s, idx) => (
+                        {catSkills.map((s) => (
                           <div key={s._id} className="skill-card">
-                            <div className="skill-card__icon" style={{ background: `hsl(${idx * 45}, 50%, 85%)`, color: `hsl(${idx * 45}, 60%, 30%)` }}>{s.name.charAt(0)}</div>
+                            <div className="skill-card__icon" style={{ background: s.brandColor ? `${s.brandColor}18` : `var(--color-surface-2)`, color: s.brandColor || 'var(--color-text-dim)' }}>{s.name.charAt(0)}</div>
                             <div className="skill-card__info">
-                              <div className="skill-card__name">{s.name}</div>
-                              <div className="skill-card__bar-track"><div className="skill-card__bar-fill" style={{ width: `${s.proficiency}%`, background: 'var(--color-primary)' }} /></div>
+                              <div className="skill-card__name">{s.title || s.name}</div>
+                              {s.description && <div className="skill-card__desc">{s.description}</div>}
+                              <div className="skill-card__bar-track"><div className="skill-card__bar-fill" style={{ width: `${s.proficiency}%`, background: s.brandColor || 'var(--color-primary)' }} /></div>
                             </div>
                             <span className="skill-card__pct">{s.proficiency}%</span>
                             <div className="skill-card__actions">
@@ -1270,6 +1271,25 @@ function Dashboard({ theme, onToggleTheme }) {
             <div className="form-group">
               <label className="form-label">Proficiency: {sForm.proficiency}%</label>
               <input type="range" min="1" max="100" value={sForm.proficiency} onChange={(e) => setSForm((f) => ({ ...f, proficiency: Number(e.target.value) }))} style={{ width: '100%' }} />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Title <span className="form-label__hint">(display name shown publicly)</span></label>
+              <input type="text" className="form-input" placeholder="JavaScript Expert" value={sForm.title} onChange={(e) => setSForm((f) => ({ ...f, title: e.target.value }))} />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Description</label>
+              <textarea className="form-input" rows="2" placeholder="I build interactive UIs with React..." value={sForm.description} onChange={(e) => setSForm((f) => ({ ...f, description: e.target.value }))} />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Icon Identifier <span className="form-label__hint">(e.g. React, Node.js, Python)</span></label>
+              <input type="text" className="form-input" placeholder="Auto-detected from name if empty" value={sForm.icon} onChange={(e) => setSForm((f) => ({ ...f, icon: e.target.value }))} />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Brand Color</label>
+              <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+                <input type="color" value={sForm.brandColor || '#6366f1'} onChange={(e) => setSForm((f) => ({ ...f, brandColor: e.target.value }))} style={{ width: 40, height: 36, padding: 2, borderRadius: 6, border: '1px solid var(--color-border)', background: 'none', cursor: 'pointer' }} />
+                <input type="text" className="form-input" placeholder="#6366f1" value={sForm.brandColor} onChange={(e) => setSForm((f) => ({ ...f, brandColor: e.target.value }))} style={{ flex: 1 }} />
+              </div>
             </div>
             <div className="modal-footer"><button className="btn btn-ghost" onClick={() => setModal(null)}>Cancel</button><button className="btn btn-primary" onClick={handleSaveSkill}>Save</button></div>
           </div>
