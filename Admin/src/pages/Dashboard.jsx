@@ -17,7 +17,7 @@ import api from '../services/api';
 import {
   LayoutDashboard, Briefcase, Zap, MessageSquare, User as UserIcon, LogOut, ChevronLeft, ChevronRight,
   Plus, X, Edit3, Trash2, MailOpen, Reply, Mail, Upload, Eye, EyeOff, History, Star, Check, XCircle,
-  Monitor, Menu as MenuIcon, CreditCard, BarChart3, TrendingUp, Bell, Share2, UserCog, Settings,
+  Monitor, Smartphone, Menu as MenuIcon, CreditCard, BarChart3, TrendingUp, Bell, Share2, UserCog, Settings,
   Activity, Users, Globe, Clock, ArrowUp, ArrowDown, GripVertical, Save, RefreshCw, CheckCheck,
   Search, Calendar, Filter, ExternalLink, Hash, AlertTriangle, CheckCircle, Info,
 } from 'lucide-react';
@@ -114,6 +114,7 @@ function Dashboard({ theme, onToggleTheme }) {
   const [sectionForms, setSectionForms] = useState({});
   const [sectionSaving, setSectionSaving] = useState(null);
   const [draggedIdx, setDraggedIdx] = useState(null);
+  const [previewDevice, setPreviewDevice] = useState('desktop');
 
   // Section form state
   useEffect(() => {
@@ -346,19 +347,6 @@ function Dashboard({ theme, onToggleTheme }) {
   const updateNavLink = (idx, field, value) => {
     const links = [...getNavLinks()];
     links[idx] = { ...links[idx], [field]: value };
-    handleSectionChange('navbar', 'links', links);
-  };
-
-  const addNavLink = () => {
-    const links = [...getNavLinks()];
-    const id = 'nav_' + Date.now();
-    links.push({ id, label: 'New Link', path: '/', visible: true });
-    handleSectionChange('navbar', 'links', links);
-  };
-
-  const removeNavLink = (idx) => {
-    const links = [...getNavLinks()];
-    links.splice(idx, 1);
     handleSectionChange('navbar', 'links', links);
   };
 
@@ -780,13 +768,12 @@ function Dashboard({ theme, onToggleTheme }) {
           </div>
         )}
 
-        {/* ═══ SECTION EDITORS ═══ */}
-
-        {['hero-editor', 'about-editor', 'navbar-editor', 'footer-editor'].includes(tab) && (
+        {/* ═══ SECTION EDITORS (hero, about, footer) ═══ */}
+        {['hero-editor', 'about-editor', 'footer-editor'].includes(tab) && (
           <div>
             <div className="page-toolbar">
               <div className="page-toolbar__left">
-                <span className="page-toolbar__title">{tab === 'hero-editor' ? 'Hero' : tab === 'about-editor' ? 'About' : tab === 'navbar-editor' ? 'Navbar' : 'Footer'} Editor</span>
+                <span className="page-toolbar__title">{tab === 'hero-editor' ? 'Hero' : tab === 'about-editor' ? 'About' : 'Footer'} Editor</span>
               </div>
               <div className="page-toolbar__right">
                 <button className="btn btn-primary" onClick={() => handleSectionSave(tab.replace('-editor', ''))} disabled={sectionSaving === tab.replace('-editor', '')} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -815,38 +802,6 @@ function Dashboard({ theme, onToggleTheme }) {
                   <>
                     <div className="form-group"><label className="form-label">Tagline</label><input type="text" className="form-input" value={sectionForms.about?.tagline || ''} onChange={(e) => handleSectionChange('about', 'tagline', e.target.value)} /></div>
                     <div className="form-group"><label className="form-label">Description</label><textarea className="form-textarea" rows={6} value={sectionForms.about?.description || ''} onChange={(e) => handleSectionChange('about', 'description', e.target.value)} /></div>
-                  </>
-                )}
-                {tab === 'navbar-editor' && (
-                  <>
-                    <div className="form-group"><label className="form-label">Logo Text</label><input type="text" className="form-input" value={sectionForms.navbar?.logoText || ''} onChange={(e) => handleSectionChange('navbar', 'logoText', e.target.value)} /></div>
-                    <div className="form-group">
-                      <label className="form-label">Navigation Links</label>
-                      <div className="nav-links-editor">
-                        {getNavLinks().map((link, idx) => (
-                          <div
-                            key={link.id || idx}
-                            className={`nav-link-item${draggedIdx === idx ? ' nav-link-item--dragging' : ''}`}
-                            draggable
-                            onDragStart={() => handleNavLinkDragStart(idx)}
-                            onDragOver={(e) => handleNavLinkDragOver(e, idx)}
-                            onDragEnd={handleNavLinkDragEnd}
-                          >
-                            <div className="nav-link-item__drag" title="Drag to reorder">
-                              <GripVertical size={14} />
-                            </div>
-                            <label className="toggle-switch nav-link-item__toggle">
-                              <input type="checkbox" checked={link.visible !== false} onChange={() => updateNavLink(idx, 'visible', link.visible === false)} />
-                              <span className="toggle-switch__track"><span className="toggle-switch__thumb" /></span>
-                            </label>
-                            <input type="text" className="form-input nav-link-item__label" value={link.label} placeholder="Label" onChange={(e) => updateNavLink(idx, 'label', e.target.value)} />
-                            <input type="text" className="form-input nav-link-item__path" value={link.path} placeholder="/path" onChange={(e) => updateNavLink(idx, 'path', e.target.value)} />
-                            <button className="icon-btn icon-btn--danger nav-link-item__remove" onClick={() => removeNavLink(idx)} title="Remove link"><X size={13} /></button>
-                          </div>
-                        ))}
-                        <button className="btn btn-ghost" onClick={addNavLink} style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '8px', fontSize: '0.8rem' }}><Plus size={14} /> Add Link</button>
-                      </div>
-                    </div>
                   </>
                 )}
                 {tab === 'footer-editor' && (
@@ -878,18 +833,112 @@ function Dashboard({ theme, onToggleTheme }) {
                         <p>{sectionForms.about?.description || 'Your description will appear here...'}</p>
                       </div>
                     )}
-                    {tab === 'navbar-editor' && (
-                      <div className="preview-navbar">
-                        <span className="logo">{sectionForms.navbar?.logoText || 'Logo'}</span>
-                        <div className="links">{getNavLinks().filter((l) => l.visible !== false).map((l, i) => <span key={l.id || i}>{l.label || 'Link'}</span>)}</div>
-                      </div>
-                    )}
                     {tab === 'footer-editor' && (
                       <div className="preview-footer">
                         <p>{sectionForms.footer?.text || 'Your footer text'}</p>
                         <small>{sectionForms.footer?.copyright || '© 2026'}</small>
                       </div>
                     )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ═══ NAVBAR EDITOR ═══ */}
+        {tab === 'navbar-editor' && (
+          <div className="navbar-editor-page">
+            <div className="page-toolbar">
+              <div className="page-toolbar__left">
+                <span className="page-toolbar__title">Navbar Editor</span>
+                <span className="page-toolbar__count">Customize your site navigation</span>
+              </div>
+              <div className="page-toolbar__right">
+                <button className="btn btn-primary" onClick={() => handleSectionSave('navbar')} disabled={sectionSaving === 'navbar'} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <Save size={15} /> {sectionSaving === 'navbar' ? 'Saving...' : 'Save Changes'}
+                </button>
+              </div>
+            </div>
+            <div className="navbar-editor-layout">
+              <div className="navbar-editor-form">
+                <div className="nav-card">
+                  <div className="nav-card__header">
+                    <div className="nav-card__header-left">
+                      <span className="nav-card__title">Site Branding</span>
+                      <span className="nav-card__desc">The logo text displayed in your site header</span>
+                    </div>
+                  </div>
+                  <div className="nav-card__body">
+                    <div className="brand-input-row">
+                      <div className="brand-badge">T</div>
+                      <input type="text" className="form-input brand-text-input" value={sectionForms.navbar?.logoText || ''} onChange={(e) => handleSectionChange('navbar', 'logoText', e.target.value)} placeholder="Your Name" />
+                    </div>
+                  </div>
+                </div>
+                <div className="nav-card">
+                  <div className="nav-card__header">
+                    <div className="nav-card__header-left">
+                      <span className="nav-card__title">Navigation Links</span>
+                      <span className="nav-card__desc">Reorder, rename, or hide navigation items</span>
+                    </div>
+                    <span className="nav-card__count">{getNavLinks().length} items</span>
+                  </div>
+                  <div className="nav-card__body nav-card__body--flush">
+                    <div className="nav-links-editor">
+                      {getNavLinks().map((link, idx) => (
+                        <div key={link.id || idx} className={`nav-link-item${draggedIdx === idx ? ' nav-link-item--dragging' : ''}`} draggable onDragStart={() => handleNavLinkDragStart(idx)} onDragOver={(e) => handleNavLinkDragOver(e, idx)} onDragEnd={handleNavLinkDragEnd}>
+                          <div className="nav-link-item__drag" title="Drag to reorder"><GripVertical size={13} /></div>
+                          <button className="nav-link-item__dot" data-visible={link.visible !== false} onClick={() => updateNavLink(idx, 'visible', link.visible === false)} title={link.visible !== false ? 'Click to hide' : 'Click to show'} />
+                          <input type="text" className="nav-link-item__label" value={link.label} placeholder="Label" onChange={(e) => updateNavLink(idx, 'label', e.target.value)} />
+                          <input type="text" className="nav-link-item__path" value={link.path} placeholder="/path" onChange={(e) => updateNavLink(idx, 'path', e.target.value)} />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="navbar-editor-preview">
+                <div className="nav-preview-header">
+                  <span className="nav-preview-header__title">Live Preview</span>
+                  <div className="nav-preview-devices">
+                    <button className={`nav-preview-device-btn${previewDevice === 'desktop' ? ' nav-preview-device-btn--active' : ''}`} onClick={() => setPreviewDevice('desktop')} title="Desktop"><Monitor size={13} /></button>
+                    <button className={`nav-preview-device-btn${previewDevice === 'mobile' ? ' nav-preview-device-btn--active' : ''}`} onClick={() => setPreviewDevice('mobile')} title="Mobile"><Smartphone size={13} /></button>
+                  </div>
+                </div>
+                <div className={`nav-preview-frame${previewDevice === 'mobile' ? ' nav-preview-frame--mobile' : ''}`}>
+                  <div className="nav-preview-site-navbar">
+                    <div className="nav-preview-site-navbar__inner">
+                      <div className="nav-preview-site-navbar__logo">
+                        <div className="nav-preview-badge">T</div>
+                        <span className="nav-preview-logo-text">{sectionForms.navbar?.logoText || 'Logo'}</span>
+                      </div>
+                      {previewDevice === 'desktop' && (
+                        <div className="nav-preview-site-navbar__links">
+                          {getNavLinks().filter((l) => l.visible !== false).map((l, i) => (
+                            <span key={l.id || i} className="nav-preview-link">{l.label}</span>
+                          ))}
+                        </div>
+                      )}
+                      <div className="nav-preview-site-navbar__controls">
+                        <div className="nav-preview-theme-btn"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></div>
+                        {previewDevice === 'mobile' && (
+                          <div className="nav-preview-hamburger"><span /><span /><span /></div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  {previewDevice === 'mobile' && (
+                    <div className="nav-preview-mobile-menu">
+                      {getNavLinks().filter((l) => l.visible !== false).map((l, i) => (
+                        <div key={l.id || i} className="nav-preview-mobile-link">{l.label}</div>
+                      ))}
+                    </div>
+                  )}
+                  <div className="nav-preview-body-area">
+                    <div className="nav-preview-content-block" />
+                    <div className="nav-preview-content-block" />
+                    <div className="nav-preview-content-block nav-preview-content-block--short" />
                   </div>
                 </div>
               </div>
