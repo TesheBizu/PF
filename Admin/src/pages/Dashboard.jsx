@@ -28,6 +28,17 @@ import ThemeToggle from '../components/ThemeToggle/ThemeToggle';
 import { SocialIcon } from '../components/SocialIcons';
 import OverviewPanel from '../components/Analytics/OverviewPanel';
 import AnalyticsPanel from '../components/Analytics/AnalyticsPanel';
+
+const SKILL_BRAND_COLORS = {
+  JavaScript: '#F7DF1E', TypeScript: '#3178C6', Python: '#3776AB',
+  React: '#61DAFB', 'Redux Toolkit': '#764ABC', 'Node.js': '#339933',
+  'Express.js': '#000000', 'REST APIs': '#FF6C37', MongoDB: '#47A248',
+  Git: '#F05032', GitHub: '#181717', Postman: '#FF6C37', HTML: '#E34F26',
+  CSS: '#1572B6', Vite: '#646CFF', Docker: '#2496ED', Tailwind: '#06B6D4',
+  'Tailwind CSS': '#06B6D4', 'Next.js': '#000000', GraphQL: '#E10098',
+  Firebase: '#FFCA28', MySQL: '#4479A1', PostgreSQL: '#4169E1',
+  npm: '#CB3837', Vercel: '#000000', Figma: '#F24E1E',
+};
 import MetricsPanel from '../components/Analytics/MetricsPanel';
 
 function Modal({ title, onClose, children }) {
@@ -662,11 +673,11 @@ function Dashboard({ theme, onToggleTheme }) {
                       <div className="skill-category-grid">
                         {catSkills.map((s) => (
                           <div key={s._id} className="skill-card">
-                            <div className="skill-card__icon" style={{ background: s.brandColor ? `${s.brandColor}18` : 'var(--color-surface-2)', color: s.brandColor || 'var(--color-text-dim)' }}>{s.name.charAt(0)}</div>
+                            <div className="skill-card__icon" style={{ background: (s.brandColor || SKILL_BRAND_COLORS[s.name]) ? `${s.brandColor || SKILL_BRAND_COLORS[s.name]}18` : 'var(--color-surface-2)', color: s.brandColor || SKILL_BRAND_COLORS[s.name] || 'var(--color-text-dim)' }}>{s.name.charAt(0)}</div>
                             <div className="skill-card__info">
                               <div className="skill-card__name">{s.title || s.name}</div>
                               {s.description && <div className="skill-card__desc">{s.description}</div>}
-                              <div className="skill-card__bar-track"><div className="skill-card__bar-fill" style={{ width: `${s.proficiency}%`, background: s.brandColor || 'var(--color-primary)' }} /></div>
+                              <div className="skill-card__bar-track"><div className="skill-card__bar-fill" style={{ width: `${s.proficiency}%`, background: s.brandColor || SKILL_BRAND_COLORS[s.name] || 'var(--color-primary)' }} /></div>
                             </div>
                             <span className="skill-card__pct">{s.proficiency}%</span>
                             <div className="skill-card__actions">
@@ -882,12 +893,14 @@ function Dashboard({ theme, onToggleTheme }) {
                     </div>
                   </>
                 )}
-                {tab === 'about-editor' && (
-                  <>
-                    <div className="form-group"><label className="form-label">Tagline</label><input type="text" className="form-input" value={sectionForms.about?.tagline || ''} onChange={(e) => handleSectionChange('about', 'tagline', e.target.value)} /></div>
-                    <div className="form-group"><label className="form-label">Description</label><textarea className="form-textarea" rows={6} value={sectionForms.about?.description || ''} onChange={(e) => handleSectionChange('about', 'description', e.target.value)} /></div>
-                  </>
-                )}
+        {tab === 'about-editor' && (
+          <>
+            <div className="form-group"><label className="form-label">Title</label><input type="text" className="form-input" value={sectionForms.about?.title || ''} onChange={(e) => handleSectionChange('about', 'title', e.target.value)} /></div>
+            <div className="form-group"><label className="form-label">Subtitle</label><input type="text" className="form-input" value={sectionForms.about?.subtitle || ''} onChange={(e) => handleSectionChange('about', 'subtitle', e.target.value)} /></div>
+            <div className="form-group"><label className="form-label">Description</label><input type="text" className="form-input" value={sectionForms.about?.description || ''} onChange={(e) => handleSectionChange('about', 'description', e.target.value)} /></div>
+            <div className="form-group"><label className="form-label">Bio</label><textarea className="form-textarea" rows={6} value={sectionForms.about?.bio || ''} onChange={(e) => handleSectionChange('about', 'bio', e.target.value)} /></div>
+          </>
+        )}
                 {tab === 'footer-editor' && (
                   <>
                     <div className="form-group"><label className="form-label">Footer Text</label><input type="text" className="form-input" value={sectionForms.footer?.text || ''} onChange={(e) => handleSectionChange('footer', 'text', e.target.value)} /></div>
@@ -911,12 +924,13 @@ function Dashboard({ theme, onToggleTheme }) {
                         {sectionForms.hero?.roles && <div style={{ marginTop: 12, display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap' }}>{(Array.isArray(sectionForms.hero.roles) ? sectionForms.hero.roles : []).map((r, i) => <span key={i} style={{ padding: '4px 12px', background: '#eef2ff', color: '#6366f1', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 600 }}>{r}</span>)}</div>}
                       </div>
                     )}
-                    {tab === 'about-editor' && (
-                      <div>
-                        <h2 style={{ color: '#6366f1', fontSize: '1.1rem', marginBottom: 4 }}>{sectionForms.about?.tagline || 'Your Tagline'}</h2>
-                        <p>{sectionForms.about?.description || 'Your description will appear here...'}</p>
-                      </div>
-                    )}
+            {tab === 'about-editor' && (
+              <div>
+                <h2 style={{ color: '#6366f1', fontSize: '1.1rem', marginBottom: 4 }}>{sectionForms.about?.title || 'Who I Am'}</h2>
+                <p style={{ fontSize: '0.85rem', color: '#888' }}>{sectionForms.about?.subtitle || 'Your subtitle'}</p>
+                <p>{sectionForms.about?.bio || 'Your bio will appear here...'}</p>
+              </div>
+            )}
                     {tab === 'footer-editor' && (
                       <div className="preview-footer">
                         <p>{sectionForms.footer?.text || 'Your footer text'}</p>

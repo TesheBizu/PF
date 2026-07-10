@@ -57,6 +57,36 @@ export const SKILL_ICONS = {
   Figma: SiFigma,
 };
 
+/** Name → brand color fallback used when skill.brandColor is empty */
+export const SKILL_BRAND_COLORS = {
+  JavaScript: '#F7DF1E',
+  TypeScript: '#3178C6',
+  Python: '#3776AB',
+  React: '#61DAFB',
+  'Redux Toolkit': '#764ABC',
+  'Node.js': '#339933',
+  'Express.js': '#000000',
+  'REST APIs': '#FF6C37',
+  MongoDB: '#47A248',
+  Git: '#F05032',
+  GitHub: '#181717',
+  Postman: '#FF6C37',
+  HTML: '#E34F26',
+  CSS: '#1572B6',
+  Vite: '#646CFF',
+  Docker: '#2496ED',
+  Tailwind: '#06B6D4',
+  'Tailwind CSS': '#06B6D4',
+  'Next.js': '#000000',
+  GraphQL: '#E10098',
+  Firebase: '#FFCA28',
+  MySQL: '#4479A1',
+  PostgreSQL: '#4169E1',
+  npm: '#CB3837',
+  Vercel: '#000000',
+  Figma: '#F24E1E',
+};
+
 /** Normalized aliases for flexible DB name matching */
 const SKILL_ALIASES = {
   javascript: SiJavascript,

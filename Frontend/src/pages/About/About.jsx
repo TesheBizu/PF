@@ -42,6 +42,8 @@ function About() {
   const items = useSelector((s) => s.projects.items);
   const skills = useSelector((s) => s.skills.items);
   const experiences = useSelector((s) => s.experiences.items);
+  const sections = useSelector((s) => s.sections?.items || {});
+  const about = sections.about || {};
 
   useEffect(() => {
     setCircularFavicon('/profile.png');
@@ -54,12 +56,10 @@ function About() {
     <section className="about section" id="about">
       <div className="container">
         <div className="section-header animate-fadeInUp">
-          <h2 className="section-title">
-            Who <span>I Am</span>
-          </h2>
-          <p className="section-desc">
-            A brief introduction about me.
-          </p>
+          <h2 className="section-title"
+            dangerouslySetInnerHTML={{ __html: about.title || 'Who <span>I Am</span>' }}
+          />
+          {about.description && <p className="section-desc">{about.description}</p>}
         </div>
 
         <div className="about__grid animate-fadeInUp">
@@ -67,7 +67,7 @@ function About() {
             <div className="about__stats-label">By the numbers</div>
             <div className="about__stats">
               <div className="about__stat-float" style={{ '--stat-color': '#3B82F6' }}>
-                <div className="about__stat-num"><AnimatedNumber target={Math.min(experiences.length, 5) || 1} /></div>
+                <div className="about__stat-num"><AnimatedNumber target={1} /></div>
                 <div className="about__stat-label">Years Experience</div>
               </div>
               <div className="about__stat-float" style={{ '--stat-color': '#60A5FA' }}>
@@ -82,15 +82,8 @@ function About() {
           </div>
 
           <div className="about__bio-col">
-            <h3 className="about__subtitle">
-              Full Stack Developer &amp; Problem Solver
-            </h3>
-            <p className="about__text">
-              I'm <strong>Teshome Bizuayehu</strong> — an Information Systems Student at Bahir Dar University and passionate Full Stack Developer focused on building modern, responsive, and scalable web applications. I love turning complex problems into elegant, user-friendly digital experiences.
-            </p>
-            <p className="about__text">
-              When I'm not coding, I'm exploring new technologies, contributing to open-source projects, and building tools that make a real difference.
-            </p>
+            {about.subtitle && <h3 className="about__subtitle">{about.subtitle}</h3>}
+            {about.bio && <p className="about__text">{about.bio}</p>}
             <div className="about__cta">
               <a href="mailto:teshelin7@gmail.com" className="btn btn-primary">
                 <Mail size={15} />

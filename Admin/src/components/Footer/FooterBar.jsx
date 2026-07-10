@@ -17,7 +17,7 @@ function FooterBar({ variant = 'site' }) {
               <a href="https://linkedin.com/in/teshome-bizuayehu" className="footer__social-btn" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" title="LinkedIn"><SocialIcon platform="linkedin" size={16} /></a>
               <a href="mailto:teshelin7@gmail.com" className="footer__social-btn" target="_blank" rel="noopener noreferrer" aria-label="Email" title="Email"><SocialIcon platform="mail" size={16} /></a>
             </div>
-          </div>
+          </div> 
         </div>
 
         <div className="footer__divider" />
