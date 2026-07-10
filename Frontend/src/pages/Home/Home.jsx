@@ -110,9 +110,7 @@ function HeroSection({ settings }) {
         </div>
 
         <div className="home__visual">
-          <div className="home__profile-blend">
-            <img src={profileUrl} alt="Teshome Bizuayehu" className="home__profile-img" />
-          </div>
+          <img src={profileUrl} alt="Teshome Bizuayehu" className="home__profile-img" />
         </div>
       </div>
 

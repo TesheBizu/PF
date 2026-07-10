@@ -1,44 +1,34 @@
 .about { position: relative; z-index: 1; }
 
-.about__content {
-  max-width: 720px;
-  margin: 0 auto;
+.about__grid {
+  display: grid;
+  grid-template-columns: 1fr 1.4fr;
+  gap: var(--space-2xl);
+  align-items: start;
 }
 
-.about__intro {
-  text-align: center;
-  margin-bottom: var(--space-xl);
+.about__stats-col {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
 }
 
-.about__subtitle {
-  font-size: 1.3rem;
-  font-weight: 700;
-  margin-bottom: var(--space-md);
-  color: var(--color-primary);
+.about__stats-label {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-text-dim);
 }
-
-.about__text {
-  font-size: 0.92rem;
-  line-height: 1.8;
-  color: var(--color-text-muted);
-  margin-bottom: var(--space-md);
-  max-width: 600px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.about__text strong { color: var(--color-text); font-weight: 600; }
 
 .about__stats {
   display: flex;
-  gap: var(--space-lg);
-  justify-content: center;
-  margin-bottom: var(--space-xl);
+  flex-direction: column;
+  gap: var(--space-md);
 }
 
 .about__stat-card {
-  flex: 1;
-  max-width: 200px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -100,13 +90,34 @@
   letter-spacing: 0.05em;
 }
 
-.about__cta { display: flex; gap: var(--space-md); justify-content: center; flex-wrap: wrap; }
+.about__bio-col {
+  padding-top: var(--space-sm);
+}
+
+.about__subtitle {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: var(--space-md);
+  color: var(--color-primary);
+}
+
+.about__text {
+  font-size: 0.92rem;
+  line-height: 1.8;
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-md);
+}
+
+.about__text strong { color: var(--color-text); font-weight: 600; }
+
+.about__cta { display: flex; gap: var(--space-md); flex-wrap: wrap; }
 
 @media (max-width: 768px) {
-  .about__stats { flex-direction: column; align-items: center; }
-  .about__stat-card { max-width: 260px; width: 100%; }
+  .about__grid { grid-template-columns: 1fr; }
+  .about__stats { flex-direction: row; flex-wrap: wrap; }
+  .about__stat-card { flex: 1; min-width: 140px; }
 }
 
 @media (max-width: 480px) {
-  .about__stat-card { max-width: 100%; }
+  .about__stats { flex-direction: column; }
 }

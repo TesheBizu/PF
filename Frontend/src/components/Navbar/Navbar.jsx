@@ -53,7 +53,7 @@ function Navbar({ theme, onToggleTheme }) {
         });
         if (best) setActiveSection(best);
       },
-      { threshold: [0, 0.15, 0.3, 0.5, 0.7, 0.9, 1], rootMargin: '-20px 0px -10% 0px' }
+      { threshold: [0, 0.2, 0.4, 0.6, 0.8, 1], rootMargin: '-10% 0px -15% 0px' }
     );
 
     els.forEach((el) => observer.observe(el));
@@ -74,6 +74,7 @@ function Navbar({ theme, onToggleTheme }) {
     e.preventDefault();
     setMobileOpen(false);
     const id = path.replace('/#', '');
+    setActiveSection(id);
     if (location.pathname !== '/') {
       window.location.href = path;
     } else {

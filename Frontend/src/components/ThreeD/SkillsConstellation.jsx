@@ -1,57 +1,86 @@
 import { useRef, useMemo, useState, useCallback, createElement } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { Float, Text, Html } from '@react-three/drei';
+import { Float, Text, Html, Line } from '@react-three/drei';
 import * as THREE from 'three';
 import { CATEGORY_COLORS } from '../../utils/skillCategories';
 import { getSkillIcon } from '../../utils/skillIcons';
 
-/* ── Category → geometry mapping for visual variety ── */
 const CATEGORY_GEOM = {
-  Programming: <octahedronGeometry args={[0.3, 0]} />,
-  Frontend: <boxGeometry args={[0.45, 0.45, 0.45]} />,
-  Backend: <cylinderGeometry args={[0.2, 0.3, 0.5, 8]} />,
-  Database: <torusGeometry args={[0.25, 0.1, 8, 16]} />,
-  Tools: <dodecahedronGeometry args={[0.3, 0]} />,
-  Other: <icosahedronGeometry args={[0.3, 0]} />,
+  Programming: <octahedronGeometry args={[0.28, 0]} />,
+  Frontend: <boxGeometry args={[0.4, 0.4, 0.4]} />,
+  Backend: <cylinderGeometry args={[0.18, 0.28, 0.45, 8]} />,
+  Database: <torusGeometry args={[0.22, 0.08, 8, 16]} />,
+  Tools: <dodecahedronGeometry args={[0.28, 0]} />,
+  Other: <icosahedronGeometry args={[0.28, 0]} />,
 };
+
+function HolographicRing({ color, radius = 0.55, speed = 0.8, offset = 0 }) {
+  const ref = useRef(null);
+  useFrame(({ clock }) => {
+    if (ref.current) {
+      ref.current.rotation.z = clock.getElapsedTime() * speed + offset;
+    }
+  });
+  return (
+    <mesh ref={ref}>
+      <ringGeometry args={[radius - 0.03, radius, 48]} />
+      <meshBasicMaterial color={color} transparent opacity={0.08} side={THREE.DoubleSide} />
+    </mesh>
+  );
+}
 
 function SkillNode({ skill, position, color, isHovered, onHover, onLeave, category }) {
   const meshRef = useRef(null);
   const glowRef = useRef(null);
-  const targetScale = isHovered ? 1.6 : 1;
+  const ringRef = useRef(null);
+  const hologramRef = useRef(null);
+  const targetScale = isHovered ? 1.7 : 1;
   const Icon = getSkillIcon(skill.name);
-  const geom = CATEGORY_GEOM[category] || <sphereGeometry args={[0.25, 16, 16]} />;
+  const geom = CATEGORY_GEOM[category] || <sphereGeometry args={[0.22, 16, 16]} />;
 
   useFrame(({ clock }) => {
+    const t = clock.getElapsedTime();
     if (meshRef.current) {
       meshRef.current.scale.lerp(
         new THREE.Vector3(targetScale, targetScale, targetScale),
-        0.06
+        0.05
       );
     }
     if (glowRef.current) {
-      glowRef.current.rotation.y = clock.getElapsedTime() * 1.2;
-      const s = 1 + Math.sin(clock.getElapsedTime() * 2) * 0.05;
+      glowRef.current.rotation.y = t * 1.5;
+      const s = 1 + Math.sin(t * 2.5) * 0.06;
       glowRef.current.scale.set(s, s, s);
+      glowRef.current.material.opacity = 0.08 + Math.sin(t * 2) * 0.04;
+    }
+    if (ringRef.current) {
+      ringRef.current.rotation.x = Math.PI / 2 + Math.sin(t * 0.6) * 0.1;
+      ringRef.current.rotation.z = t * 0.5;
+    }
+    if (hologramRef.current) {
+      hologramRef.current.material.opacity = 0.15 + Math.sin(t * 3) * 0.06;
     }
   });
 
   return (
     <group position={position}>
-      {/* Glow ring */}
+      {/* Holographic glow ring */}
       <mesh ref={glowRef} rotation={[-Math.PI / 2, 0, 0]}>
-        <ringGeometry args={[0.4, 0.5, 32]} />
-        <meshBasicMaterial color={color} transparent opacity={isHovered ? 0.3 : 0.1} side={THREE.DoubleSide} />
+        <ringGeometry args={[0.45, 0.6, 48]} />
+        <meshBasicMaterial color={color} transparent opacity={0.1} side={THREE.DoubleSide} />
       </mesh>
 
-      {/* Orbital ring (inner) */}
-      <mesh rotation={[Math.PI / 3, 0, 0]}>
-        <ringGeometry args={[0.35, 0.38, 24]} />
-        <meshBasicMaterial color={color} transparent opacity={0.06} side={THREE.DoubleSide} />
+      {/* Orbital scanning ring */}
+      <mesh ref={ringRef}>
+        <ringGeometry args={[0.5, 0.52, 48]} />
+        <meshBasicMaterial color={color} transparent opacity={0.12} side={THREE.DoubleSide} />
       </mesh>
 
-      {/* Core shape */}
-      <Float speed={1.5} rotationIntensity={0.3} floatIntensity={0.4}>
+      {/* Outer holographic ring */}
+      <HolographicRing color={color} radius={0.6} speed={0.6} offset={0} />
+      <HolographicRing color={color} radius={0.52} speed={-0.4} offset={1.2} />
+
+      {/* Core shape — holographic material */}
+      <Float speed={1.2} rotationIntensity={0.25} floatIntensity={0.35}>
         <mesh
           ref={meshRef}
           onPointerEnter={(e) => { e.stopPropagation(); onHover(skill._id); }}
@@ -61,50 +90,64 @@ function SkillNode({ skill, position, color, isHovered, onHover, onLeave, catego
           <meshPhysicalMaterial
             color={color}
             transparent
-            opacity={isHovered ? 1 : 0.75}
-            roughness={0.15}
-            metalness={0.8}
-            envMapIntensity={1.2}
-            clearcoat={0.3}
+            opacity={isHovered ? 0.95 : 0.55}
+            roughness={0.05}
+            metalness={0.3}
+            envMapIntensity={0.8}
+            clearcoat={0.6}
+            clearcoatRoughness={0.2}
+            emissive={color}
+            emissiveIntensity={isHovered ? 0.3 : 0.08}
           />
         </mesh>
       </Float>
 
-      {/* Skill icon as sprite — larger, glossy badge per skill */}
+      {/* Holographic wireframe shell */}
+      <mesh ref={hologramRef} scale={[1.25, 1.25, 1.25]}>
+        {geom}
+        <meshBasicMaterial
+          color={color}
+          transparent
+          opacity={0.12}
+          wireframe
+        />
+      </mesh>
+
+      {/* Icon sprite — holographic badge */}
       <Html distanceFactor={7} center>
         <div style={{
-          transform: `translateY(-22px) scale(${isHovered ? 1.15 : 1})`,
+          transform: `translateY(-20px) scale(${isHovered ? 1.2 : 1})`,
           pointerEvents: 'none',
-          opacity: isHovered ? 1 : 0.7,
-          transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
-          filter: isHovered ? `drop-shadow(0 0 8px ${color}60)` : 'none',
+          opacity: isHovered ? 1 : 0.6,
+          transition: 'all 0.35s cubic-bezier(0.16, 1, 0.3, 1)',
+          filter: isHovered ? `drop-shadow(0 0 12px ${color}80)` : 'none',
         }}>
           <div style={{
-            width: 36,
-            height: 36,
+            width: 34,
+            height: 34,
             borderRadius: 10,
-            background: `linear-gradient(145deg, ${color}22, ${color}10)`,
-            border: `1px solid ${color}30`,
+            background: `linear-gradient(145deg, ${color}30, ${color}08)`,
+            border: `1px solid ${color}40`,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             color: color,
-            fontSize: 18,
+            fontSize: 17,
             lineHeight: 1,
-            boxShadow: `0 2px 12px ${color}20, inset 0 1px 0 ${color}15`,
-            backdropFilter: 'blur(4px)',
+            backdropFilter: 'blur(6px)',
+            boxShadow: `0 2px 16px ${color}20, inset 0 1px 0 ${color}20`,
           }}>
-            {createElement(Icon, { size: 18 })}
+            {createElement(Icon, { size: 17 })}
           </div>
         </div>
       </Html>
 
-      {/* Label below */}
+      {/* Label */}
       <Text
-        position={[0, -0.65, 0]}
-        fontSize={0.13}
+        position={[0, -0.6, 0]}
+        fontSize={0.12}
         color={color}
-        opacity={isHovered ? 0.95 : 0.45}
+        opacity={isHovered ? 0.95 : 0.35}
         anchorX="center"
         anchorY="top"
         fontWeight={600}
@@ -112,28 +155,32 @@ function SkillNode({ skill, position, color, isHovered, onHover, onLeave, catego
         {skill.name}
       </Text>
 
-      {/* Hover tooltip */}
+      {/* Hover detail panel */}
       {isHovered && (
-        <Html distanceFactor={6} center>
+        <Html distanceFactor={5} center>
           <div style={{
-            background: 'rgba(15, 23, 42, 0.92)',
-            backdropFilter: 'blur(10px)',
+            background: 'rgba(8, 11, 20, 0.88)',
+            backdropFilter: 'blur(12px)',
             color: '#fff',
-            padding: '6px 12px',
-            borderRadius: 10,
+            padding: '8px 14px',
+            borderRadius: 12,
             fontSize: 12,
             fontWeight: 600,
             whiteSpace: 'nowrap',
-            transform: 'translateY(-40px)',
+            transform: 'translateY(-44px)',
             fontFamily: 'Inter, sans-serif',
             textAlign: 'center',
-            border: `1px solid ${color}30`,
+            border: `1px solid ${color}40`,
+            boxShadow: `0 4px 20px rgba(0,0,0,0.3), inset 0 1px 0 ${color}20`,
+            minWidth: 120,
           }}>
-            <div style={{ color, fontSize: 10, fontWeight: 700, marginBottom: 1, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            <div style={{ color, fontSize: 10, fontWeight: 700, marginBottom: 2, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
               {skill.name}
             </div>
-            <div style={{ color: '#94a3b8', fontSize: 11 }}>
-              {skill.proficiency}% &middot; {category}
+            <div style={{ display: 'flex', gap: 10, justifyContent: 'center', fontSize: 11, color: '#94a3b8' }}>
+              <span>{skill.proficiency}% proficiency</span>
+              <span style={{ color: 'rgba(255,255,255,0.2)' }}>|</span>
+              <span style={{ color }}>{category}</span>
             </div>
           </div>
         </Html>
@@ -142,17 +189,30 @@ function SkillNode({ skill, position, color, isHovered, onHover, onLeave, catego
   );
 }
 
-function ConnectingLine({ from, to, color, opacity = 0.15 }) {
+function ConnectingLine({ from, to, color }) {
+  const ref = useRef(null);
   const points = useMemo(() => [
     new THREE.Vector3(from[0], from[1], from[2]),
     new THREE.Vector3(to[0], to[1], to[2]),
   ], [from, to]);
 
-  const geometry = useMemo(() => new THREE.BufferGeometry().setFromPoints(points), [points]);
+  useFrame(({ clock }) => {
+    if (ref.current) {
+      ref.current.material.opacity = 0.06 + Math.sin(clock.getElapsedTime() * 0.8) * 0.04;
+    }
+  });
 
   return (
-    <line geometry={geometry}>
-      <lineBasicMaterial color={color} transparent opacity={opacity} />
+    <line ref={ref}>
+      <bufferGeometry>
+        <bufferAttribute
+          attach="attributes-position"
+          count={points.length}
+          array={new Float32Array(points.flatMap((p) => [p.x, p.y, p.z]))}
+          itemSize={3}
+        />
+      </bufferGeometry>
+      <lineBasicMaterial color={color} transparent opacity={0.1} />
     </line>
   );
 }
@@ -171,7 +231,7 @@ function SceneContent({ skills, hoveredId, onHover, onLeave }) {
 
       catSkills.forEach((skill, skIdx) => {
         const angle = baseAngle + ((skIdx - (catSkills.length - 1) / 2) * sectorAngle * 0.35);
-        const r = 1.8 + catIdx * 0.4 + skIdx * 0.25;
+        const r = 1.6 + catIdx * 0.35 + skIdx * 0.2;
         const x = Math.cos(angle) * r;
         const z = Math.sin(angle) * r;
         n.push({ skill, position: [x, 0, z], color, category: cat });
@@ -218,15 +278,15 @@ export default function SkillsConstellation({ skills }) {
   return (
     <div style={{ width: '100%', height: 480, position: 'relative' }}>
       <Canvas
-        camera={{ position: [0, 3.5, 5.5], fov: 42 }}
+        camera={{ position: [0, 3.8, 5.8], fov: 40 }}
         dpr={[1, 1.5]}
         gl={{ antialias: true, alpha: true }}
         style={{ background: 'transparent' }}
       >
-        <ambientLight intensity={0.6} />
-        <directionalLight position={[5, 5, 5]} intensity={0.8} />
-        <directionalLight position={[-5, -5, -5]} intensity={0.3} />
-        <pointLight position={[0, 0, 0]} intensity={0.2} color="#3B82F6" />
+        <ambientLight intensity={0.4} />
+        <directionalLight position={[5, 5, 5]} intensity={0.6} />
+        <directionalLight position={[-5, -5, -5]} intensity={0.2} />
+        <pointLight position={[0, 0, 0]} intensity={0.15} color="#3B82F6" />
         <SceneContent
           skills={skills}
           hoveredId={hoveredId}
