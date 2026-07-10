@@ -36,9 +36,7 @@ function FooterBar({ variant = 'site' }) {
       <div className={isDashboard ? 'footer__shell footer__shell--dash' : 'container footer__shell'}>
         <div className="footer__inner">
           <Link to="/" className="footer__logo">
-            <span className="footer__logo-bracket">&lt;</span>
-            <span className="footer__logo-name">Teshome</span>
-            <span className="footer__logo-bracket"> /&gt;</span>
+            <span className="footer__logo-badge">T</span>
           </Link>
 
           <div className="footer__connect">

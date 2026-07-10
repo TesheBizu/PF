@@ -43,13 +43,23 @@
   flex-shrink: 0;
 }
 
-.footer__logo-bracket {
-  color: var(--color-primary);
-  font-size: 0.85rem;
+.footer__logo-bracket,
+.footer__logo-name {
+  display: none;
 }
 
-.footer__logo-name {
-  color: var(--color-primary);
+.footer__logo-badge {
+  width: 30px;
+  height: 30px;
+  border-radius: 7px;
+  background: linear-gradient(135deg, var(--color-primary), #818cf8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
 }
 
 .footer__connect {
