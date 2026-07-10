@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback, lazy, Suspense } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { fetchAllSections } from '../../redux/slices/sectionsSlice';
 import { fetchProjects } from '../../redux/slices/projectsSlice';
@@ -14,6 +14,8 @@ import Experience from '../Experience/Experience';
 import Contact from '../Contact/Contact';
 import Testimonials from '../Testimonials/Testimonials';
 import './Home.css';
+
+const HeroBackground = lazy(() => import('../../components/ThreeD/SceneBackground'));
 
 function Counter({ target, duration = 1200, suffix = '+' }) {
   const [count, setCount] = useState(0);
@@ -41,7 +43,6 @@ function HeroSection({ settings }) {
   const [isDeleting, setIsDeleting] = useState(false);
   const [profileUrl, setProfileUrl] = useState('/profile.png');
   const tr = useRef(null);
-  const profileFrameRef = useRef(null);
   const tiltRef = useRef(null);
   const items = useSelector((s) => s.projects.items);
   const skills = useSelector((s) => s.skills.items);
@@ -50,8 +51,7 @@ function HeroSection({ settings }) {
 
   const updateProfile = useCallback(() => {
     api.get('/settings/profile-image').then(({ data }) => {
-      const url = data?.url || '/profile.png';
-      setProfileUrl(url);
+      setProfileUrl(data?.url || '/profile.png');
     }).catch(() => {});
   }, []);
 
@@ -66,7 +66,7 @@ function HeroSection({ settings }) {
     const current = LINES[roleIdx];
     if (!isDeleting && displayed === current) {
       tr.current = setTimeout(() => setIsDeleting(true), 2200);
-      return;
+      return () => clearTimeout(tr.current);
     }
     if (isDeleting && displayed === '') {
       setIsDeleting(false);
@@ -81,55 +81,59 @@ function HeroSection({ settings }) {
   }, [displayed, isDeleting, roleIdx]);
 
   const handleTilt = (e) => {
-    const frame = profileFrameRef.current;
+    const frame = tiltRef.current;
     if (!frame) return;
     const rect = frame.getBoundingClientRect();
     const x = (e.clientX - rect.left) / rect.width;
     const y = (e.clientY - rect.top) / rect.height;
-    const tiltX = (y - 0.5) * -16;
-    const tiltY = (x - 0.5) * 16;
+    const tiltX = (y - 0.5) * -20;
+    const tiltY = (x - 0.5) * 20;
     const glowX = x * 100;
     const glowY = y * 100;
-    if (tiltRef.current) {
-      tiltRef.current.style.transform = `perspective(600px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) scale(1.02)`;
-      tiltRef.current.style.boxShadow = `${(x - 0.5) * 20}px ${(y - 0.5) * 20}px 40px rgba(99,102,241,0.15), 0 0 0 6px var(--color-primary-glow)`;
-      tiltRef.current.style.background = `radial-gradient(circle at ${glowX}% ${glowY}%, rgba(99,102,241,0.08), transparent 70%)`;
-    }
+    frame.style.transform = `perspective(800px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) scale(1.03)`;
+    frame.style.boxShadow = `${(x - 0.5) * 30}px ${(y - 0.5) * 30}px 50px rgba(59,130,246,0.15), 0 0 0 6px rgba(59,130,246,0.1)`;
+    frame.style.setProperty('--glow-x', `${glowX}%`);
+    frame.style.setProperty('--glow-y', `${glowY}%`);
   };
 
   const handleTiltLeave = () => {
     if (tiltRef.current) {
-      tiltRef.current.style.transform = 'perspective(600px) rotateX(0deg) rotateY(0deg) scale(1)';
+      tiltRef.current.style.transform = 'perspective(800px) rotateX(0deg) rotateY(0deg) scale(1)';
       tiltRef.current.style.boxShadow = '';
-      tiltRef.current.style.background = '';
     }
   };
 
   return (
     <section className="home" id="home">
-      <div className="home__particles" aria-hidden="true">
-        <div className="home__particle home__particle--1" />
-        <div className="home__particle home__particle--2" />
-        <div className="home__particle home__particle--3" />
-        <div className="home__particle home__particle--4" />
-      </div>
+      <Suspense fallback={null}>
+        <HeroBackground />
+      </Suspense>
+
+      <div className="home__gradient-blob home__gradient-blob--1" aria-hidden="true" />
+      <div className="home__gradient-blob home__gradient-blob--2" aria-hidden="true" />
+      <div className="home__gradient-blob home__gradient-blob--3" aria-hidden="true" />
+
       <div className="container home__container">
         <div className="home__content">
           <div className="home__greeting">
             <span className="home__greeting-line" />
-            <span className="home__greeting-text">{settings?.greeting || 'Hello, I\'m'}</span>
+            <span className="home__greeting-text">{settings?.greeting || "Hello, I'm"}</span>
           </div>
+
           <h1 className="home__name">
-            <span style={{ color: 'var(--color-heading)' }}>{settings?.name?.split(' ')[0] || 'Teshome'}</span><br />
-            <span style={{ color: 'var(--color-primary)' }}>{settings?.name?.split(' ').slice(1).join(' ') || 'Bizuayehu'}</span>
+            <span className="home__name-first">{settings?.name?.split(' ')[0] || 'Teshome'}</span>
+            <span className="home__name-last">{settings?.name?.split(' ').slice(1).join(' ') || 'Bizuayehu'}</span>
           </h1>
+
           <div className="home__role">
             <span className="home__role-prefix">&lt; </span>
             <span className="home__typewriter">{displayed}</span>
             <span className="home__cursor" aria-hidden="true">|</span>
             <span className="home__role-prefix"> /&gt;</span>
           </div>
+
           <p className="home__bio">{settings?.bio || 'Passionate about building modern, responsive, scalable web applications.'}</p>
+
           <div className="home__actions">
             <a href="#projects" className="btn btn-primary" onClick={(e) => { e.preventDefault(); document.getElementById('projects')?.scrollIntoView({ behavior: 'smooth' }); }}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
@@ -140,42 +144,46 @@ function HeroSection({ settings }) {
               Get In Touch
             </a>
           </div>
+
           {links.length > 0 && (
             <div className="home__socials">
               {links.map((l) => (
                 <a key={l._id} href={l.url} target="_blank" rel="noopener noreferrer" className="home__social-link" aria-label={l.platform} onClick={() => { try { fetch('/api/analytics/record', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'socialClick', platform: l.platform }) }).catch(() => {}); } catch (e) {} }}>
-                  <SocialIcon platform={l.platform} icon={l.icon} size={20} />
+                  <SocialIcon platform={l.platform} icon={l.icon} size={18} />
                 </a>
               ))}
             </div>
           )}
         </div>
+
         <div className="home__visual">
-          <div className="home__profile-wrapper" ref={profileFrameRef} onMouseMove={handleTilt} onMouseLeave={handleTiltLeave}>
+          <div className="home__profile-wrapper" onMouseMove={handleTilt} onMouseLeave={handleTiltLeave}>
+            <div className="home__profile-glow" aria-hidden="true" />
             <div className="home__profile-frame" ref={tiltRef}>
               <img src={profileUrl} alt="Teshome Bizuayehu" className="home__profile-img" />
             </div>
-            <div className="home__profile-glow" aria-hidden="true" />
           </div>
+
           <div className="home__stats-panel">
             <div className="home__stat-row">
-              <div className="home__stat-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div>
+              <div className="home__stat-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div>
               <div className="home__stat-num"><Counter target={Math.min(experiences.length, 5) || 1} /></div>
               <div className="home__stat-info"><h4>Years Active</h4><p>Professional exp.</p></div>
             </div>
             <div className="home__stat-row">
-              <div className="home__stat-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+              <div className="home__stat-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
               <div className="home__stat-num"><Counter target={items.length || 0} /></div>
               <div className="home__stat-info"><h4>Projects</h4><p>Completed works</p></div>
             </div>
             <div className="home__stat-row">
-              <div className="home__stat-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+              <div className="home__stat-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
               <div className="home__stat-num"><Counter target={skills.length || 0} /></div>
               <div className="home__stat-info"><h4>Tech Skills</h4><p>Frameworks & tools</p></div>
             </div>
           </div>
         </div>
       </div>
+
       <div className="home__scroll-hint" aria-hidden="true">
         <div className="home__scroll-mouse"><div className="home__scroll-wheel" /></div>
         <span>Scroll</span>
