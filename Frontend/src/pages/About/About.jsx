@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Mail, Download } from 'lucide-react';
 import api from '../../services/api';
+import { setCircularFavicon } from '../../utils/circularFavicon';
 import './About.css';
 
 function Counter({ target, duration = 1200, suffix = '+' }) {
@@ -22,11 +23,6 @@ function Counter({ target, duration = 1200, suffix = '+' }) {
   return <>{count}{suffix}</>;
 }
 
-function setFavicon(src) {
-  const link = document.querySelector("link[rel~='icon']");
-  if (link) link.href = src;
-}
-
 function About() {
   const [profileUrl, setProfileUrl] = useState('/profile.png');
   const items = useSelector((s) => s.projects.items);
@@ -37,17 +33,17 @@ function About() {
     api.get('/settings/profile-image').then(({ data }) => {
       const url = data?.url || '/profile.png';
       setProfileUrl(url);
-      setFavicon(url);
+      setCircularFavicon(url);
     }).catch(() => {});
   };
 
   useEffect(() => {
-    setFavicon('/profile.png');
+    setCircularFavicon('/profile.png');
     updateFromApi();
     const handler = (e) => {
       const url = e.detail.url || '/profile.png';
       setProfileUrl(url);
-      setFavicon(url);
+      setCircularFavicon(url);
     };
     window.addEventListener('profileImageChanged', handler);
     return () => window.removeEventListener('profileImageChanged', handler);
