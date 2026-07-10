@@ -5,6 +5,7 @@ import messagesReducer from './slices/messagesSlice';
 import experiencesReducer from './slices/experiencesSlice';
 import sectionsReducer from './slices/sectionsSlice';
 import socialLinksReducer from './slices/socialLinksSlice';
+import testimonialsReducer from './slices/testimonialsSlice';
 
 const store = configureStore({
   reducer: {
@@ -14,6 +15,7 @@ const store = configureStore({
     experiences: experiencesReducer,
     sections: sectionsReducer,
     socialLinks: socialLinksReducer,
+    testimonials: testimonialsReducer,
   },
   devTools: import.meta.env.MODE !== 'production',
 });

@@ -7,6 +7,7 @@ import { experienceAdded, experienceUpdated, experienceRemoved } from '../../red
 import { messageReceived } from '../../redux/slices/messagesSlice';
 import { sectionRealtimeUpdated } from '../../redux/slices/sectionsSlice';
 import { socialLinkCreated, socialLinkUpdated, socialLinkDeleted, socialLinksReordered } from '../../redux/slices/socialLinksSlice';
+import { testimonialAdded, testimonialUpdated, testimonialRemoved } from '../../redux/slices/testimonialsSlice';
 
 function SocketListener() {
   const dispatch = useDispatch();
@@ -36,15 +37,9 @@ function SocketListener() {
     socket.on('socialLink:deleted', (id) => dispatch(socialLinkDeleted(id)));
     socket.on('socialLinks:reordered', (data) => dispatch(socialLinksReordered(data)));
 
-    socket.on('testimonial:created', () => {
-      window.dispatchEvent(new CustomEvent('testimonialsChanged'));
-    });
-    socket.on('testimonial:updated', () => {
-      window.dispatchEvent(new CustomEvent('testimonialsChanged'));
-    });
-    socket.on('testimonial:deleted', () => {
-      window.dispatchEvent(new CustomEvent('testimonialsChanged'));
-    });
+    socket.on('testimonial:created', (data) => dispatch(testimonialAdded(data)));
+    socket.on('testimonial:updated', (data) => dispatch(testimonialUpdated(data)));
+    socket.on('testimonial:deleted', (id) => dispatch(testimonialRemoved(id)));
 
     socket.on('profileImage:updated', (url) => {
       window.dispatchEvent(new CustomEvent('profileImageChanged', { detail: { url } }));

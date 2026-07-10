@@ -1,27 +1,20 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import { Star, ChevronLeft, ChevronRight, Quote } from 'lucide-react';
-import api from '../../services/api';
+import { fetchPublishedTestimonials } from '../../redux/slices/testimonialsSlice';
 import './Testimonials.css';
 
 function Testimonials() {
-  const [testimonials, setTestimonials] = useState([]);
+  const dispatch = useDispatch();
+  const { items: testimonials, loading } = useSelector((s) => s.testimonials);
   const [active, setActive] = useState(0);
-  const [loading, setLoading] = useState(true);
   const intervalRef = useRef(null);
 
-  const fetchTestimonials = useCallback(() => {
-    api.get('/testimonials/published').then(({ data }) => {
-      setTestimonials(data.data || []);
-      setLoading(false);
-    }).catch(() => setLoading(false));
-  }, []);
-
   useEffect(() => {
-    fetchTestimonials();
-    const handler = () => fetchTestimonials();
-    window.addEventListener('testimonialsChanged', handler);
-    return () => window.removeEventListener('testimonialsChanged', handler);
-  }, [fetchTestimonials]);
+    if (!testimonials.length) {
+      dispatch(fetchPublishedTestimonials());
+    }
+  }, [dispatch, testimonials.length]);
 
   const startAutoPlay = useCallback(() => {
     stopAutoPlay();
@@ -39,11 +32,17 @@ function Testimonials() {
     return stopAutoPlay;
   }, [testimonials.length, startAutoPlay, stopAutoPlay]);
 
+  useEffect(() => {
+    if (active >= testimonials.length && testimonials.length > 0) {
+      setActive(0);
+    }
+  }, [testimonials.length, active]);
+
   const goTo = (idx) => { setActive(idx); startAutoPlay(); };
   const goPrev = () => { setActive((prev) => (prev - 1 + testimonials.length) % testimonials.length); startAutoPlay(); };
   const goNext = () => { setActive((prev) => (prev + 1) % testimonials.length); startAutoPlay(); };
 
-  if (loading) {
+  if (loading && !testimonials.length) {
     return (
       <section className="testimonials section" id="testimonials">
         <div className="container">

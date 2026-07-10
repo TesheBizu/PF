@@ -383,6 +383,19 @@ function Dashboard({ theme, onToggleTheme }) {
   const handleNavLinkDragEnd = () => {
     setDraggedIdx(null);
   };
+
+  const addNavLink = () => {
+    const links = [...getNavLinks()];
+    const idx = links.length + 1;
+    links.push({ id: `nav-${Date.now()}`, label: `Link ${idx}`, path: `/#link${idx}`, visible: true });
+    handleSectionChange('navbar', 'links', links);
+  };
+
+  const removeNavLink = (idx) => {
+    const links = [...getNavLinks()];
+    links.splice(idx, 1);
+    handleSectionChange('navbar', 'links', links);
+  };
   const handleSectionSave = async (key) => {
     setSectionSaving(key);
     try {
@@ -461,7 +474,7 @@ function Dashboard({ theme, onToggleTheme }) {
           {sidebarOpen ? <ChevronLeft size={18} /> : <ChevronRight size={18} />}
         </button>
         <div className="dash-sidebar__logo">
-          <div className="logo-badge-3d">T</div>
+          <div className="logo-badge-3d">{(sections.navbar?.logoText || 'T').charAt(0).toUpperCase()}</div>
           {showSidebarLabels && <span className="dash-sidebar__logo-text">Admin</span>}
         </div>
         <nav className="dash-sidebar__nav">
@@ -914,7 +927,7 @@ function Dashboard({ theme, onToggleTheme }) {
                   </div>
                   <div className="nav-card__body">
                     <div className="brand-input-row">
-                      <div className="brand-badge">T</div>
+                      <div className="brand-badge">{(sectionForms.navbar?.logoText || 'T').charAt(0).toUpperCase()}</div>
                       <input type="text" className="form-input brand-text-input" value={sectionForms.navbar?.logoText || ''} onChange={(e) => handleSectionChange('navbar', 'logoText', e.target.value)} placeholder="Your Name" />
                     </div>
                   </div>
@@ -935,8 +948,12 @@ function Dashboard({ theme, onToggleTheme }) {
                           <button className="nav-link-item__dot" data-visible={link.visible !== false} onClick={() => updateNavLink(idx, 'visible', link.visible === false)} title={link.visible !== false ? 'Click to hide' : 'Click to show'} />
                           <input type="text" className="nav-link-item__label" value={link.label} placeholder="Label" onChange={(e) => updateNavLink(idx, 'label', e.target.value)} />
                           <input type="text" className="nav-link-item__path" value={link.path} placeholder="/path" onChange={(e) => updateNavLink(idx, 'path', e.target.value)} />
+                          <button className="nav-link-item__remove" onClick={() => removeNavLink(idx)} title="Remove link"><X size={14} /></button>
                         </div>
                       ))}
+                      <button className="nav-link-item__add" onClick={addNavLink}>
+                        <Plus size={14} /> Add Link
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -952,8 +969,8 @@ function Dashboard({ theme, onToggleTheme }) {
                 <div className={`nav-preview-frame${previewDevice === 'mobile' ? ' nav-preview-frame--mobile' : ''}`}>
                   <div className="nav-preview-site-navbar">
                     <div className="nav-preview-site-navbar__inner">
-                      <div className="nav-preview-site-navbar__logo">
-                        <div className="nav-preview-badge">T</div>
+                        <div className="nav-preview-site-navbar__logo">
+                          <div className="nav-preview-badge">{(sectionForms.navbar?.logoText || 'T').charAt(0).toUpperCase()}</div>
                         <span className="nav-preview-logo-text">{sectionForms.navbar?.logoText || 'Logo'}</span>
                       </div>
                       {previewDevice === 'desktop' && (

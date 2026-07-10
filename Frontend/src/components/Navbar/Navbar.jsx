@@ -129,7 +129,7 @@ function Navbar({ theme, onToggleTheme }) {
       <div className="container navbar__container">
         <Link to="/" className="navbar__logo" onClick={() => setMobileOpen(false)}>
           <div className="navbar__logo-icon">
-            <span className="navbar__logo-mono">T</span>
+            <span className="navbar__logo-mono">{logoText.charAt(0).toUpperCase()}</span>
           </div>
           <span className="navbar__logo-name">{logoText}</span>
         </Link>
