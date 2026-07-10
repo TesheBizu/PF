@@ -42,15 +42,29 @@ const analyticsSlice = createSlice({
   reducers: {
     clearDetail(state) { state.detailData = null; },
     realtimeAnalyticsUpdate(state, action) {
-      const { type, data } = action.payload;
-      if (type === 'visit' && state.summary) {
-        state.summary.visitors = (state.summary.visitors || 0) + 1;
-      }
-      if (type === 'pageview' && state.summary) {
-        state.summary.pageViews = (state.summary.pageViews || 0) + 1;
-      }
-      if (type === 'interaction' && state.summary) {
-        state.summary.interactions = (state.summary.interactions || 0) + 1;
+      const payload = action.payload;
+      const evtType = payload.type || payload?.data?.type;
+      if (!state.summary) return;
+      switch (evtType) {
+        case 'visit':
+          state.summary.visitors = (state.summary.visitors || 0) + 1;
+          if (payload.isNewVisitor) state.summary.uniqueUsers = (state.summary.uniqueUsers || 0) + 1;
+          break;
+        case 'pageview':
+          state.summary.pageViews = (state.summary.pageViews || 0) + 1;
+          if (payload.page && state.pageViewsByPage) {
+            state.pageViewsByPage[payload.page] = (state.pageViewsByPage[payload.page] || 0) + 1;
+          }
+          break;
+        case 'interaction':
+          state.summary.interactions = (state.summary.interactions || 0) + 1;
+          break;
+        case 'socialClick':
+          state.summary.socialLinkClicks = (state.summary.socialLinkClicks || 0) + 1;
+          break;
+        case 'contactSubmission':
+          state.summary.contactSubmissions = (state.summary.contactSubmissions || 0) + 1;
+          break;
       }
     },
   },

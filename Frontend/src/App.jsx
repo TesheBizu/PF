@@ -1,11 +1,12 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { ToastContainer, Slide } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 import Navbar from './components/Navbar/Navbar';
 import Footer from './components/Footer/Footer';
 import SocketListener from './components/SocketListener/SocketListener';
+import { trackVisit, trackPageView } from './services/analytics';
 
 const Home       = lazy(() => import('./pages/Home/Home'));
 const About      = lazy(() => import('./pages/About/About'));
@@ -31,6 +32,23 @@ function PageLoader() {
   );
 }
 
+function AnalyticsTracker() {
+  const location = useLocation();
+
+  useEffect(() => {
+    const delay = setTimeout(() => {
+      trackPageView(location.pathname);
+    }, 500);
+    return () => clearTimeout(delay);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    trackVisit();
+  }, []);
+
+  return null;
+}
+
 function App() {
   const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'dark');
 
@@ -46,6 +64,7 @@ function App() {
   return (
     <BrowserRouter>
       <SocketListener />
+      <AnalyticsTracker />
 
       <ToastContainer
         position="top-right"

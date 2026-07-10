@@ -71,6 +71,7 @@ function Contact() {
     const e_ = validate();
     if (Object.keys(e_).length > 0) { setErrors(e_); return; }
     dispatch(sendMessage(form));
+    try { fetch('/api/analytics/record', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'contactSubmission' }) }).catch(() => {}); } catch (e) {}
   };
 
   return (

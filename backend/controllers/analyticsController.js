@@ -1,4 +1,7 @@
 const Analytics = require('../models/Analytics');
+const { getIO } = require('../socket');
+
+const LOG_PREFIX = '[Analytics]';
 
 const getAnalytics = async (req, res, next) => {
   try {
@@ -198,45 +201,96 @@ const exportAnalytics = async (req, res, next) => {
 const recordEvent = async (req, res, next) => {
   try {
     const today = new Date().toISOString().slice(0, 10);
-    const { type, page, source, device, browser, geo: geoLoc } = req.body;
+    const { type, page, source, device, browser, geo: geoLoc, isNewVisitor, platform: socialPlatform } = req.body;
+
     let entry = await Analytics.findOne({ date: today });
+    const wasNewDay = !entry;
     if (!entry) {
       entry = await Analytics.create({ date: today });
     }
-    if (type === 'visit') {
-      entry.visitors += 1;
-      if (source) {
-        const sources = entry.trafficSources || new Map();
-        sources.set(source, (sources.get(source) || 0) + 1);
-        entry.trafficSources = sources;
+
+    switch (type) {
+      case 'visit': {
+        entry.visitors += 1;
+        if (isNewVisitor) entry.uniqueUsers += 1;
+        if (source) {
+          const sources = entry.trafficSources || new Map();
+          sources.set(source, (sources.get(source) || 0) + 1);
+          entry.trafficSources = sources;
+        }
+        if (device) {
+          const devMap = entry.devices || new Map();
+          devMap.set(device, (devMap.get(device) || 0) + 1);
+          entry.devices = devMap;
+        }
+        if (browser) {
+          const brMap = entry.browsers || new Map();
+          brMap.set(browser, (brMap.get(browser) || 0) + 1);
+          entry.browsers = brMap;
+        }
+        if (geoLoc) {
+          const geoMap = entry.geo || new Map();
+          geoMap.set(geoLoc, (geoMap.get(geoLoc) || 0) + 1);
+          entry.geo = geoMap;
+        }
+        console.log(`${LOG_PREFIX} Visit recorded — visitors:${entry.visitors}, unique:${entry.uniqueUsers}, source:${source || '—'}, device:${device || '—'}, browser:${browser || '—'}`);
+        break;
       }
-      if (device) {
-        const devices = entry.devices || new Map();
-        devices.set(device, (devices.get(device) || 0) + 1);
-        entry.devices = devices;
+      case 'pageview': {
+        entry.pageViews += 1;
+        const p = page || 'unknown';
+        const details = entry.pageViewDetails || new Map();
+        details.set(p, (details.get(p) || 0) + 1);
+        entry.pageViewDetails = details;
+        console.log(`${LOG_PREFIX} Pageview — ${p} (total:${entry.pageViews})`);
+        break;
       }
-      if (browser) {
-        const browsers = entry.browsers || new Map();
-        browsers.set(browser, (browsers.get(browser) || 0) + 1);
-        entry.browsers = browsers;
+      case 'interaction': {
+        entry.interactions += 1;
+        console.log(`${LOG_PREFIX} Interaction recorded (total:${entry.interactions})`);
+        break;
       }
-      if (geoLoc) {
-        const geoData = entry.geo || new Map();
-        geoData.set(geoLoc, (geoData.get(geoLoc) || 0) + 1);
-        entry.geo = geoData;
+      case 'socialClick': {
+        entry.socialLinkClicks = (entry.socialLinkClicks || 0) + 1;
+        console.log(`${LOG_PREFIX} Social click — ${socialPlatform || 'unknown'} (total:${entry.socialLinkClicks})`);
+        break;
       }
-    } else if (type === 'pageview') {
-      entry.pageViews += 1;
-      const p = page || 'unknown';
-      const details = entry.pageViewDetails || new Map();
-      details.set(p, (details.get(p) || 0) + 1);
-      entry.pageViewDetails = details;
-    } else if (type === 'interaction') {
-      entry.interactions += 1;
+      case 'contactSubmission': {
+        entry.contactSubmissions = (entry.contactSubmissions || 0) + 1;
+        console.log(`${LOG_PREFIX} Contact submission (total:${entry.contactSubmissions})`);
+        break;
+      }
+      default:
+        console.log(`${LOG_PREFIX} Unknown event type: ${type}`);
+        return res.status(400).json({ success: false, message: `Unknown event type: ${type}` });
     }
+
     await entry.save();
-    res.status(200).json({ success: true });
+
+    const changed = {};
+    changed[type] = true;
+    if (wasNewDay) changed.newDay = true;
+    try {
+      getIO().emit('analytics:stats', {
+        type,
+        date: today,
+        page: type === 'pageview' ? page : undefined,
+        isNewVisitor: type === 'visit' ? isNewVisitor : undefined,
+        socialPlatform: type === 'socialClick' ? socialPlatform : undefined,
+        uniqueUsersToday: entry.uniqueUsers,
+        visitorsToday: entry.visitors,
+        pageViewsToday: entry.pageViews,
+        interactionsToday: entry.interactions,
+      });
+    } catch (socketErr) {
+      if (process.env.NODE_ENV === 'development') {
+        console.warn(`${LOG_PREFIX} Socket emission failed:`, socketErr.message);
+      }
+    }
+
+    res.status(200).json({ success: true, date: today });
   } catch (error) {
+    console.error(`${LOG_PREFIX} Error recording event:`, error.message);
     next(error);
   }
 };
