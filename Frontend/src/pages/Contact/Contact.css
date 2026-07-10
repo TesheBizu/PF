@@ -7,15 +7,15 @@
   align-items: start;
 }
 
-/* ── Info column ────────────────────────────────────────────── */
 .contact__info-title {
-  font-size: 1.5rem;
+  font-size: 1.4rem;
   font-weight: 700;
   margin-bottom: var(--space-md);
+  color: var(--color-heading);
 }
 
 .contact__info-text {
-  font-size: 0.95rem;
+  font-size: 0.92rem;
   line-height: 1.8;
   color: var(--color-text-muted);
   margin-bottom: var(--space-xl);
@@ -34,7 +34,7 @@
   gap: var(--space-md);
   background: var(--color-surface);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
+  border-radius: 14px;
   padding: var(--space-md) var(--space-lg);
   text-decoration: none;
   transition: all var(--transition-base);
@@ -43,13 +43,13 @@
 .contact__card:hover {
   border-color: var(--color-primary);
   background: var(--color-primary-glow);
-  transform: translateX(6px);
+  transform: translateX(4px);
 }
 
 .contact__card-icon {
-  width: 44px;
-  height: 44px;
-  border-radius: var(--radius-md);
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
   background: var(--color-primary-glow);
   display: flex;
   align-items: center;
@@ -59,42 +59,41 @@
 }
 
 .contact__card-label {
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.07em;
+  letter-spacing: 0.06em;
   color: var(--color-text-dim);
   margin-bottom: 2px;
 }
 
 .contact__card-value {
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   font-weight: 600;
   color: var(--color-text);
 }
 
-/* Availability */
 .contact__availability {
   display: flex;
   align-items: center;
   gap: var(--space-sm);
-  font-size: 0.875rem;
+  font-size: 0.85rem;
   color: var(--color-success);
   font-weight: 500;
 }
 
 .contact__availability-dot {
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   background: var(--color-success);
+  animation: pulse 2s ease-in-out infinite;
 }
 
-/* ── Form ───────────────────────────────────────────────────── */
 .contact__form-col {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
+  border-radius: 20px;
   padding: var(--space-2xl);
 }
 
@@ -115,7 +114,7 @@
 }
 
 .contact__error {
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   color: var(--color-error);
   margin-top: 2px;
   display: block;
@@ -124,8 +123,8 @@
 .contact__submit {
   width: 100%;
   justify-content: center;
-  font-size: 1rem;
-  padding: 0.9rem;
+  font-size: 0.95rem;
+  padding: 0.85rem;
 }
 
 .contact__submit:disabled {
@@ -143,7 +142,6 @@
   animation: spin 0.7s linear infinite;
 }
 
-/* Responsive */
 @media (max-width: 900px) {
   .contact__grid { grid-template-columns: 1fr; }
 }

@@ -1,9 +1,8 @@
 .projects { position: relative; z-index: 1; }
 
-/* ── Project card image ─────────────────────────── */
 .project-card__img {
   width: 100%;
-  height: 150px;
+  height: 160px;
   object-fit: cover;
   display: block;
   border-bottom: 1px solid var(--color-border);
@@ -11,8 +10,8 @@
 
 .project-card__img-default {
   width: 100%;
-  height: 150px;
-  background: var(--color-surface-2);
+  height: 160px;
+  background: linear-gradient(135deg, var(--color-primary-glow), var(--color-surface-2));
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -24,7 +23,7 @@
 
 .project-card__img-code {
   font-family: var(--font-mono);
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   opacity: 0.7;
 }
 
@@ -45,22 +44,21 @@
 }
 
 .projects__filter-btn {
-  padding: 0.4rem 1rem;
+  padding: 0.35rem 0.9rem;
   border-radius: var(--radius-full);
   border: 1.5px solid var(--color-border);
   background: var(--color-surface);
   color: var(--color-text-muted);
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   font-weight: 500;
-  font-family: var(--font-mono);
   cursor: pointer;
   transition: all var(--transition-base);
 }
 
 .projects__filter-btn:hover {
   border-color: var(--color-primary);
-  color: #fff;
-  background: var(--color-primary);
+  color: var(--color-primary);
+  background: var(--color-primary-glow);
 }
 
 .projects__filter-btn--active {
@@ -69,7 +67,6 @@
   border-color: var(--color-primary);
 }
 
-/* Carousel */
 .projects__carousel-wrap {
   position: relative;
   margin-bottom: var(--space-3xl);
@@ -106,7 +103,6 @@
   z-index: 2;
 }
 
-/* Hover focus — hovered card clear & large, others dimmed */
 .projects__carousel-wrap--hovering .swiper-slide {
   opacity: 0.3;
   transform: scale(0.86) translateY(8px);
@@ -129,15 +125,14 @@
 }
 
 .projects__swiper .swiper-slide-active .project-card {
-  box-shadow: var(--shadow-md), 0 0 28px var(--color-primary-glow);
+  box-shadow: var(--shadow-md);
 }
 
 .projects__carousel-wrap--hovering .projects__slide--focused .project-card {
-  box-shadow: var(--shadow-md), 0 0 36px var(--color-primary-glow);
+  box-shadow: var(--shadow-lg);
   border-color: var(--color-primary);
 }
 
-/* Let the slide handle scale — avoid double transform from global .card:hover */
 .projects__swiper .project-card:hover {
   transform: none;
 }
@@ -148,51 +143,49 @@
   padding: var(--space-2xl) 0;
 }
 
-/* Swiper navigation arrows */
 .projects__swiper .swiper-button-prev,
 .projects__swiper .swiper-button-next {
-  width: 42px;
-  height: 42px;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
-  color: var(--color-primary);
+  color: var(--color-text-muted);
   transition: all var(--transition-base);
 }
 
 .projects__swiper .swiper-button-prev::after,
 .projects__swiper .swiper-button-next::after {
-  font-size: 1rem;
+  font-size: 0.9rem;
   font-weight: 700;
 }
 
 .projects__swiper .swiper-button-prev:hover,
 .projects__swiper .swiper-button-next:hover {
-  background: var(--color-primary-glow);
+  background: var(--color-primary);
+  color: #fff;
   border-color: var(--color-primary);
-  box-shadow: 0 4px 16px var(--color-primary-glow);
+  box-shadow: 0 4px 16px rgba(99, 102, 241, 0.2);
 }
 
 .projects__swiper .swiper-button-disabled {
-  opacity: 0.35;
+  opacity: 0.3;
 }
 
-/* Swiper pagination dots */
 .projects__swiper .swiper-pagination-bullet {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
   background: var(--color-text-dim);
   opacity: 1;
   transition: all var(--transition-base);
 }
 
 .projects__swiper .swiper-pagination-bullet-active {
-  width: 24px;
+  width: 20px;
   border-radius: var(--radius-full);
   background: var(--color-primary);
 }
 
-/* Loading skeleton grid */
 .projects__grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
@@ -200,7 +193,6 @@
   margin-bottom: var(--space-3xl);
 }
 
-/* Card */
 .project-card { display: flex; flex-direction: column; }
 
 .project-card__top {
@@ -214,8 +206,8 @@
   gap: 6px;
 }
 .project-card__dots span {
-  width: 12px;
-  height: 12px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
   background: var(--color-border);
 }
@@ -224,15 +216,15 @@
 .project-card__dots span:nth-child(3) { background: #28c840; }
 
 .project-card__featured {
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   font-weight: 600;
   color: var(--color-accent);
   font-family: var(--font-mono);
 }
 
 .project-card__icon {
-  width: 56px;
-  height: 56px;
+  width: 52px;
+  height: 52px;
   border-radius: var(--radius-md);
   background: var(--color-primary-glow);
   border: 1px solid var(--color-border);
@@ -243,14 +235,14 @@
 }
 
 .project-card__title {
-  font-size: 1.05rem;
+  font-size: 1rem;
   font-weight: 700;
   color: var(--color-heading);
   line-height: 1.3;
 }
 
 .project-card__desc {
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   line-height: 1.5;
   color: var(--color-text-muted);
   display: -webkit-box;
@@ -273,11 +265,10 @@
 }
 
 .project-card__btn {
-  font-size: 0.8rem;
-  padding: 0.35rem 0.85rem;
+  font-size: 0.78rem;
+  padding: 0.3rem 0.8rem;
 }
 
-/* CTA */
 .projects__cta {
   text-align: center;
   padding: var(--space-2xl);
@@ -291,18 +282,17 @@
 }
 
 .projects__cta p {
-  font-size: 1rem;
+  font-size: 0.95rem;
   color: var(--color-text-muted);
 }
 
-/* Responsive */
 @media (max-width: 768px) {
   .projects__carousel-wrap { padding: 0 var(--space-xs); }
   .projects__grid { grid-template-columns: 1fr; }
 
   .project-card__img,
   .project-card__img-default {
-    height: 120px;
+    height: 130px;
   }
 
   .project-card__body {
@@ -311,11 +301,11 @@
   }
 
   .project-card__title {
-    font-size: 0.95rem;
+    font-size: 0.92rem;
   }
 
   .project-card__desc {
-    font-size: 0.8rem;
+    font-size: 0.78rem;
     line-height: 1.4;
     -webkit-line-clamp: 2;
   }
@@ -323,14 +313,13 @@
   .project-card__btn {
     flex: 1;
     justify-content: center;
-    min-height: 40px;
+    min-height: 38px;
   }
 
   .project-card__links {
     width: 100%;
   }
 
-  /* Reduce hover dimming on touch devices */
   .projects__carousel-wrap--hovering .swiper-slide {
     opacity: 1;
     transform: scale(1);
@@ -339,39 +328,39 @@
 
   .projects__swiper .swiper-button-prev,
   .projects__swiper .swiper-button-next {
-    width: 36px;
-    height: 36px;
+    width: 34px;
+    height: 34px;
   }
 
   .projects__swiper .swiper-button-prev::after,
   .projects__swiper .swiper-button-next::after {
-    font-size: 0.85rem;
+    font-size: 0.8rem;
   }
 
   .projects__filter-btn {
-    font-size: 0.8rem;
-    padding: 0.35rem 0.85rem;
+    font-size: 0.78rem;
+    padding: 0.3rem 0.8rem;
   }
 }
 
 @media (max-width: 480px) {
   .project-card__img,
   .project-card__img-default {
-    height: 100px;
+    height: 110px;
   }
 
   .project-card__title {
-    font-size: 0.9rem;
+    font-size: 0.88rem;
   }
 
   .project-card__desc {
-    font-size: 0.78rem;
+    font-size: 0.75rem;
     -webkit-line-clamp: 2;
   }
 
   .project-card__btn {
-    font-size: 0.78rem;
-    padding: 0.35rem 0.75rem;
+    font-size: 0.75rem;
+    padding: 0.3rem 0.7rem;
   }
 
   .projects__cta {
