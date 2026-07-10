@@ -2,8 +2,7 @@ import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 import { sendMessage, resetSent } from '../../redux/slices/messagesSlice';
-import { Mail, Send } from 'lucide-react';
-import { Github, Linkedin } from '../../components/Icons';
+import { Mail, Send, Phone, MapPin } from 'lucide-react';
 import './Contact.css';
 
 const CONTACT_INFO = [
@@ -14,16 +13,16 @@ const CONTACT_INFO = [
     href: 'mailto:teshelin7@gmail.com',
   },
   {
-    icon: <Github size={22} />,
-    label: 'GitHub',
-    value: 'github.com/TesheBizu',
-    href: 'https://github.com/TesheBizu',
+    icon: <Phone size={22} />,
+    label: 'Phone',
+    value: '+251988044439',
+    href: 'tel:+251988044439',
   },
   {
-    icon: <Linkedin size={22} />,
-    label: 'LinkedIn',
-    value: 'teshome-bizuayehu',
-    href: 'https://linkedin.com/in/teshome-bizuayehu',
+    icon: <MapPin size={22} />,
+    label: 'Location',
+    value: 'Bahir Dar, Ethiopia',
+    href: null,
   },
 ];
 
@@ -98,21 +97,31 @@ function Contact() {
             </p>
 
             <div className="contact__cards">
-              {CONTACT_INFO.map((c) => (
-                <a
-                  key={c.label}
-                  href={c.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="contact__card"
-                >
-                  <div className="contact__card-icon" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{c.icon}</div>
-                  <div>
-                    <div className="contact__card-label">{c.label}</div>
-                    <div className="contact__card-value">{c.value}</div>
+              {CONTACT_INFO.map((c) =>
+                c.href ? (
+                  <a
+                    key={c.label}
+                    href={c.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="contact__card"
+                  >
+                    <div className="contact__card-icon" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{c.icon}</div>
+                    <div>
+                      <div className="contact__card-label">{c.label}</div>
+                      <div className="contact__card-value">{c.value}</div>
+                    </div>
+                  </a>
+                ) : (
+                  <div key={c.label} className="contact__card">
+                    <div className="contact__card-icon" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{c.icon}</div>
+                    <div>
+                      <div className="contact__card-label">{c.label}</div>
+                      <div className="contact__card-value">{c.value}</div>
+                    </div>
                   </div>
-                </a>
-              ))}
+                )
+              )}
             </div>
 
             {/* Availability indicator */}
