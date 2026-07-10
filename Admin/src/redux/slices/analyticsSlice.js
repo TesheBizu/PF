@@ -49,11 +49,24 @@ const analyticsSlice = createSlice({
         case 'visit':
           state.summary.visitors = (state.summary.visitors || 0) + 1;
           if (payload.isNewVisitor) state.summary.uniqueUsers = (state.summary.uniqueUsers || 0) + 1;
+          if (payload.visitorsToday != null && state.entries?.length) {
+            const last = state.entries[state.entries.length - 1];
+            if (last.date === payload.date) {
+              last.visitors = payload.visitorsToday;
+              last.uniqueUsers = payload.uniqueUsersToday || last.uniqueUsers;
+            }
+          }
           break;
         case 'pageview':
           state.summary.pageViews = (state.summary.pageViews || 0) + 1;
           if (payload.page && state.pageViewsByPage) {
             state.pageViewsByPage[payload.page] = (state.pageViewsByPage[payload.page] || 0) + 1;
+          }
+          if (payload.pageViewsToday != null && state.entries?.length) {
+            const last = state.entries[state.entries.length - 1];
+            if (last.date === payload.date) {
+              last.pageViews = payload.pageViewsToday;
+            }
           }
           break;
         case 'interaction':

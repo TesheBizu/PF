@@ -300,4 +300,65 @@ const recordEvent = async (req, res, next) => {
   }
 };
 
-module.exports = { getAnalytics, getAnalyticsDetail, exportAnalytics, recordEvent };
+const seedAnalytics = async (req, res, next) => {
+  try {
+    const existing = await Analytics.countDocuments({ isSeedData: true });
+    if (existing > 0) {
+      await Analytics.deleteMany({ isSeedData: true });
+      console.log(`${LOG_PREFIX} Deleted ${existing} existing seed records.`);
+    }
+
+    const endDate = new Date();
+    const startDate = new Date(endDate);
+    startDate.setDate(endDate.getDate() - 30);
+
+    const days = [];
+    const cur = new Date(startDate);
+    while (cur <= endDate) {
+      days.push(cur.toISOString().slice(0, 10));
+      cur.setDate(cur.getDate() + 1);
+    }
+
+    const batch = [];
+    for (let i = 0; i < days.length; i++) {
+      const date = days[i];
+      const seed = 42 + i * 1000;
+      let s = seed % 2147483647;
+      if (s <= 0) s += 2147483646;
+      const rng = () => { s = (s * 16807) % 2147483647; return (s - 1) / 2147483646; };
+
+      const progress = i / days.length;
+      const base = 15 + progress * 35;
+      const d = new Date(date);
+      const wk = d.getDay();
+      const wf = (wk === 0 || wk === 6) ? 0.5 + rng() * 0.3 : 1 + rng() * 0.4;
+      const spike = rng() > 0.93 ? 2 + rng() * 2 : 1;
+      const visitors = Math.round(base * wf * spike);
+      const uu = Math.round(visitors * (0.5 + rng() * 0.3));
+      const pv = Math.round(visitors * (2 + rng() * 4));
+
+      const sources = { direct: Math.round(visitors * 0.35), organic: Math.round(visitors * 0.30), social: Math.round(visitors * 0.15), referral: Math.round(visitors * 0.12), email: Math.round(visitors * 0.08) };
+      const deviceMap = { desktop: Math.round(visitors * 0.55), mobile: Math.round(visitors * 0.35), tablet: visitors - Math.round(visitors * 0.55) - Math.round(visitors * 0.35) };
+      const browserMap = { chrome: Math.round(visitors * 0.50), firefox: Math.round(visitors * 0.15), safari: Math.round(visitors * 0.18), edge: Math.round(visitors * 0.12), other: visitors - Math.round(visitors * 0.50) - Math.round(visitors * 0.15) - Math.round(visitors * 0.18) - Math.round(visitors * 0.12) };
+      const geoMap = { US: Math.round(visitors * 0.30), IN: Math.round(visitors * 0.15), ET: Math.round(visitors * 0.12), UK: Math.round(visitors * 0.10), DE: Math.round(visitors * 0.08) };
+      const pvDetails = { '/': Math.round(pv * 0.25), '/about': Math.round(pv * 0.15), '/projects': Math.round(pv * 0.25), '/skills': Math.round(pv * 0.20), '/contact': Math.round(pv * 0.10), '/testimonials': Math.round(pv * 0.05) };
+
+      batch.push({
+        date, visitors, uniqueUsers: uu, pageViews: pv,
+        pageViewDetails: pvDetails, interactions: Math.round(visitors * rng() * 1.5),
+        trafficSources: sources, devices: deviceMap, browsers: browserMap, geo: geoMap,
+        socialLinkClicks: Math.round(visitors * 0.08), testimonialConversions: Math.round(visitors * 0.03),
+        contactSubmissions: Math.round(visitors * 0.02), isSeedData: true,
+      });
+    }
+
+    await Analytics.insertMany(batch, { ordered: false });
+    console.log(`${LOG_PREFIX} Seeded ${batch.length} days of analytics data.`);
+
+    res.status(200).json({ success: true, message: `Seeded ${batch.length} days`, count: batch.length });
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports = { getAnalytics, getAnalyticsDetail, exportAnalytics, recordEvent, seedAnalytics };
