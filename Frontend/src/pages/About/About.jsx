@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { Mail, Download } from 'lucide-react';
 import { setCircularFavicon } from '../../utils/circularFavicon';
