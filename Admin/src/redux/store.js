@@ -6,6 +6,10 @@ import messagesReducer from './slices/messagesSlice';
 import experiencesReducer from './slices/experiencesSlice';
 import siteSettingsReducer from './slices/siteSettingsSlice';
 import testimonialsReducer from './slices/testimonialsSlice';
+import sectionsReducer from './slices/sectionsSlice';
+import notificationsReducer from './slices/notificationsSlice';
+import analyticsReducer from './slices/analyticsSlice';
+import socialLinksReducer from './slices/socialLinksSlice';
 
 const store = configureStore({
   reducer: {
@@ -16,6 +20,10 @@ const store = configureStore({
     experiences: experiencesReducer,
     siteSettings: siteSettingsReducer,
     testimonials: testimonialsReducer,
+    sections: sectionsReducer,
+    notifications: notificationsReducer,
+    analytics: analyticsReducer,
+    socialLinks: socialLinksReducer,
   },
   devTools: import.meta.env.MODE !== 'production',
 });

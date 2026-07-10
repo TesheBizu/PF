@@ -17,6 +17,15 @@ import { profileImageUpdated, profileImageDeleted } from '../../redux/slices/sit
 import {
   testimonialRealtimeAdded, testimonialRealtimeUpdated, testimonialRealtimeRemoved,
 } from '../../redux/slices/testimonialsSlice';
+import { sectionRealtimeUpdated } from '../../redux/slices/sectionsSlice';
+import {
+  notificationRealtimeNew, notificationRealtimeRead, notificationRealtimeAllRead,
+  notificationRealtimeDeleted, notificationUnreadCountChanged,
+} from '../../redux/slices/notificationsSlice';
+import {
+  socialLinkRealtimeAdded, socialLinkRealtimeUpdated, socialLinkRealtimeRemoved,
+  socialLinksRealtimeReordered,
+} from '../../redux/slices/socialLinksSlice';
 import { toast } from 'react-toastify';
 
 function SocketListener() {
@@ -50,6 +59,24 @@ function SocketListener() {
     socket.on('testimonial:created', (data) => dispatch(testimonialRealtimeAdded(data)));
     socket.on('testimonial:updated', (data) => dispatch(testimonialRealtimeUpdated(data)));
     socket.on('testimonial:deleted', (id) => dispatch(testimonialRealtimeRemoved(id)));
+
+    socket.on('sectionSetting:updated', ({ key, value }) => {
+      dispatch(sectionRealtimeUpdated({ key, value }));
+    });
+
+    socket.on('notification:new', (data) => {
+      dispatch(notificationRealtimeNew(data));
+      toast.info(data.title);
+    });
+    socket.on('notification:read', (data) => dispatch(notificationRealtimeRead(data)));
+    socket.on('notification:allRead', () => dispatch(notificationRealtimeAllRead()));
+    socket.on('notification:deleted', (id) => dispatch(notificationRealtimeDeleted(id)));
+    socket.on('notification:unreadCountChanged', (count) => dispatch(notificationUnreadCountChanged(count)));
+
+    socket.on('socialLink:created', (data) => dispatch(socialLinkRealtimeAdded(data)));
+    socket.on('socialLink:updated', (data) => dispatch(socialLinkRealtimeUpdated(data)));
+    socket.on('socialLink:deleted', (id) => dispatch(socialLinkRealtimeRemoved(id)));
+    socket.on('socialLinks:reordered', (data) => dispatch(socialLinksRealtimeReordered(data)));
 
     return () => {
       socket.disconnect();

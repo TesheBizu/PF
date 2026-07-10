@@ -17,6 +17,10 @@ const uploadRoutes = require('./routes/upload');
 const experienceRoutes = require('./routes/experiences');
 const siteSettingRoutes = require('./routes/siteSettings');
 const testimonialRoutes = require('./routes/testimonials');
+const sectionRoutes = require('./routes/sections');
+const notificationRoutes = require('./routes/notifications');
+const analyticsRoutes = require('./routes/analytics');
+const socialLinkRoutes = require('./routes/socialLinks');
 
 
 // Connect to Database
@@ -81,6 +85,10 @@ app.use('/api/upload', uploadRoutes);
 app.use('/api/experiences', experienceRoutes);
 app.use('/api/settings', siteSettingRoutes);
 app.use('/api/testimonials', testimonialRoutes);
+app.use('/api/sections', sectionRoutes);
+app.use('/api/notifications', notificationRoutes);
+app.use('/api/analytics', analyticsRoutes);
+app.use('/api/social-links', socialLinkRoutes);
 
 
 // Health check
