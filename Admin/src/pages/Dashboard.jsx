@@ -19,7 +19,7 @@ import {
   Plus, X, Edit3, Trash2, MailOpen, Reply, Mail, Upload, Eye, EyeOff, History, Star, Check, XCircle,
   Monitor, Smartphone, Menu as MenuIcon, CreditCard, BarChart3, TrendingUp, Bell, Share2, UserCog, Settings,
   Activity, Users, Globe, Clock, ArrowUp, ArrowDown, GripVertical, Save, RefreshCw, CheckCheck,
-  Search, Calendar, Filter, ExternalLink, Hash, AlertTriangle, CheckCircle, Info,
+  Search, Filter, ExternalLink, Hash, AlertTriangle, CheckCircle, Info,
 } from 'lucide-react';
 import './Admin.css';
 import FooterBar from '../components/Footer/FooterBar';
@@ -552,12 +552,9 @@ const handleSectionSave = async (key) => {
           <div className="dash-topbar__actions">
             <button className="dash-topbar__action-btn" title="Notifications" onClick={() => setTab('notifications-center')}>
               <Bell size={16} />
-              {notifUnread > 0 && <span className="dash-topbar__notif-dot" />}
+              {notifUnread > 0 && <span className="dash-topbar__notif-badge">{notifUnread}</span>}
             </button>
-            <div className="dash-topbar__date-selector" title="Date range">
-              <Calendar size={14} />
-              <span>Last 30 days</span>
-            </div>
+            
             <div className="dash-topbar__user" title="Edit profile" onClick={() => setModal('profileEditor')}>
               <div className="dash-topbar__user-avatar">
                 {profileImageUrl ? <img src={profileImageUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} /> : (user?.name?.[0] ?? 'A')}
@@ -1233,25 +1230,15 @@ const handleSectionSave = async (key) => {
             <div className="page-toolbar"><div className="page-toolbar__left"><span className="page-toolbar__title">Settings</span></div></div>
             <div className="settings-layout">
               <div className="settings-nav">
-                {['profile', 'security', 'appearance', 'system'].map((st) => (
+                {['security', 'appearance', 'system'].map((st) => (
                   <button key={st} className={`settings-nav-btn${settingsTab === st ? ' settings-nav-btn--active' : ''}`} onClick={() => setSettingsTab(st)}>
-                    {st === 'profile' && <UserIcon size={14} />}{st === 'security' && <Eye size={14} />}{st === 'appearance' && <Monitor size={14} />}{st === 'system' && <Settings size={14} />}
+                    {st === 'security' && <Eye size={14} />}{st === 'appearance' && <Monitor size={14} />}{st === 'system' && <Settings size={14} />}
                     {st.charAt(0).toUpperCase() + st.slice(1)}
                   </button>
                 ))}
               </div>
               <div className="settings-content">
-                {settingsTab === 'profile' && (
-                  <div className="settings-section">
-                    <div className="settings-card">
-                      <span className="settings-card__title">Site Information</span>
-                      <span className="settings-card__desc">Basic information about your portfolio site.</span>
-                      <div className="form-group"><label className="form-label">Site Title</label><input type="text" className="form-input" placeholder="Teshome Bizuayehu Portfolio" value={sectionForms.settings?.siteTitle || ''} onChange={(e) => handleSectionChange('settings', 'siteTitle', e.target.value)} /></div>
-                      <div className="form-group"><label className="form-label">Site Description</label><textarea className="form-textarea" rows={2} placeholder="Full Stack Developer Portfolio" value={sectionForms.settings?.siteDescription || ''} onChange={(e) => handleSectionChange('settings', 'siteDescription', e.target.value)} /></div>
-                      <div className="settings-actions"><button className="btn btn-primary" onClick={() => handleSectionSave('settings')} disabled={sectionSaving === 'settings'} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Save size={14} /> Save</button></div>
-                    </div>
-                  </div>
-                )}
+                
                 {settingsTab === 'security' && (
                   <div className="settings-section">
                     <div className="settings-card">
@@ -1560,7 +1547,7 @@ const handleSectionSave = async (key) => {
               </div>
             </div>
             <div className="form-group">
-              <label className="form-label">Site Title (metadata)</label>
+              <label className="form-label">Profile Name</label>
               <input type="text" className="form-input" placeholder="Teshome Bizuayehu Portfolio" value={sectionForms.settings?.siteTitle || user?.name || ''} onChange={(e) => handleSectionChange('settings', 'siteTitle', e.target.value)} />
               <span style={{ fontSize: '0.72rem', color: 'var(--color-text-muted)', marginTop: 2, display: 'block' }}>Controls the browser tab title and SEO metadata.</span>
             </div>

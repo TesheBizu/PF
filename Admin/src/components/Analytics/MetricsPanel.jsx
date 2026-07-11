@@ -3,9 +3,8 @@ import { useSelector, useDispatch } from 'react-redux';
 import {
   Users, Eye, Clock, MessageSquare, TrendingUp, TrendingDown,
   Download, Search, ArrowUpDown, Star, BarChart3, RefreshCw,
-  Calendar,
 } from 'lucide-react';
-import { fetchAnalytics, realtimeAnalyticsUpdate } from '../../redux/slices/analyticsSlice';
+import { fetchAnalytics } from '../../redux/slices/analyticsSlice';
 import './AnalyticsPanels.css';
 
 const DATE_RANGES = [
@@ -62,7 +61,6 @@ export default function MetricsPanel() {
     const totalPageViews = summary?.pageViews || 0;
     const totalInteractions = summary?.interactions || 0;
     const contactSubs = summary?.contactSubmissions || 0;
-    const totalDays = entries?.length || 1;
     const recent = entries?.slice(-Math.max(1, Math.floor(days / 2))) || [];
     const prior = entries?.slice(0, Math.max(0, entries.length - Math.floor(days / 2))) || [];
 
@@ -73,7 +71,6 @@ export default function MetricsPanel() {
     const priorPageViews = sum(prior, 'pageViews');
     const recentInteractions = sum(recent, 'interactions');
     const priorInteractions = sum(prior, 'interactions');
-    const recentContact = contactSubs; // contactSubs is total, use overall
 
     const calcTrend = (recentVal, priorVal) => {
       if (priorVal <= 0) return recentVal > 0 ? 100 : 0;
@@ -112,7 +109,7 @@ export default function MetricsPanel() {
       },
       convRate: {
         value: convRate,
-        trend: calcTrend(recentContact, priorContact || 1),
+        trend: calcTrend(contactSubs, priorVisitors || 1),
         icon: MessageSquare,
         label: 'Contact Conv. Rate',
         format: 'percent',
@@ -194,7 +191,6 @@ export default function MetricsPanel() {
 
   return (
     <div className="mt-panel animate-fadeInUp">
-      {/* Header */}
       <div className="mt-header">
         <div className="mt-header__left">
           <div className="mt-header__brand">
@@ -209,7 +205,6 @@ export default function MetricsPanel() {
         </div>
         <div className="mt-header__right">
           <div className="mt-date-range">
-            <Calendar size={13} className="mt-date-range__icon" />
             {DATE_RANGES.map((r) => (
               <button
                 key={r.value}
@@ -229,15 +224,14 @@ export default function MetricsPanel() {
         </div>
       </div>
 
-      {loading ? (
+      {loading && !summary ? (
         <div className="mt-loading">
           {Array.from({ length: 4 }).map((_, i) => (
             <div key={i} className="skeleton mt-kpi-skeleton" />
           ))}
         </div>
-      ) : summary ? (
+      ) : (
         <>
-          {/* KPI Cards */}
           <div className="mt-kpi-grid">
             {Object.values(kpis).map((kpi, idx) => {
               const colors = metricCardColor(idx);
@@ -256,7 +250,6 @@ export default function MetricsPanel() {
             })}
           </div>
 
-          {/* Most Viewed Projects */}
           <div className="mt-table-card">
             <div className="mt-table-card__header">
               <div className="mt-table-card__title">
@@ -335,12 +328,6 @@ export default function MetricsPanel() {
             )}
           </div>
         </>
-      ) : (
-        <div className="empty-panel">
-          <BarChart3 size={32} />
-          <h3>No analytics data yet</h3>
-          <p>Visit the public site to generate data, then refresh.</p>
-        </div>
       )}
     </div>
   );
