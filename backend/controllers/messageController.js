@@ -89,4 +89,24 @@ const markAsRead = async (req, res, next) => {
   }
 };
 
-module.exports = { sendMessage, getMessages, getMessage, deleteMessage, markAsRead };
+const seedMessages = async (req, res, next) => {
+  try {
+    await Message.deleteMany({ isSeedData: true });
+    const now = Date.now();
+    const seeds = [
+      { name: 'Sarah Johnson', email: 'sarah.j@example.com', subject: 'Collaboration Inquiry', message: 'Hi! I really love your portfolio. I run a web development agency and we are looking for a frontend developer for an upcoming project. Would you be interested in discussing this further?', isRead: false, createdAt: now - 86400000 * 6 },
+      { name: 'Michael Chen', email: 'm.chen@example.com', subject: 'Freelance Project Opportunity', message: 'Hello, I came across your work through a mutual connection. We need a React developer to build a dashboard interface for our SaaS platform. The project would start next month. Let me know if you are available!', isRead: false, createdAt: now - 86400000 * 5 },
+      { name: 'Emily Rodriguez', email: 'emily.r@example.com', subject: 'Thank You!', message: 'Just wanted to say thank you for the amazing portfolio template. I used it as inspiration for my own site and it turned out great! Keep up the fantastic work.', isRead: true, createdAt: now - 86400000 * 4 },
+      { name: 'David Kim', email: 'david.kim@example.com', subject: 'Speaking Engagement', message: 'We are organizing a tech conference in Addis Ababa next quarter and would love to have you as a speaker. Your experience as a full-stack developer would be invaluable to our audience.', isRead: false, createdAt: now - 86400000 * 3 },
+      { name: 'Priya Patel', email: 'priya.p@example.com', subject: 'Code Review Request', message: 'Hi! I am a junior developer and I have been following your tutorials. Would you mind taking a look at my GitHub repo and giving some feedback? I would really appreciate your insights.', isRead: true, createdAt: now - 86400000 * 2 },
+      { name: 'James Wilson', email: 'j.wilson@example.com', subject: 'Job Offer - Senior Developer', message: 'We are impressed by your portfolio and would like to invite you to apply for a Senior Full-Stack Developer position at our company. Remote work is available. Please check the attached job description.', isRead: false, createdAt: now - 86400000 * 1 },
+      { name: 'Amina Hassan', email: 'amina.h@example.com', subject: 'Partnership Proposal', message: 'I run a coding bootcamp and we are looking for guest instructors. Your expertise in React and Node.js would be perfect for our advanced track. We offer competitive compensation for part-time instructors.', isRead: false, createdAt: now - 86400000 * 0.5 },
+    ];
+    const created = await Message.insertMany(seeds.map((s) => ({ ...s, isSeedData: true })));
+    res.status(200).json({ success: true, message: `Seeded ${created.length} messages`, count: created.length });
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports = { sendMessage, getMessages, getMessage, deleteMessage, markAsRead, seedMessages };

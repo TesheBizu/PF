@@ -6,6 +6,7 @@ const {
   markAsRead,
   markAllAsRead,
   deleteNotification,
+  seedNotifications,
 } = require('../controllers/notificationController');
 const { protect } = require('../middleware/auth');
 
@@ -14,5 +15,6 @@ router.post('/', protect, createNotification);
 router.patch('/read-all', protect, markAllAsRead);
 router.patch('/:id/read', protect, markAsRead);
 router.delete('/:id', protect, deleteNotification);
+router.post('/seed', protect, seedNotifications);
 
 module.exports = router;

@@ -64,4 +64,28 @@ const deleteNotification = async (req, res, next) => {
   }
 };
 
-module.exports = { getNotifications, createNotification, markAsRead, markAllAsRead, deleteNotification };
+const seedNotifications = async (req, res, next) => {
+  try {
+    await Notification.deleteMany({ isSeedData: true });
+    const now = Date.now();
+    const seeds = [
+      { type: 'message', title: 'New message from Sarah Johnson', body: 'Collaboration Inquiry', isRead: false, createdAt: now - 86400000 * 6 },
+      { type: 'message', title: 'New message from Michael Chen', body: 'Freelance Project Opportunity', isRead: false, createdAt: now - 86400000 * 5 },
+      { type: 'system', title: 'Portfolio performance update', body: 'Your portfolio received 230 visits this week — a 12% increase from last week.', isRead: true, createdAt: now - 86400000 * 4 },
+      { type: 'message', title: 'New message from David Kim', body: 'Speaking Engagement', isRead: false, createdAt: now - 86400000 * 3 },
+      { type: 'alert', title: 'New login detected', body: 'Admin panel accessed from a new device (Chrome on Windows).', isRead: true, createdAt: now - 86400000 * 2 },
+      { type: 'alert', title: 'Password changed successfully', body: 'Your admin password was updated.', isRead: false, createdAt: now - 86400000 * 1.5 },
+      { type: 'message', title: 'New message from James Wilson', body: 'Job Offer - Senior Developer', isRead: false, createdAt: now - 86400000 * 1 },
+      { type: 'message', title: 'New message from Amina Hassan', body: 'Partnership Proposal', isRead: false, createdAt: now - 86400000 * 0.5 },
+      { type: 'system', title: 'Daily analytics report', body: '30 unique visitors — 3 contact submissions today.', isRead: false, createdAt: now - 86400000 * 0.2 },
+    ];
+    const created = await Notification.insertMany(seeds.map((s) => ({ ...s, isSeedData: true })));
+    const totalUnread = await Notification.countDocuments({ isRead: false });
+    getIO().emit('notification:unreadCountChanged', totalUnread);
+    res.status(200).json({ success: true, message: `Seeded ${created.length} notifications`, count: created.length });
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports = { getNotifications, createNotification, markAsRead, markAllAsRead, deleteNotification, seedNotifications };

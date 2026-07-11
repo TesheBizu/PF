@@ -137,6 +137,8 @@ function Dashboard({ theme, onToggleTheme }) {
   const [is2faEnabled, setIs2faEnabled] = useState(user?.totpEnabled || false);
   const [totpLoading, setTotpLoading] = useState(false);
   const [showDisable2fa, setShowDisable2fa] = useState(false);
+  const [msgSeeding, setMsgSeeding] = useState(false);
+  const [notifSeeding, setNotifSeeding] = useState(false);
   const [disablePassword, setDisablePassword] = useState('');
   const [sectionForms, setSectionForms] = useState({});
   const [sectionSaving, setSectionSaving] = useState(null);
@@ -498,6 +500,30 @@ const handleSectionSave = async (key) => {
   const handleMarkRead = async (id) => { await dispatch(markNotificationRead(id)); };
   const handleDeleteNotif = async (id) => { await dispatch(deleteNotification(id)); };
 
+  const handleSeedMessages = async () => {
+    setMsgSeeding(true);
+    try {
+      await api.post('/messages/seed');
+      dispatch(fetchMessages());
+      toast.success('Sample messages created');
+    } catch (e) {
+      toast.error('Failed to seed messages');
+    }
+    setMsgSeeding(false);
+  };
+
+  const handleSeedNotifications = async () => {
+    setNotifSeeding(true);
+    try {
+      await api.post('/notifications/seed');
+      dispatch(fetchNotifications());
+      toast.success('Sample notifications created');
+    } catch (e) {
+      toast.error('Failed to seed notifications');
+    }
+    setNotifSeeding(false);
+  };
+
   const currentTabObj = SIDEBAR_GROUPS.flatMap((g) => g.items).find((t) => t.id === tab);
   const TabIcon = currentTabObj?.icon || LayoutDashboard;
 
@@ -819,6 +845,11 @@ const handleSectionSave = async (key) => {
                 <span className="page-toolbar__title">Inbox</span>
                 <span className="page-toolbar__count">{messages.length} messages</span>
               </div>
+              <div className="page-toolbar__right">
+                <button className="btn btn-ghost" onClick={handleSeedMessages} disabled={msgSeeding} style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.72rem' }}>
+                  <BarChart3 size={13} /> {msgSeeding ? 'Seeding...' : 'Seed Data'}
+                </button>
+              </div>
             </div>
             {mLoading ? <p style={{ padding: '20px', color: 'var(--color-text-muted)' }}>Loading...</p> : (
               <div className="inbox-layout">
@@ -1128,6 +1159,9 @@ const handleSectionSave = async (key) => {
                 {['all', 'unread', 'read'].map((f) => (
                   <button key={f} className={`inbox-filter-btn${notifFilter === f ? ' inbox-filter-btn--active' : ''}`} onClick={() => setNotifFilter(f)}>{f.charAt(0).toUpperCase() + f.slice(1)}</button>
                 ))}
+                <button className="btn btn-ghost" onClick={handleSeedNotifications} disabled={notifSeeding} style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.72rem' }}>
+                  <BarChart3 size={13} /> {notifSeeding ? 'Seeding...' : 'Seed Data'}
+                </button>
                 {notifUnread > 0 && <button className="btn btn-ghost" onClick={handleMarkAllRead} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><CheckCheck size={14} /> Mark All Read</button>}
               </div>
             </div>
