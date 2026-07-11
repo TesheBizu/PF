@@ -15,13 +15,18 @@ const testimonialsSlice = createSlice({
   initialState: { items: [], loading: false, error: null },
   reducers: {
     testimonialAdded(state, action) {
-      if (!state.items.find((t) => t._id === action.payload._id)) {
+      if (action.payload.published && !state.items.find((t) => t._id === action.payload._id)) {
         state.items.push(action.payload);
       }
     },
     testimonialUpdated(state, action) {
       const idx = state.items.findIndex((t) => t._id === action.payload._id);
-      if (idx !== -1) state.items[idx] = action.payload;
+      if (idx !== -1) {
+        if (action.payload.published) state.items[idx] = action.payload;
+        else state.items.splice(idx, 1);
+      } else if (action.payload.published) {
+        state.items.push(action.payload);
+      }
     },
     testimonialRemoved(state, action) {
       state.items = state.items.filter((t) => t._id !== action.payload);
