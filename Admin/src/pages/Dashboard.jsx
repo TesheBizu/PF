@@ -219,7 +219,6 @@ function Dashboard({ theme, onToggleTheme }) {
       { id: 'hero-editor', label: 'Hero', icon: Monitor },
       { id: 'about-editor', label: 'About', icon: UserIcon },
       { id: 'navbar-editor', label: 'Navbar', icon: MenuIcon },
-      { id: 'footer-editor', label: 'Footer', icon: CreditCard },
     ]},
     { label: 'Engagement', items: [
       { id: 'analytics', label: 'Analytics', icon: BarChart3 },
@@ -886,8 +885,8 @@ const handleSectionSave = async (key) => {
           </div>
         )}
 
-        {/* ═══ SECTION EDITORS (hero, about, footer) ═══ */}
-        {['hero-editor', 'about-editor', 'footer-editor'].includes(tab) && (
+        {/* ═══ SECTION EDITORS (hero, about) ═══ */}
+        {['hero-editor', 'about-editor'].includes(tab) && (
           <div>
             <div className="page-toolbar">
               <div className="page-toolbar__left">
@@ -995,12 +994,6 @@ const handleSectionSave = async (key) => {
             </div>
           </>
         )}
-                {tab === 'footer-editor' && (
-                  <>
-                    <div className="form-group"><label className="form-label">Footer Text</label><input type="text" className="form-input" value={sectionForms.footer?.text || ''} onChange={(e) => handleSectionChange('footer', 'text', e.target.value)} /></div>
-                    <div className="form-group"><label className="form-label">Copyright</label><input type="text" className="form-input" value={sectionForms.footer?.copyright || ''} onChange={(e) => handleSectionChange('footer', 'copyright', e.target.value)} /></div>
-                  </>
-                )}
               </div>
             </div>
           </div>
@@ -1265,20 +1258,6 @@ const handleSectionSave = async (key) => {
                   ))}
                   <button type="submit" className="btn btn-primary profile-form__submit" disabled={pwdLoading}>{pwdLoading ? 'Saving...' : 'Update Password'}</button>
                 </form>
-                <h4 className="profile-card__section-title" style={{ marginTop: '2.5rem' }}>Two-Factor Authentication (2FA)</h4>
-                <div className="profile-card__2fa" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', padding: '1.25rem', background: 'var(--color-surface-2)', borderRadius: '8px', border: '1px solid var(--color-border)' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
-                    <div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <span style={{ fontWeight: '600' }}>Google Authenticator (TOTP)</span>
-                        <span className={`state-badge state-badge--${is2faEnabled ? 'active' : 'inactive'}`}>{is2faEnabled ? 'Enabled' : 'Disabled'}</span>
-                      </div>
-                      <p style={{ margin: '6px 0 0', fontSize: '0.875rem', color: 'var(--color-text-muted)' }}>Add an extra layer of security using any standard TOTP authenticator app.</p>
-                    </div>
-                    {is2faEnabled ? <button className="btn btn-ghost" style={{ color: '#ef4444' }} onClick={() => setShowDisable2fa(true)}>Disable 2FA</button>
-                      : <button className="btn btn-primary" onClick={handleStart2faSetup} disabled={totpLoading}>{totpLoading ? 'Loading...' : 'Enable 2FA'}</button>}
-                  </div>
-                </div>
               </div>
             </div>
           </div>
@@ -1307,15 +1286,30 @@ const handleSectionSave = async (key) => {
                       <div className="form-group"><label className="form-label">Site Description</label><textarea className="form-textarea" rows={2} placeholder="Full Stack Developer Portfolio" value={sectionForms.settings?.siteDescription || ''} onChange={(e) => handleSectionChange('settings', 'siteDescription', e.target.value)} /></div>
                       <div className="settings-actions"><button className="btn btn-primary" onClick={() => handleSectionSave('settings')} disabled={sectionSaving === 'settings'} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Save size={14} /> Save</button></div>
                     </div>
+                    <div className="settings-card" style={{ marginTop: 16 }}>
+                      <span className="settings-card__title">Footer</span>
+                      <span className="settings-card__desc">Name and copyright text shown in the site footer.</span>
+                      <div className="form-group"><label className="form-label">Name</label><input type="text" className="form-input" placeholder="Teshome Bizuayehu" value={sectionForms.footer?.name || ''} onChange={(e) => handleSectionChange('footer', 'name', e.target.value)} /></div>
+                      <div className="form-group"><label className="form-label">Copyright Text</label><input type="text" className="form-input" value={sectionForms.footer?.copyrightText || 'All rights reserved.'} onChange={(e) => handleSectionChange('footer', 'copyrightText', e.target.value)} />
+                        <span style={{ fontSize: '0.72rem', color: 'var(--color-text-muted)', marginTop: 2, display: 'block' }}>Appears after &copy; {new Date().getFullYear()}.</span>
+                      </div>
+                      <div className="settings-actions"><button className="btn btn-primary" onClick={() => handleSectionSave('footer')} disabled={sectionSaving === 'footer'} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Save size={14} /> Save</button></div>
+                    </div>
                   </div>
                 )}
                 {settingsTab === 'security' && (
                   <div className="settings-section">
                     <div className="settings-card">
-                      <span className="settings-card__title">Password Policy</span>
-                      <span className="settings-card__desc">Minimum password requirements and session settings.</span>
-                      <div className="form-group"><label className="form-label">Min Password Length</label><input type="number" className="form-input" value="6" readOnly /></div>
-                      <div className="settings-actions"><button className="btn btn-ghost" disabled>Defaults</button></div>
+                      <span className="settings-card__title">Two-Factor Authentication (2FA)</span>
+                      <span className="settings-card__desc">Add an extra layer of security to your account using any standard TOTP authenticator app.</span>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem', marginTop: 12 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <span style={{ fontWeight: 600, fontSize: '0.85rem' }}>Google Authenticator (TOTP)</span>
+                          <span className={`state-badge state-badge--${is2faEnabled ? 'active' : 'inactive'}`}>{is2faEnabled ? 'Enabled' : 'Disabled'}</span>
+                        </div>
+                        {is2faEnabled ? <button className="btn btn-ghost" style={{ color: '#ef4444' }} onClick={() => setShowDisable2fa(true)}>Disable 2FA</button>
+                          : <button className="btn btn-primary" onClick={handleStart2faSetup} disabled={totpLoading}>{totpLoading ? 'Loading...' : 'Enable 2FA'}</button>}
+                      </div>
                     </div>
                   </div>
                 )}

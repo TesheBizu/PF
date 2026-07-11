@@ -7,7 +7,10 @@ function FooterBar({ variant = 'site' }) {
   const year = new Date().getFullYear();
   const isDashboard = variant === 'dashboard';
   const socialLinks = useSelector((s) => s.socialLinks?.items) || [];
+  const footerSection = useSelector((s) => s.sections?.items?.footer) || {};
   const activeLinks = socialLinks.filter((l) => l.active);
+  const footerName = footerSection.name || 'Teshome Bizuayehu';
+  const copyrightText = footerSection.copyrightText || 'All rights reserved.';
 
   return (
     <footer className={isDashboard ? 'footer footer--dash' : 'footer'}>
@@ -38,7 +41,7 @@ function FooterBar({ variant = 'site' }) {
 
         <div className="footer__divider" />
         <p className="footer__copy">
-          <span className="footer__copy-name">Teshome Bizuayehu</span> &copy; {year}. All rights reserved.
+          <span className="footer__copy-name">{footerName}</span> &copy; {year}. {copyrightText}
         </p>
       </div>
     </footer>
