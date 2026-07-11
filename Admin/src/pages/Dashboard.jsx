@@ -920,7 +920,7 @@ const handleSectionSave = async (key) => {
           <>
             <div className="form-group"><label className="form-label">Title</label><input type="text" className="form-input" value={sectionForms.about?.title || 'Who I Am'} onChange={(e) => handleSectionChange('about', 'title', e.target.value)} /></div>
             <div className="form-group"><label className="form-label">Subtitle</label><input type="text" className="form-input" value={sectionForms.about?.subtitle || 'Full Stack Developer & Problem Solver'} onChange={(e) => handleSectionChange('about', 'subtitle', e.target.value)} /></div>
-            <div className="form-group"><label className="form-label">Description</label><input type="text" className="form-input" value={sectionForms.about?.description || ''} onChange={(e) => handleSectionChange('about', 'description', e.target.value)} /></div>
+            <div className="form-group"><label className="form-label">Description (bio)</label><textarea className="form-textarea" rows={4} value={sectionForms.about?.description || "I'm Teshome Bizuayehu — an Information Systems Student at Bahir Dar University and passionate Full Stack Developer focused on building modern, responsive, and scalable web applications. I love turning complex problems into elegant, user-friendly digital experiences."} onChange={(e) => handleSectionChange('about', 'description', e.target.value)} /></div>
             <div className="form-group"><label className="form-label">Contact Link</label><input type="text" className="form-input" placeholder="mailto:teshelin7@gmail.com" value={sectionForms.about?.contactLink || ''} onChange={(e) => handleSectionChange('about', 'contactLink', e.target.value)} /></div>
             <div className="form-group">
               <label className="form-label">CV File</label>
@@ -936,7 +936,13 @@ const handleSectionSave = async (key) => {
             </div>
             <div className="form-group" style={{ marginTop: 20, borderTop: '1px solid var(--color-border)', paddingTop: 16 }}>
               <label className="form-label" style={{ fontWeight: 700, fontSize: '0.85rem' }}>Stats</label>
-              {(sectionForms.about?.stats || []).map((st, i) => (
+              {[].concat(
+                (sectionForms.about?.stats?.length ? sectionForms.about.stats : [
+                  { id: 'exp', label: 'Years Experience', value: 1, suffix: '+' },
+                  { id: 'proj', label: 'Projects Done', value: null, suffix: '+' },
+                  { id: 'tech', label: 'Tech Skills', value: null, suffix: '+' },
+                ])
+              ).map((st, i) => (
                 <div key={st.id || i} style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 8 }}>
                   <input type="text" className="form-input" style={{ width: 150 }} placeholder="Label" value={st.label || ''} onChange={(e) => { const s = [...(sectionForms.about?.stats || [])]; s[i] = { ...s[i], label: e.target.value }; handleSectionChange('about', 'stats', s); }} />
                   <input type="number" className="form-input" style={{ width: 75 }} placeholder="Value" value={st.value ?? ''} onChange={(e) => { const s = [...(sectionForms.about?.stats || [])]; s[i] = { ...s[i], value: e.target.value === '' ? null : Number(e.target.value) }; handleSectionChange('about', 'stats', s); }} />

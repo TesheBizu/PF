@@ -86,7 +86,7 @@ function About() {
               Full Stack Developer &amp; Problem Solver
             </h3>
             <p className="about__text">
-              I'm <strong>Teshome Bizuayehu</strong> — an Information Systems Student at Bahir Dar University and passionate Full Stack Developer focused on building modern, responsive, and scalable web applications. I love turning complex problems into elegant, user-friendly digital experiences.
+              {about.description || "I'm Teshome Bizuayehu — an Information Systems Student at Bahir Dar University and passionate Full Stack Developer focused on building modern, responsive, and scalable web applications. I love turning complex problems into elegant, user-friendly digital experiences."}
             </p>
             <p className="about__text">
               When I'm not coding, I'm exploring new technologies, contributing to open-source projects, and building tools that make a real difference.
