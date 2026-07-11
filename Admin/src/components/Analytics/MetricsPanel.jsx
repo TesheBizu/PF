@@ -208,7 +208,7 @@ export default function MetricsPanel() {
         </div>
       </div>
 
-      {loading && !summary ? (
+      {loading ? (
         <div className="mt-loading">
           {Array.from({ length: 4 }).map((_, i) => (
             <div key={i} className="skeleton mt-kpi-skeleton" />
