@@ -918,8 +918,8 @@ const handleSectionSave = async (key) => {
                 )}
         {tab === 'about-editor' && (
           <>
-            <div className="form-group"><label className="form-label">Title</label><input type="text" className="form-input" value={sectionForms.about?.title || ''} onChange={(e) => handleSectionChange('about', 'title', e.target.value)} /></div>
-            <div className="form-group"><label className="form-label">Subtitle</label><input type="text" className="form-input" value={sectionForms.about?.subtitle || ''} onChange={(e) => handleSectionChange('about', 'subtitle', e.target.value)} /></div>
+            <div className="form-group"><label className="form-label">Title</label><input type="text" className="form-input" value={sectionForms.about?.title || 'Who I Am'} onChange={(e) => handleSectionChange('about', 'title', e.target.value)} /></div>
+            <div className="form-group"><label className="form-label">Subtitle</label><input type="text" className="form-input" value={sectionForms.about?.subtitle || 'Full Stack Developer & Problem Solver'} onChange={(e) => handleSectionChange('about', 'subtitle', e.target.value)} /></div>
             <div className="form-group"><label className="form-label">Description</label><input type="text" className="form-input" value={sectionForms.about?.description || ''} onChange={(e) => handleSectionChange('about', 'description', e.target.value)} /></div>
             <div className="form-group"><label className="form-label">Contact Link</label><input type="text" className="form-input" placeholder="mailto:teshelin7@gmail.com" value={sectionForms.about?.contactLink || ''} onChange={(e) => handleSectionChange('about', 'contactLink', e.target.value)} /></div>
             <div className="form-group">
