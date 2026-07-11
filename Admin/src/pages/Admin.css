@@ -1344,6 +1344,7 @@
   .dash-topbar { gap: 8px; }
   .dash-topbar__search { flex: 0; }
   .content-overview-grid { grid-template-columns: 1fr; }
+  .exec-kpi-grid { grid-template-columns: 1fr; }
 }
 
 .dash-stat__sub {

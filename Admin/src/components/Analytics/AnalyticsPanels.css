@@ -1331,6 +1331,8 @@
   .metrics-stats-grid { grid-template-columns: 1fr; }
   .metrics-table th, .metrics-table td { padding: 8px 10px; }
   .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+  .exec-kpi-grid { grid-template-columns: repeat(2, 1fr); }
+  .exec-bottom-grid { grid-template-columns: 1fr; }
   .analytics-toolbar { flex-direction: column; align-items: flex-start; }
   .analytics-toolbar__right { width: 100%; justify-content: flex-start; flex-wrap: wrap; }
 }
@@ -1340,10 +1342,15 @@
   .kpi-card { padding: 10px 12px; }
   .kpi-card__icon { width: 34px; height: 34px; }
   .kpi-card__value { font-size: 1rem; }
+  .exec-kpi-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .exec-kpi-card { padding: 14px 16px; }
+  .exec-kpi-card__value { font-size: 1.2rem; }
   .metrics-select-grid { grid-template-columns: 1fr; }
   .metrics-filters { flex-direction: column; align-items: flex-start; }
   .metrics-filters__search { max-width: 100%; width: 100%; }
   .date-range-selector { flex-wrap: wrap; }
+  .granularity-selector { flex-wrap: wrap; }
+  .analytics-toolbar__right { gap: 6px; }
   .metric-detail-card__body { grid-template-columns: 1fr; }
 }
 

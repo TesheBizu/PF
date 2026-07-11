@@ -7,12 +7,7 @@ import {
 import { fetchAnalytics } from '../../redux/slices/analyticsSlice';
 import './AnalyticsPanels.css';
 
-const DATE_RANGES = [
-  { label: '7d', value: 7 },
-  { label: '14d', value: 14 },
-  { label: '30d', value: 30 },
-  { label: '90d', value: 90 },
-];
+
 
 function TrendBadge({ value }) {
   if (value == null) return null;
@@ -46,14 +41,13 @@ export default function MetricsPanel() {
   const dispatch = useDispatch();
   const { summary, entries, pageViewsByPage, loading } = useSelector((s) => s.analytics);
   const { items: projects } = useSelector((s) => s.projects);
-  const [days, setDays] = useState(30);
   const [sortField, setSortField] = useState('views');
   const [sortDir, setSortDir] = useState('desc');
   const [search, setSearch] = useState('');
 
   useEffect(() => {
-    dispatch(fetchAnalytics(days));
-  }, [dispatch, days]);
+    dispatch(fetchAnalytics());
+  }, [dispatch]);
 
   const kpis = useMemo(() => {
     const totalVisitors = summary?.visitors || 0;
@@ -61,8 +55,9 @@ export default function MetricsPanel() {
     const totalPageViews = summary?.pageViews || 0;
     const totalInteractions = summary?.interactions || 0;
     const contactSubs = summary?.contactSubmissions || 0;
-    const recent = entries?.slice(-Math.max(1, Math.floor(days / 2))) || [];
-    const prior = entries?.slice(0, Math.max(0, entries.length - Math.floor(days / 2))) || [];
+    const split = Math.max(1, Math.floor(entries.length / 2));
+    const recent = entries?.slice(-split) || [];
+    const prior = entries?.slice(0, Math.max(0, entries.length - split)) || [];
 
     const sum = (arr, key) => arr.reduce((s, e) => s + (e[key] || 0), 0);
     const recentVisitors = sum(recent, 'visitors');
@@ -115,7 +110,7 @@ export default function MetricsPanel() {
         format: 'percent',
       },
     };
-  }, [summary, entries, days]);
+  }, [summary, entries]);
 
   const projectViews = useMemo(() => {
     if (!pageViewsByPage || !projects?.length) return [];
@@ -182,10 +177,10 @@ export default function MetricsPanel() {
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `project-views-${days}d.csv`;
+    a.download = 'project-views.csv';
     a.click();
     window.URL.revokeObjectURL(url);
-  }, [kpis, sortedProjects, days]);
+  }, [kpis, sortedProjects]);
 
   const totalProjectViews = projectViews.reduce((s, p) => s + p.views, 0);
 
@@ -204,21 +199,10 @@ export default function MetricsPanel() {
           </div>
         </div>
         <div className="mt-header__right">
-          <div className="mt-date-range">
-            {DATE_RANGES.map((r) => (
-              <button
-                key={r.value}
-                className={`mt-date-btn${days === r.value ? ' mt-date-btn--active' : ''}`}
-                onClick={() => setDays(r.value)}
-              >
-                {r.label}
-              </button>
-            ))}
-          </div>
           <button className="mt-btn mt-btn--primary" onClick={handleExportCSV} title="Export to CSV">
             <Download size={14} /> Export CSV
           </button>
-          <button className="mt-btn" onClick={() => dispatch(fetchAnalytics(days))} title="Refresh data">
+          <button className="mt-btn" onClick={() => dispatch(fetchAnalytics())} title="Refresh data">
             <RefreshCw size={14} />
           </button>
         </div>

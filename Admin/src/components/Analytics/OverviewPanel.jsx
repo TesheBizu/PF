@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import {
   Users, Eye, MessageSquare, BarChart3, Activity, Bell, Mail, Star,
   Briefcase, Zap, History, Plus, ArrowUp, ArrowDown, TrendingUp, Clock,
-  RefreshCw, LayoutDashboard, Calendar, TrendingDown, MousePointerClick,
+  RefreshCw, LayoutDashboard, TrendingDown, MousePointerClick,
   ExternalLink, Share2, Settings, Download, FileText,
 } from 'lucide-react';
 import {
@@ -13,14 +13,6 @@ import {
 import { fetchAnalytics } from '../../redux/slices/analyticsSlice';
 import api from '../../services/api';
 import './AnalyticsPanels.css';
-
-const DATE_RANGES = [
-  { label: '7d', value: 7 },
-  { label: '14d', value: 14 },
-  { label: '30d', value: 30 },
-  { label: '60d', value: 60 },
-  { label: '90d', value: 90 },
-];
 
 const QUICK_ACTIONS = [
   { id: 'projects', label: 'New Project', icon: Plus, color: '#6366f1' },
@@ -78,12 +70,11 @@ export default function OverviewPanel({ onNavigate }) {
   const { summary, entries, loading, trends } = useSelector((s) => s.analytics);
   const { items: messages } = useSelector((s) => s.messages);
   const { items: notifications } = useSelector((s) => s.notifications);
-  const [days, setDays] = useState(30);
   const [seeding, setSeeding] = useState(false);
 
   useEffect(() => {
-    dispatch(fetchAnalytics(days));
-  }, [dispatch, days]);
+    dispatch(fetchAnalytics());
+  }, [dispatch]);
 
   const chartData = useMemo(() => {
     if (!entries?.length) return [];
@@ -117,19 +108,19 @@ export default function OverviewPanel({ onNavigate }) {
   }, [notifications, messages]);
 
   const handleRefresh = useCallback(() => {
-    dispatch(fetchAnalytics(days));
-  }, [dispatch, days]);
+    dispatch(fetchAnalytics());
+  }, [dispatch]);
 
   const handleSeed = useCallback(async () => {
     setSeeding(true);
     try {
       await api.post('/analytics/seed');
-      dispatch(fetchAnalytics(days));
+      dispatch(fetchAnalytics());
     } catch (e) {
       console.error('Seeding failed:', e);
     }
     setSeeding(false);
-  }, [dispatch, days]);
+  }, [dispatch]);
 
   const KPI_CONFIG = [
     {
@@ -288,19 +279,6 @@ export default function OverviewPanel({ onNavigate }) {
           <div className="exec-chart-card__title">
             <TrendingUp size={15} />
             <span>Traffic Trend</span>
-          </div>
-          <div className="exec-chart-card__controls">
-            <div className="exec-date-range">
-              {DATE_RANGES.map((r) => (
-                <button
-                  key={r.value}
-                  className={`exec-date-btn${days === r.value ? ' exec-date-btn--active' : ''}`}
-                  onClick={() => setDays(r.value)}
-                >
-                  {r.label}
-                </button>
-              ))}
-            </div>
           </div>
         </div>
         <div className="exec-chart-card__body">

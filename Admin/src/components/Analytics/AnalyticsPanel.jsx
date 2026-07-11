@@ -2,7 +2,7 @@ import { useState, useMemo, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import {
   BarChart3, TrendingUp, Globe, Monitor, Smartphone, Tablet,
-  Download, RefreshCw, Calendar, Users, Eye, MousePointerClick,
+  Download, RefreshCw, Users, Eye, MousePointerClick,
   ArrowUp, ArrowDown, Activity, Bell, ExternalLink, FileText,
 } from 'lucide-react';
 import {
@@ -15,13 +15,7 @@ import api from '../../services/api';
 import './AnalyticsPanels.css';
 
 const COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ec4899', '#a855f7', '#f43f5e', '#06b6d4', '#84cc16'];
-const DATE_RANGES = [
-  { label: '7 days', value: 7 },
-  { label: '14 days', value: 14 },
-  { label: '30 days', value: 30 },
-  { label: '60 days', value: 60 },
-  { label: '90 days', value: 90 },
-];
+
 const GRANULARITY_OPTIONS = [
   { label: 'Daily', value: 'daily' },
   { label: 'Weekly', value: 'weekly' },
@@ -70,7 +64,6 @@ export default function AnalyticsPanel() {
   const dispatch = useDispatch();
   const { summary, entries, pageViewsByPage, trafficSources, devices, browsers, geo, trends, spikes, loading } = useSelector((s) => s.analytics);
   const { items: projects } = useSelector((s) => s.projects);
-  const [days, setDays] = useState(30);
   const [granularity, setGranularity] = useState('daily');
   const [activePie, setActivePie] = useState(null);
   const [exporting, setExporting] = useState(null);
@@ -140,28 +133,28 @@ export default function AnalyticsPanel() {
   }, [summary]);
 
   const handleRefresh = useCallback(() => {
-    dispatch(fetchAnalytics(days));
-  }, [dispatch, days]);
+    dispatch(fetchAnalytics());
+  }, [dispatch]);
 
   const handleExport = useCallback(async (format) => {
     setExporting(format);
     try {
       if (format === 'csv') {
-        const res = await api.get(`/analytics/export?days=${days}&format=csv`, { responseType: 'blob' });
+        const res = await api.get('/analytics/export?days=365&format=csv', { responseType: 'blob' });
         const url = window.URL.createObjectURL(new Blob([res.data]));
         const a = document.createElement('a');
         a.href = url;
-        a.download = `analytics-${days}d.csv`;
+        a.download = 'analytics-export.csv';
         a.click();
         window.URL.revokeObjectURL(url);
       } else {
-        const res = await api.get(`/analytics/export?days=${days}&format=json`);
+        const res = await api.get('/analytics/export?days=365&format=json');
         const dataStr = JSON.stringify(res.data, null, 2);
         const blob = new Blob([dataStr], { type: 'application/json' });
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `analytics-${days}d.json`;
+        a.download = 'analytics-export.json';
         a.click();
         window.URL.revokeObjectURL(url);
       }
@@ -169,7 +162,7 @@ export default function AnalyticsPanel() {
       console.error('Export failed:', e);
     }
     setExporting(null);
-  }, [days]);
+  }, []);
 
   return (
     <div className="analytics-panel animate-fadeInUp">
@@ -190,18 +183,7 @@ export default function AnalyticsPanel() {
               </button>
             ))}
           </div>
-          <div className="date-range-selector">
-            <Calendar size={14} />
-            {DATE_RANGES.map((r) => (
-              <button
-                key={r.value}
-                className={`date-range-btn${days === r.value ? ' date-range-btn--active' : ''}`}
-                onClick={() => { setDays(r.value); dispatch(fetchAnalytics(r.value)); }}
-              >
-                {r.label}
-              </button>
-            ))}
-          </div>
+
           <button className="btn btn-ghost" onClick={handleRefresh} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
             <RefreshCw size={14} /> Refresh
           </button>
