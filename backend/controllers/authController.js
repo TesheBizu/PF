@@ -3,6 +3,8 @@ const { OAuth2Client } = require('google-auth-library');
 const speakeasy = require('speakeasy');
 const QRCode = require('qrcode');
 const User = require('../models/User');
+const Notification = require('../models/Notification');
+const { getIO } = require('../socket');
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -48,6 +50,10 @@ const login = async (req, res, next) => {
     const refreshToken = generateRefreshToken(user._id);
     user.refreshToken  = refreshToken;
     await user.save({ validateBeforeSave: false });
+
+    Notification.create({ type: 'system', title: 'New login to admin panel', body: email }).then(() => {
+      Notification.countDocuments({ isRead: false }).then((c) => getIO().emit('notification:unreadCountChanged', c));
+    }).catch(() => {});
 
     res.status(200).json(buildUserResponse(user, accessToken, refreshToken));
   } catch (error) { next(error); }
@@ -195,6 +201,10 @@ const verifyTotpSetup = async (req, res, next) => {
     user.totpEnabled = true;
     await user.save({ validateBeforeSave: false });
 
+    Notification.create({ type: 'alert', title: '2FA has been enabled', body: 'Two-factor authentication is now active.' }).then(() => {
+      Notification.countDocuments({ isRead: false }).then((c) => getIO().emit('notification:unreadCountChanged', c));
+    }).catch(() => {});
+
     res.status(200).json({ success: true, message: '2FA has been enabled successfully!' });
   } catch (error) { next(error); }
 };
@@ -217,6 +227,10 @@ const disableTotp = async (req, res, next) => {
     user.totpEnabled = false;
     user.totpSecret  = undefined;
     await user.save({ validateBeforeSave: false });
+
+    Notification.create({ type: 'alert', title: '2FA has been disabled', body: 'Two-factor authentication is no longer active.' }).then(() => {
+      Notification.countDocuments({ isRead: false }).then((c) => getIO().emit('notification:unreadCountChanged', c));
+    }).catch(() => {});
 
     res.status(200).json({ success: true, message: '2FA has been disabled.' });
   } catch (error) { next(error); }
@@ -285,6 +299,10 @@ const changePassword = async (req, res, next) => {
 
     user.password = newPassword;
     await user.save();
+
+    Notification.create({ type: 'alert', title: 'Password changed', body: 'Your admin password was updated successfully.' }).then(() => {
+      Notification.countDocuments({ isRead: false }).then((c) => getIO().emit('notification:unreadCountChanged', c));
+    }).catch(() => {});
 
     res.status(200).json({ success: true, message: 'Password changed successfully' });
   } catch (error) {

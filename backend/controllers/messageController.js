@@ -1,4 +1,5 @@
 const Message = require('../models/Message');
+const Notification = require('../models/Notification');
 const { getIO } = require('../socket');
 
 const sendMessage = async (req, res, next) => {
@@ -11,6 +12,17 @@ const sendMessage = async (req, res, next) => {
 
     const newMessage = await Message.create({ name, email, subject, message });
     getIO().emit('message:created', newMessage.toObject());
+
+    Notification.create({
+      type: 'message',
+      title: `New message from ${name}`,
+      body: subject,
+      link: '/admin',
+    }).then((n) => {
+      getIO().emit('notification:new', n.toObject());
+      Notification.countDocuments({ isRead: false }).then((c) => getIO().emit('notification:unreadCountChanged', c));
+    }).catch(() => {});
+
     res.status(201).json({
       success: true,
       message: 'Message sent successfully!',

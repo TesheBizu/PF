@@ -117,7 +117,7 @@ function Dashboard({ theme, onToggleTheme }) {
   const [skillSearch, setSkillSearch] = useState('');
   const [msgSearch, setMsgSearch] = useState('');
   const [msgFilter, setMsgFilter] = useState('all');
-  const [settingsTab, setSettingsTab] = useState('profile');
+  const [settingsTab, setSettingsTab] = useState('security');
   const [notifFilter, setNotifFilter] = useState('all');
   const [sForm, setSForm] = useState(initSkill);
   const [eForm, setEForm] = useState(initExperience);
@@ -337,7 +337,7 @@ function Dashboard({ theme, onToggleTheme }) {
   const handleTogglePublish = async (t) => { await dispatch(updateTestimonial({ id: t._id, testimonialData: { published: !t.published } })); toast.success(t.published ? 'Unpublished' : 'Published'); };
 
   // Message handlers
-  const openMessage = (m) => { setSelected(m); dispatch(markMessageRead(m._id)); setModal('viewMessage'); };
+  const openMessage = (m) => { setSelected(m); dispatch(markMessageRead(m._id)); };
   const handleReplyMessage = (m) => { const to = encodeURIComponent(m.email); const subject = encodeURIComponent(`Re: ${m.subject}`); const body = encodeURIComponent(`\n\n---\nOn ${new Date(m.createdAt).toLocaleString()}, ${m.name} <${m.email}> wrote:\n${m.message}`); window.open(`https://mail.google.com/mail/?view=cm&to=${to}&su=${subject}&body=${body}`, '_blank'); };
   const requestDeleteMessage = (id, subject) => setConfirm({ title: 'Delete message?', message: `Delete "${subject}"?`, confirmLabel: 'Delete', danger: true, onConfirm: async () => { await dispatch(deleteMessage(id)); toast.success('Deleted'); setModal(null); } });
 
@@ -1332,25 +1332,6 @@ const handleSectionSave = async (key) => {
               <input type="range" min="1" max="100" value={sForm.proficiency} onChange={(e) => setSForm((f) => ({ ...f, proficiency: Number(e.target.value) }))} style={{ width: '100%' }} />
             </div>
             <div className="modal-footer"><button className="btn btn-ghost" onClick={() => setModal(null)}>Cancel</button><button className="btn btn-primary" onClick={handleSaveSkill}>Save</button></div>
-          </div>
-        </Modal>
-      )}
-
-      {/* View Message */}
-      {modal === 'viewMessage' && selected && (
-        <Modal title="Message" onClose={() => setModal(null)}>
-          <div className="modal-message">
-            <div className="modal-message__meta">
-              <p><strong>From:</strong> {selected.name} &lt;{selected.email}&gt;</p>
-              <p><strong>Subject:</strong> {selected.subject}</p>
-              <p><strong>Date:</strong> {new Date(selected.createdAt).toLocaleString()}</p>
-            </div>
-            <div className="modal-message__body">{selected.message}</div>
-            <div className="modal-footer">
-              <button className="btn btn-ghost" onClick={() => setModal(null)}>Close</button>
-              <button className="btn btn-primary" onClick={() => handleReplyMessage(selected)} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Reply size={14} /> Reply via Gmail</button>
-              <button className="btn dash-btn--danger btn" onClick={() => requestDeleteMessage(selected._id, selected.subject)} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><Trash2 size={13} /> Delete</button>
-            </div>
           </div>
         </Modal>
       )}

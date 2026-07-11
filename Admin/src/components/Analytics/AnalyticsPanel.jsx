@@ -22,6 +22,18 @@ const DATE_RANGES = [
   { label: '60 days', value: 60 },
   { label: '90 days', value: 90 },
 ];
+const GRANULARITY_OPTIONS = [
+  { label: 'Daily', value: 'daily' },
+  { label: 'Weekly', value: 'weekly' },
+  { label: 'Monthly', value: 'monthly' },
+];
+
+function getWeekId(dateStr) {
+  const d = new Date(dateStr);
+  const start = new Date(d.getFullYear(), 0, 1);
+  const weekNum = Math.ceil((((d - start) / 86400000) + start.getDay() + 1) / 7);
+  return `${d.getFullYear()}-W${String(weekNum).padStart(2, '0')}`;
+}
 
 function CustomTooltip({ active, payload, label }) {
   if (!active || !payload?.length) return null;
@@ -59,19 +71,32 @@ export default function AnalyticsPanel() {
   const { summary, entries, pageViewsByPage, trafficSources, devices, browsers, geo, trends, spikes, loading } = useSelector((s) => s.analytics);
   const { items: projects } = useSelector((s) => s.projects);
   const [days, setDays] = useState(30);
+  const [granularity, setGranularity] = useState('daily');
   const [activePie, setActivePie] = useState(null);
   const [exporting, setExporting] = useState(null);
 
   const chartData = useMemo(() => {
     if (!entries?.length) return [];
-    return entries.map((e) => ({
-      date: e.date?.slice(5) || e.date,
-      fullDate: e.date,
-      visitors: e.visitors || 0,
-      pageViews: e.pageViews || 0,
-      interactions: e.interactions || 0,
-    }));
-  }, [entries]);
+    if (granularity === 'daily') {
+      return entries.map((e) => ({
+        date: e.date?.slice(5) || e.date,
+        fullDate: e.date,
+        visitors: e.visitors || 0,
+        pageViews: e.pageViews || 0,
+        interactions: e.interactions || 0,
+      }));
+    }
+    const getId = granularity === 'weekly' ? getWeekId : (d) => d.slice(0, 7);
+    const groups = {};
+    for (const e of entries) {
+      const id = getId(e.date);
+      if (!groups[id]) groups[id] = { date: id, fullDate: id, visitors: 0, pageViews: 0, interactions: 0 };
+      groups[id].visitors += e.visitors || 0;
+      groups[id].pageViews += e.pageViews || 0;
+      groups[id].interactions += e.interactions || 0;
+    }
+    return Object.entries(groups).sort(([a], [b]) => a.localeCompare(b)).map(([, v]) => v);
+  }, [entries, granularity]);
 
   const trafficData = useMemo(() => {
     if (!trafficSources || !Object.keys(trafficSources).length) return [];
@@ -146,27 +171,6 @@ export default function AnalyticsPanel() {
     setExporting(null);
   }, [days]);
 
-  const renderCalendarHeatmap = () => {
-    if (!entries?.length) return null;
-    const vals = entries.slice(-35).map((e) => e.visitors);
-    const max = Math.max(...vals, 1);
-    return (
-      <div className="heatmap-strip">
-        {vals.map((v, i) => (
-          <div
-            key={i}
-            className="heatmap-cell"
-            style={{
-              background: `rgba(99, 102, 241, ${v / max})`,
-              opacity: v > 0 ? 0.4 + (v / max) * 0.6 : 0.1,
-            }}
-            title={`${entries[i]?.date}: ${v} visitors`}
-          />
-        ))}
-      </div>
-    );
-  };
-
   return (
     <div className="analytics-panel animate-fadeInUp">
       {/* Toolbar */}
@@ -175,6 +179,17 @@ export default function AnalyticsPanel() {
           <h3>Analytics Dashboard</h3>
         </div>
         <div className="analytics-toolbar__right">
+          <div className="granularity-selector">
+            {GRANULARITY_OPTIONS.map((g) => (
+              <button
+                key={g.value}
+                className={`granularity-btn${granularity === g.value ? ' granularity-btn--active' : ''}`}
+                onClick={() => setGranularity(g.value)}
+              >
+                {g.label}
+              </button>
+            ))}
+          </div>
           <div className="date-range-selector">
             <Calendar size={14} />
             {DATE_RANGES.map((r) => (
@@ -260,7 +275,7 @@ export default function AnalyticsPanel() {
             {/* Visitor Trend */}
             <div className="chart-card">
               <div className="chart-card__header">
-                <span className="chart-card__title"><TrendingUp size={14} /> Visitor Trend</span>
+                <span className="chart-card__title"><TrendingUp size={14} /> Visitor Trend ({granularity})</span>
               </div>
               <div className="chart-card__body">
                 <ResponsiveContainer width="100%" height={260}>
@@ -284,7 +299,7 @@ export default function AnalyticsPanel() {
             {/* Page Views Trend */}
             <div className="chart-card">
               <div className="chart-card__header">
-                <span className="chart-card__title"><BarChart3 size={14} /> Page Views & Interactions</span>
+                <span className="chart-card__title"><BarChart3 size={14} /> Page Views & Interactions ({granularity})</span>
               </div>
               <div className="chart-card__body">
                 <ResponsiveContainer width="100%" height={260}>
@@ -519,23 +534,6 @@ export default function AnalyticsPanel() {
                 </div>
               </div>
             )}
-          </div>
-
-          {/* Calendar Heatmap */}
-          <div className="chart-card">
-            <div className="chart-card__header">
-              <span className="chart-card__title"><Calendar size={14} /> Activity Overview (Last 35 days)</span>
-            </div>
-            <div className="chart-card__body">
-              {renderCalendarHeatmap()}
-              {entries?.length > 0 && (
-                <div className="heatmap-legend">
-                  <span>Less</span>
-                  <div className="heatmap-legend__gradient" />
-                  <span>More</span>
-                </div>
-              )}
-            </div>
           </div>
         </>
       ) : (

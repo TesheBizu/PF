@@ -392,6 +392,33 @@
   flex-wrap: wrap;
 }
 
+.granularity-selector {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 3px;
+}
+.granularity-btn {
+  padding: 4px 10px;
+  border-radius: 5px;
+  border: none;
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: 0.72rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: var(--font-sans);
+}
+.granularity-btn:hover { color: var(--color-text); }
+.granularity-btn--active {
+  background: var(--color-primary);
+  color: #fff;
+}
+
 .date-range-selector {
   display: flex;
   align-items: center;
