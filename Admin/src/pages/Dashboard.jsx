@@ -936,17 +936,43 @@ const handleSectionSave = async (key) => {
             </div>
             <div className="form-group" style={{ marginTop: 20, borderTop: '1px solid var(--color-border)', paddingTop: 16 }}>
               <label className="form-label" style={{ fontWeight: 700, fontSize: '0.85rem' }}>Stats</label>
-              {[].concat(
-                (sectionForms.about?.stats?.length ? sectionForms.about.stats : [
+              {(() => {
+                const defaults = [
                   { id: 'exp', label: 'Years Experience', value: 1, suffix: '+' },
                   { id: 'proj', label: 'Projects Done', value: null, suffix: '+' },
                   { id: 'tech', label: 'Tech Skills', value: null, suffix: '+' },
-                ])
-              ).map((st, i) => (
+                ];
+                const saved = sectionForms.about?.stats;
+                return saved?.length ? saved : defaults;
+              })().map((st, i) => (
                 <div key={st.id || i} style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 8 }}>
-                  <input type="text" className="form-input" style={{ width: 150 }} placeholder="Label" value={st.label || ''} onChange={(e) => { const s = [...(sectionForms.about?.stats || [])]; s[i] = { ...s[i], label: e.target.value }; handleSectionChange('about', 'stats', s); }} />
-                  <input type="number" className="form-input" style={{ width: 75 }} placeholder="Value" value={st.value ?? ''} onChange={(e) => { const s = [...(sectionForms.about?.stats || [])]; s[i] = { ...s[i], value: e.target.value === '' ? null : Number(e.target.value) }; handleSectionChange('about', 'stats', s); }} />
-                  <input type="text" className="form-input" style={{ width: 55 }} placeholder="+" value={st.suffix || '+'} onChange={(e) => { const s = [...(sectionForms.about?.stats || [])]; s[i] = { ...s[i], suffix: e.target.value }; handleSectionChange('about', 'stats', s); }} />
+                  <input type="text" className="form-input" style={{ width: 150 }} placeholder="Label" value={st.label || ''} onChange={(e) => {
+                    let s = sectionForms.about?.stats?.length ? [...sectionForms.about.stats] : [
+                      { id: 'exp', label: 'Years Experience', value: 1, suffix: '+' },
+                      { id: 'proj', label: 'Projects Done', value: null, suffix: '+' },
+                      { id: 'tech', label: 'Tech Skills', value: null, suffix: '+' },
+                    ];
+                    s[i] = { ...(s[i] || {}), id: s[i]?.id || Date.now().toString(36), label: e.target.value };
+                    handleSectionChange('about', 'stats', s);
+                  }} />
+                  <input type="number" className="form-input" style={{ width: 75 }} placeholder="Value" value={st.value ?? ''} onChange={(e) => {
+                    let s = sectionForms.about?.stats?.length ? [...sectionForms.about.stats] : [
+                      { id: 'exp', label: 'Years Experience', value: 1, suffix: '+' },
+                      { id: 'proj', label: 'Projects Done', value: null, suffix: '+' },
+                      { id: 'tech', label: 'Tech Skills', value: null, suffix: '+' },
+                    ];
+                    s[i] = { ...(s[i] || {}), id: s[i]?.id || Date.now().toString(36), value: e.target.value === '' ? null : Number(e.target.value) };
+                    handleSectionChange('about', 'stats', s);
+                  }} />
+                  <input type="text" className="form-input" style={{ width: 55 }} placeholder="+" value={st.suffix || '+'} onChange={(e) => {
+                    let s = sectionForms.about?.stats?.length ? [...sectionForms.about.stats] : [
+                      { id: 'exp', label: 'Years Experience', value: 1, suffix: '+' },
+                      { id: 'proj', label: 'Projects Done', value: null, suffix: '+' },
+                      { id: 'tech', label: 'Tech Skills', value: null, suffix: '+' },
+                    ];
+                    s[i] = { ...(s[i] || {}), id: s[i]?.id || Date.now().toString(36), suffix: e.target.value };
+                    handleSectionChange('about', 'stats', s);
+                  }} />
                   <button className="icon-btn icon-btn--danger" onClick={() => { const s = (sectionForms.about?.stats || []).filter((_, j) => j !== i); handleSectionChange('about', 'stats', s.length ? s : null); }} title="Remove stat"><Trash2 size={13} /></button>
                 </div>
               ))}
