@@ -903,16 +903,29 @@ const handleSectionSave = async (key) => {
               <div className="editor-form-panel">
                 {tab === 'hero-editor' && (
                   <>
-                    {['greeting', 'name', 'role', 'bio'].map((field) => (
-                      <div className="form-group" key={field}>
-                        <label className="form-label">{field.charAt(0).toUpperCase() + field.slice(1)}</label>
-                        {field === 'bio' ? <textarea className="form-textarea" rows={3} value={sectionForms.hero?.[field] || ''} onChange={(e) => handleSectionChange('hero', field, e.target.value)} />
-                          : <input type="text" className="form-input" value={sectionForms.hero?.[field] || ''} onChange={(e) => handleSectionChange('hero', field, e.target.value)} />}
+                    <div className="form-group">
+                      <label className="form-label">Profile Image</label>
+                      <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 8 }}>
+                        <input type="file" accept="image/*" onChange={handleProfileImageUpload} style={{ display: 'none' }} id="hero-profile-image" disabled={profileUploading} />
+                        <label htmlFor="hero-profile-image" className="btn btn-primary" style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 14px', fontSize: '0.78rem' }}>
+                          <Upload size={14} />{profileUploading ? 'Uploading...' : 'Upload Photo'}
+                        </label>
+                        {profileImageUrl && <span style={{ fontSize: '0.72rem', color: 'var(--color-text-muted)' }}>Current: {profileImageUrl.split('/').pop()}</span>}
                       </div>
-                    ))}
+                    </div>
+                    {['greeting', 'name', 'role', 'bio'].map((field) => {
+                      const defaults = { greeting: "Hello, I'm", name: 'TESHOME', role: '', bio: 'Passionate about building modern, responsive, scalable web applications.' };
+                      return (
+                        <div className="form-group" key={field}>
+                          <label className="form-label">{field.charAt(0).toUpperCase() + field.slice(1)}</label>
+                          {field === 'bio' ? <textarea className="form-textarea" rows={3} value={sectionForms.hero?.[field] || defaults[field]} onChange={(e) => handleSectionChange('hero', field, e.target.value)} />
+                            : <input type="text" className="form-input" value={sectionForms.hero?.[field] || defaults[field]} onChange={(e) => handleSectionChange('hero', field, e.target.value)} />}
+                        </div>
+                      );
+                    })}
                     <div className="form-group">
                       <label className="form-label">Roles (comma-separated)</label>
-                      <input type="text" className="form-input" placeholder="Web Developer, Designer, ..." value={Array.isArray(sectionForms.hero?.roles) ? sectionForms.hero.roles.join(', ') : sectionForms.hero?.roles || ''} onChange={(e) => handleSectionChange('hero', 'roles', e.target.value.split(',').map((r) => r.trim()))} />
+                      <input type="text" className="form-input" placeholder="Web Developer, Designer, ..." value={Array.isArray(sectionForms.hero?.roles) ? sectionForms.hero.roles.join(', ') : sectionForms.hero?.roles || 'Web Developer, Team Player, React Specialist'} onChange={(e) => handleSectionChange('hero', 'roles', e.target.value.split(',').map((r) => r.trim()))} />
                     </div>
                   </>
                 )}
