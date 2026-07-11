@@ -227,7 +227,6 @@ function Dashboard({ theme, onToggleTheme }) {
       { id: 'social-links', label: 'Social Links', icon: Share2 },
     ]},
     { label: 'System', items: [
-      { id: 'profile', label: 'Profile', icon: UserCog },
       { id: 'settings', label: 'Settings', icon: Settings },
     ]},
   ];
@@ -532,8 +531,10 @@ const handleSectionSave = async (key) => {
           ))}
         </nav>
         <div className="dash-sidebar__bottom">
-          <div className="dash-sidebar__user">
-            <div className="dash-sidebar__avatar">{user?.name?.[0] ?? 'A'}</div>
+          <div className="dash-sidebar__user" onClick={() => setModal('profileEditor')} style={{ cursor: 'pointer' }} title="Edit profile">
+            <div className="dash-sidebar__avatar">
+              {profileImageUrl ? <img src={profileImageUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} /> : (user?.name?.[0] ?? 'A')}
+            </div>
             {showSidebarLabels && (<div><div className="dash-sidebar__name">{user?.name}</div><div className="dash-sidebar__role">Administrator</div></div>)}
           </div>
           <button className="btn btn-ghost dash-sidebar__logout" onClick={requestLogout} id="admin-logout" title="Logout"><LogOut size={16} />{showSidebarLabels && 'Logout'}</button>
@@ -555,8 +556,10 @@ const handleSectionSave = async (key) => {
               <Calendar size={14} />
               <span>Last 30 days</span>
             </div>
-            <div className="dash-topbar__user" title="Profile" onClick={() => setTab('profile')}>
-              <div className="dash-topbar__user-avatar">{user?.name?.[0] ?? 'A'}</div>
+            <div className="dash-topbar__user" title="Edit profile" onClick={() => setModal('profileEditor')}>
+              <div className="dash-topbar__user-avatar">
+                {profileImageUrl ? <img src={profileImageUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} /> : (user?.name?.[0] ?? 'A')}
+              </div>
               <span className="dash-topbar__user-name">{user?.name}</span>
             </div>
             <ThemeToggle theme={theme} onToggle={onToggleTheme} />
@@ -1216,53 +1219,6 @@ const handleSectionSave = async (key) => {
 
         {/* ═══ SYSTEM TABS ═══ */}
 
-        {/* ── PROFILE ── */}
-        {tab === 'profile' && (
-          <div>
-            <div className="page-toolbar"><div className="page-toolbar__left"><span className="page-toolbar__title">Profile</span></div></div>
-            <div className="profile-card card">
-              <div className="profile-card__header">
-                <div className="profile-card__avatar-large">{user?.name?.[0] ?? 'A'}</div>
-                <div>
-                  <h3 className="profile-card__name">{user?.name}</h3>
-                  <p className="profile-card__email">{user?.email}</p>
-                  <span className="state-badge state-badge--active">Role: {user?.role || 'Admin'}</span>
-                </div>
-              </div>
-              <div className="profile-card__body">
-                <h4 className="profile-card__section-title">Profile Image</h4>
-                <div className="profile-image-section">
-                  <div className="profile-image-preview">
-                    {profileImageUrl ? <img src={profileImageUrl} alt="Profile" /> : <div className="profile-image-placeholder"><UserIcon size={32} /></div>}
-                  </div>
-                  <div className="profile-image-actions">
-                    <input type="file" accept="image/*" onChange={handleProfileImageUpload} style={{ display: 'none' }} id="profile-image-file" disabled={profileUploading} />
-                    <label htmlFor="profile-image-file" className="btn btn-primary" style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px' }}><Upload size={14} />{profileUploading ? 'Uploading...' : profileImageUrl ? 'Change Photo' : 'Upload Photo'}</label>
-                    {profileImageUrl && <button className="btn btn-ghost" onClick={handleRemoveProfileImage} style={{ color: '#ef4444', display: 'inline-flex', alignItems: 'center', gap: '6px' }}><Trash2 size={14} /> Remove</button>}
-                  </div>
-                </div>
-                <h4 className="profile-card__section-title">Change Password</h4>
-                <form onSubmit={handlePasswordChange} className="profile-form" id="password-change-form">
-                  {[
-                    { id: 'profile-current-pwd', label: 'Current Password', key: 'currentPassword', show: showCurrentPw, toggle: () => setShowCurrentPw((v) => !v) },
-                    { id: 'profile-new-pwd', label: 'New Password', key: 'newPassword', show: showNewPw, toggle: () => setShowNewPw((v) => !v) },
-                    { id: 'profile-confirm-pwd', label: 'Confirm New Password', key: 'confirmPassword', show: showConfirmPw, toggle: () => setShowConfirmPw((v) => !v) },
-                  ].map(({ id, label, key, show, toggle }) => (
-                    <div className="form-group" key={key}>
-                      <label className="form-label" htmlFor={id}>{label}</label>
-                      <div className="profile-form__pw-wrap">
-                        <input id={id} type={show ? 'text' : 'password'} className="form-input" placeholder="••••••••" required value={pwdForm[key]} onChange={(e) => setPwdForm({ ...pwdForm, [key]: e.target.value })} />
-                        <button type="button" className="profile-form__pw-toggle" onClick={toggle} aria-label={show ? 'Hide' : 'Show'}>{show ? <EyeOff size={18} /> : <Eye size={18} />}</button>
-                      </div>
-                    </div>
-                  ))}
-                  <button type="submit" className="btn btn-primary profile-form__submit" disabled={pwdLoading}>{pwdLoading ? 'Saving...' : 'Update Password'}</button>
-                </form>
-              </div>
-            </div>
-          </div>
-        )}
-
         {/* ── SETTINGS ── */}
         {tab === 'settings' && (
           <div>
@@ -1310,6 +1266,26 @@ const handleSectionSave = async (key) => {
                         {is2faEnabled ? <button className="btn btn-ghost" style={{ color: '#ef4444' }} onClick={() => setShowDisable2fa(true)}>Disable 2FA</button>
                           : <button className="btn btn-primary" onClick={handleStart2faSetup} disabled={totpLoading}>{totpLoading ? 'Loading...' : 'Enable 2FA'}</button>}
                       </div>
+                    </div>
+                    <div className="settings-card" style={{ marginTop: 16 }}>
+                      <span className="settings-card__title">Change Password</span>
+                      <span className="settings-card__desc">Update your account password.</span>
+                      <form onSubmit={handlePasswordChange} style={{ marginTop: 12 }}>
+                        {[
+                          { id: 'sec-current-pwd', label: 'Current Password', key: 'currentPassword', show: showCurrentPw, toggle: () => setShowCurrentPw((v) => !v) },
+                          { id: 'sec-new-pwd', label: 'New Password', key: 'newPassword', show: showNewPw, toggle: () => setShowNewPw((v) => !v) },
+                          { id: 'sec-confirm-pwd', label: 'Confirm New Password', key: 'confirmPassword', show: showConfirmPw, toggle: () => setShowConfirmPw((v) => !v) },
+                        ].map(({ id, label, key, show, toggle }) => (
+                          <div className="form-group" key={key}>
+                            <label className="form-label" htmlFor={id}>{label}</label>
+                            <div className="profile-form__pw-wrap">
+                              <input id={id} type={show ? 'text' : 'password'} className="form-input" placeholder="••••••••" required value={pwdForm[key]} onChange={(e) => setPwdForm({ ...pwdForm, [key]: e.target.value })} />
+                              <button type="button" className="profile-form__pw-toggle" onClick={toggle} aria-label={show ? 'Hide' : 'Show'}>{show ? <EyeOff size={18} /> : <Eye size={18} />}</button>
+                            </div>
+                          </div>
+                        ))}
+                        <button type="submit" className="btn btn-primary" disabled={pwdLoading} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>{pwdLoading ? 'Saving...' : 'Update Password'}</button>
+                      </form>
                     </div>
                   </div>
                 )}
@@ -1569,6 +1545,45 @@ const handleSectionSave = async (key) => {
             </div>
             <div className="modal-footer"><button type="button" className="btn btn-ghost" onClick={() => { setShowDisable2fa(false); setDisablePassword(''); }}>Cancel</button><button type="submit" className="btn btn-primary dash-btn--danger" style={{ backgroundColor: '#ef4444', color: '#fff' }} disabled={totpLoading}>{totpLoading ? 'Disabling...' : 'Confirm & Disable'}</button></div>
           </form>
+        </Modal>
+      )}
+
+      {/* Profile Editor Modal */}
+      {modal === 'profileEditor' && (
+        <Modal title="Edit Profile" onClose={() => setModal(null)}>
+          <div className="modal-form">
+            <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 20, paddingBottom: 16, borderBottom: '1px solid var(--color-border)' }}>
+              <div className="profile-card__avatar-large">{user?.name?.[0] ?? 'A'}</div>
+              <div>
+                <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 700 }}>{user?.name}</h3>
+                <p style={{ margin: '2px 0 0', fontSize: '0.82rem', color: 'var(--color-text-muted)' }}>{user?.email}</p>
+                <span className="state-badge state-badge--active" style={{ marginTop: 4, display: 'inline-block' }}>Role: {user?.role || 'Admin'}</span>
+              </div>
+            </div>
+            <div className="form-group">
+              <label className="form-label">Site Title (metadata)</label>
+              <input type="text" className="form-input" placeholder="Teshome Bizuayehu Portfolio" value={sectionForms.settings?.siteTitle || user?.name || ''} onChange={(e) => handleSectionChange('settings', 'siteTitle', e.target.value)} />
+              <span style={{ fontSize: '0.72rem', color: 'var(--color-text-muted)', marginTop: 2, display: 'block' }}>Controls the browser tab title and SEO metadata.</span>
+            </div>
+            <div className="form-group">
+              <label className="form-label">Profile Picture</label>
+              <div style={{ display: 'flex', gap: 16, alignItems: 'center', flexWrap: 'wrap' }}>
+                <div className="profile-image-preview">
+                  {profileImageUrl ? <img src={profileImageUrl} alt="Profile" /> : <div className="profile-image-placeholder"><UserIcon size={32} /></div>}
+                </div>
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                  <input type="file" accept="image/*" onChange={handleProfileImageUpload} style={{ display: 'none' }} id="modal-profile-image-file" disabled={profileUploading} />
+                  <label htmlFor="modal-profile-image-file" className="btn btn-primary" style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px' }}><Upload size={14} />{profileUploading ? 'Uploading...' : profileImageUrl ? 'Change Photo' : 'Upload Photo'}</label>
+                  {profileImageUrl && <button type="button" className="btn btn-ghost" onClick={handleRemoveProfileImage} style={{ color: '#ef4444', display: 'inline-flex', alignItems: 'center', gap: '6px' }}><Trash2 size={14} /> Remove</button>}
+                </div>
+              </div>
+              <span style={{ fontSize: '0.72rem', color: 'var(--color-text-muted)', marginTop: 8, display: 'block' }}>Shown in the sidebar, topbar, and public page profile image.</span>
+            </div>
+            <div className="modal-footer">
+              <button type="button" className="btn btn-ghost" onClick={() => setModal(null)}>Cancel</button>
+              <button type="button" className="btn btn-primary" onClick={() => { handleSectionSave('settings'); setModal(null); }} disabled={sectionSaving === 'settings'} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Save size={14} /> {sectionSaving === 'settings' ? 'Saving...' : 'Save'}</button>
+            </div>
+          </div>
         </Modal>
       )}
 
