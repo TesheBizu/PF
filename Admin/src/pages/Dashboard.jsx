@@ -242,7 +242,7 @@ function Dashboard({ theme, onToggleTheme }) {
     setProfileUploading(true);
     try {
       const { data } = await api.post('/upload', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
-      if (data.success) { await dispatch(updateProfileImage(data.url)); toast.success('Profile image updated!'); }
+      if (data.success) { await dispatch(updateProfileImage(data.url)); window.dispatchEvent(new CustomEvent('profileImageChanged', { detail: { url: data.url } })); toast.success('Profile image updated!'); }
       else toast.error(data.message || 'Failed');
     } catch (err) { toast.error('Error uploading'); }
     finally { setProfileUploading(false); }
@@ -905,16 +905,18 @@ const handleSectionSave = async (key) => {
                   <>
                     <div className="form-group">
                       <label className="form-label">Profile Image</label>
-                      <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 8 }}>
+                      <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
+                        <div style={{ width: 64, height: 64, borderRadius: '50%', overflow: 'hidden', flexShrink: 0, background: 'var(--color-surface-2)' }}>
+                          <img src={profileImageUrl || '/profile.png'} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        </div>
                         <input type="file" accept="image/*" onChange={handleProfileImageUpload} style={{ display: 'none' }} id="hero-profile-image" disabled={profileUploading} />
                         <label htmlFor="hero-profile-image" className="btn btn-primary" style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 14px', fontSize: '0.78rem' }}>
-                          <Upload size={14} />{profileUploading ? 'Uploading...' : 'Upload Photo'}
+                          <Upload size={14} />{profileUploading ? 'Uploading...' : 'Change Photo'}
                         </label>
-                        {profileImageUrl && <span style={{ fontSize: '0.72rem', color: 'var(--color-text-muted)' }}>Current: {profileImageUrl.split('/').pop()}</span>}
                       </div>
                     </div>
-                    {['greeting', 'name', 'role', 'bio'].map((field) => {
-                      const defaults = { greeting: "Hello, I'm", name: 'TESHOME', role: '', bio: 'Passionate about building modern, responsive, scalable web applications.' };
+                    {['greeting', 'name', 'bio'].map((field) => {
+                      const defaults = { greeting: "Hello, I'm", name: 'TESHOME', bio: 'Passionate about building modern, responsive, scalable web applications.' };
                       return (
                         <div className="form-group" key={field}>
                           <label className="form-label">{field.charAt(0).toUpperCase() + field.slice(1)}</label>
