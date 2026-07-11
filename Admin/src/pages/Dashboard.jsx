@@ -219,6 +219,7 @@ function Dashboard({ theme, onToggleTheme }) {
       { id: 'hero-editor', label: 'Hero', icon: Monitor },
       { id: 'about-editor', label: 'About', icon: UserIcon },
       { id: 'navbar-editor', label: 'Navbar', icon: MenuIcon },
+      { id: 'footer-editor', label: 'Footer', icon: CreditCard },
     ]},
     { label: 'Engagement', items: [
       { id: 'analytics', label: 'Analytics', icon: BarChart3 },
@@ -237,6 +238,7 @@ function Dashboard({ theme, onToggleTheme }) {
     if (!file) return;
     const formData = new FormData();
     formData.append('file', file);
+    formData.append('type', 'profile');
     setProfileUploading(true);
     try {
       const { data } = await api.post('/upload', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
@@ -888,8 +890,8 @@ const handleSectionSave = async (key) => {
           </div>
         )}
 
-        {/* ═══ SECTION EDITORS (hero, about) ═══ */}
-        {['hero-editor', 'about-editor'].includes(tab) && (
+        {/* ═══ SECTION EDITORS (hero, about, footer) ═══ */}
+        {['hero-editor', 'about-editor', 'footer-editor'].includes(tab) && (
           <div>
             <div className="page-toolbar">
               <div className="page-toolbar__left">
@@ -997,6 +999,12 @@ const handleSectionSave = async (key) => {
             </div>
           </>
         )}
+                {tab === 'footer-editor' && (
+                  <>
+                    <div className="form-group"><label className="form-label">Footer Text</label><input type="text" className="form-input" value={sectionForms.footer?.text || ''} onChange={(e) => handleSectionChange('footer', 'text', e.target.value)} /></div>
+                    <div className="form-group"><label className="form-label">Copyright</label><input type="text" className="form-input" value={sectionForms.footer?.copyright || ''} onChange={(e) => handleSectionChange('footer', 'copyright', e.target.value)} /></div>
+                  </>
+                )}
               </div>
             </div>
           </div>
@@ -1241,15 +1249,6 @@ const handleSectionSave = async (key) => {
                       <div className="form-group"><label className="form-label">Site Title</label><input type="text" className="form-input" placeholder="Teshome Bizuayehu Portfolio" value={sectionForms.settings?.siteTitle || ''} onChange={(e) => handleSectionChange('settings', 'siteTitle', e.target.value)} /></div>
                       <div className="form-group"><label className="form-label">Site Description</label><textarea className="form-textarea" rows={2} placeholder="Full Stack Developer Portfolio" value={sectionForms.settings?.siteDescription || ''} onChange={(e) => handleSectionChange('settings', 'siteDescription', e.target.value)} /></div>
                       <div className="settings-actions"><button className="btn btn-primary" onClick={() => handleSectionSave('settings')} disabled={sectionSaving === 'settings'} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Save size={14} /> Save</button></div>
-                    </div>
-                    <div className="settings-card" style={{ marginTop: 16 }}>
-                      <span className="settings-card__title">Footer</span>
-                      <span className="settings-card__desc">Name and copyright text shown in the site footer.</span>
-                      <div className="form-group"><label className="form-label">Name</label><input type="text" className="form-input" placeholder="Teshome Bizuayehu" value={sectionForms.footer?.name || ''} onChange={(e) => handleSectionChange('footer', 'name', e.target.value)} /></div>
-                      <div className="form-group"><label className="form-label">Copyright Text</label><input type="text" className="form-input" value={sectionForms.footer?.copyrightText || 'All rights reserved.'} onChange={(e) => handleSectionChange('footer', 'copyrightText', e.target.value)} />
-                        <span style={{ fontSize: '0.72rem', color: 'var(--color-text-muted)', marginTop: 2, display: 'block' }}>Appears after &copy; {new Date().getFullYear()}.</span>
-                      </div>
-                      <div className="settings-actions"><button className="btn btn-primary" onClick={() => handleSectionSave('footer')} disabled={sectionSaving === 'footer'} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Save size={14} /> Save</button></div>
                     </div>
                   </div>
                 )}
