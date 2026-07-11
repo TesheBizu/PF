@@ -1001,8 +1001,8 @@ const handleSectionSave = async (key) => {
         )}
                 {tab === 'footer-editor' && (
                   <>
-                    <div className="form-group"><label className="form-label">Footer Text</label><input type="text" className="form-input" value={sectionForms.footer?.text || ''} onChange={(e) => handleSectionChange('footer', 'text', e.target.value)} /></div>
-                    <div className="form-group"><label className="form-label">Copyright</label><input type="text" className="form-input" value={sectionForms.footer?.copyright || ''} onChange={(e) => handleSectionChange('footer', 'copyright', e.target.value)} /></div>
+                    <div className="form-group"><label className="form-label">Footer Text</label><input type="text" className="form-input" value={sectionForms.footer?.text || 'Teshome Bizuayehu'} onChange={(e) => handleSectionChange('footer', 'text', e.target.value)} /></div>
+                    <div className="form-group"><label className="form-label">Copyright</label><input type="text" className="form-input" value={sectionForms.footer?.copyright || 'All rights reserved.'} onChange={(e) => handleSectionChange('footer', 'copyright', e.target.value)} /></div>
                   </>
                 )}
               </div>

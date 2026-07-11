@@ -9,8 +9,8 @@ function FooterBar({ variant = 'site' }) {
   const socialLinks = useSelector((s) => s.socialLinks?.items) || [];
   const footerSection = useSelector((s) => s.sections?.items?.footer) || {};
   const activeLinks = socialLinks.filter((l) => l.active);
-  const footerName = footerSection.name || 'Teshome Bizuayehu';
-  const copyrightText = footerSection.copyrightText || 'All rights reserved.';
+  const footerName = footerSection.text || 'Teshome Bizuayehu';
+  const copyrightText = footerSection.copyright || 'All rights reserved.';
 
   return (
     <footer className={isDashboard ? 'footer footer--dash' : 'footer'}>
