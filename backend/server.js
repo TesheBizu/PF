@@ -118,8 +118,13 @@ const server = app.listen(PORT, () => {
 });
 
 // ─── Socket.io (real-time) ────────────────────────────────────────────────────
-socketInit.init(server);
+const io = socketInit.init(server);
 console.log(' Socket.io initialized for real-time updates');
+
+// ─── Analytics tracker (real-time via socket.io) ─────────────────────────────
+const { setupSocketAnalytics } = require('./services/analyticsTracker');
+setupSocketAnalytics(io);
+console.log(' Analytics tracker initialized for real-time socket.io');
 
 // Handle unhandled promise rejections
 process.on('unhandledRejection', (err) => {

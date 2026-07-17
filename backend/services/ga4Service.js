@@ -2,30 +2,32 @@ const { BetaAnalyticsDataClient } = require('@google-analytics/data');
 
 let analyticsDataClient = null;
 let propertyId = null;
+let initError = null;
 
 function getClient() {
   if (analyticsDataClient) return { client: analyticsDataClient, propertyId };
 
   if (!process.env.GA_PROPERTY_ID) {
-    throw new Error('GA_PROPERTY_ID is not set in environment variables');
+    throw new Error('GA_PROPERTY_ID is not set');
   }
 
   const clientEmail = process.env.GOOGLE_CLIENT_EMAIL;
   const privateKey = process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n');
 
   if (!clientEmail || !privateKey) {
-    throw new Error('Google service account credentials (GOOGLE_CLIENT_EMAIL, GOOGLE_PRIVATE_KEY) are not set');
+    throw new Error('Google service account credentials not set');
   }
 
-  analyticsDataClient = new BetaAnalyticsDataClient({
-    credentials: {
-      client_email: clientEmail,
-      private_key: privateKey,
-    },
-  });
-
-  propertyId = process.env.GA_PROPERTY_ID;
-  return { client: analyticsDataClient, propertyId };
+  try {
+    analyticsDataClient = new BetaAnalyticsDataClient({
+      credentials: { client_email: clientEmail, private_key: privateKey },
+    });
+    propertyId = process.env.GA_PROPERTY_ID;
+    return { client: analyticsDataClient, propertyId };
+  } catch (err) {
+    initError = err.message;
+    throw err;
+  }
 }
 
 const cache = new Map();
@@ -72,18 +74,28 @@ function getDateRange(preset) {
       return { startDate: formatDate(today), endDate: formatDate(today) };
     case 'yesterday':
       return { startDate: formatDate(yesterday), endDate: formatDate(yesterday) };
-    case '7days':
-      return { startDate: formatDate(new Date(today.setDate(today.getDate() - 6))), endDate: formatDate(new Date()) };
-    case '30days':
-      return { startDate: formatDate(new Date(new Date().setDate(new Date().getDate() - 29))), endDate: formatDate(new Date()) };
-    case '90days':
-      return { startDate: formatDate(new Date(new Date().setDate(new Date().getDate() - 89))), endDate: formatDate(new Date()) };
-    case '12months':
-      return { startDate: formatDate(new Date(new Date().setFullYear(new Date().getFullYear() - 1))), endDate: formatDate(new Date()) };
+    case '7days': {
+      const d = new Date(); d.setDate(d.getDate() - 6);
+      return { startDate: formatDate(d), endDate: formatDate(new Date()) };
+    }
+    case '30days': {
+      const d = new Date(); d.setDate(d.getDate() - 29);
+      return { startDate: formatDate(d), endDate: formatDate(new Date()) };
+    }
+    case '90days': {
+      const d = new Date(); d.setDate(d.getDate() - 89);
+      return { startDate: formatDate(d), endDate: formatDate(new Date()) };
+    }
+    case '12months': {
+      const d = new Date(); d.setFullYear(d.getFullYear() - 1);
+      return { startDate: formatDate(d), endDate: formatDate(new Date()) };
+    }
     case 'custom':
       return null;
-    default:
-      return { startDate: formatDate(new Date(new Date().setDate(new Date().getDate() - 29))), endDate: formatDate(new Date()) };
+    default: {
+      const d = new Date(); d.setDate(d.getDate() - 29);
+      return { startDate: formatDate(d), endDate: formatDate(new Date()) };
+    }
   }
 }
 
@@ -100,18 +112,9 @@ async function runReport({ metrics, dimensions = [], dateRange, dimensionFilter,
     dimensions: dimensions.map((d) => ({ name: d })),
   };
 
-  if (dimensionFilter) {
-    request.dimensionFilter = dimensionFilter;
-  }
-
-  if (orderBys.length > 0) {
-    request.orderBys = orderBys;
-  }
-
-  if (limit) {
-    request.limit = limit;
-    request.offset = offset;
-  }
+  if (dimensionFilter) request.dimensionFilter = dimensionFilter;
+  if (orderBys.length > 0) request.orderBys = orderBys;
+  if (limit) { request.limit = limit; request.offset = offset; }
 
   const [response] = await client.runReport(request);
   setCache(cacheKey, response);
@@ -133,9 +136,9 @@ async function runRealtimeReport({ metrics, dimensions = [], limit = 10 }) {
 }
 
 function parseReportResponse(response) {
-  const rows = response.rows || [];
-  const dimensionHeaders = (response.dimensionHeaders || []).map((h) => h.name);
-  const metricHeaders = (response.metricHeaders || []).map((h) => h.name);
+  const rows = response?.rows || [];
+  const dimensionHeaders = (response?.dimensionHeaders || []).map((h) => h.name);
+  const metricHeaders = (response?.metricHeaders || []).map((h) => h.name);
 
   return rows.map((row) => {
     const dimensions = {};
@@ -151,14 +154,25 @@ function parseReportResponse(response) {
 }
 
 function parseTotals(response) {
-  const totals = response.totals?.[0];
+  const totals = response?.totals?.[0];
   if (!totals) return {};
-  const metricHeaders = (response.metricHeaders || []).map((h) => h.name);
+  const metricHeaders = (response?.metricHeaders || []).map((h) => h.name);
   const result = {};
   metricHeaders.forEach((header, i) => {
     result[header] = parseFloat(totals.metricValues?.[i]?.value || '0');
   });
   return result;
+}
+
+function isAvailable() {
+  try {
+    if (!process.env.GA_PROPERTY_ID || !process.env.GOOGLE_CLIENT_EMAIL || !process.env.GOOGLE_PRIVATE_KEY) {
+      return false;
+    }
+    return !initError;
+  } catch (_) {
+    return false;
+  }
 }
 
 module.exports = {
@@ -170,4 +184,5 @@ module.exports = {
   runRealtimeReport,
   parseReportResponse,
   parseTotals,
+  isAvailable,
 };
