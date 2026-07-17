@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { fetchProjects } from '../../redux/slices/projectsSlice';
 import { Monitor, ExternalLink } from 'lucide-react';
 import { Github } from '../../components/Icons';
-import { trackInteraction } from '../../services/analytics';
+import { trackProjectClick, trackProjectDemoClick, trackGithubLinkClick } from '../../services/analytics';
 import './Projects.css';
 
 function ProjectDefaultBanner() {
@@ -49,13 +49,13 @@ function ProjectCard({ project }) {
 
         <div className="project-card__links">
           {project.githubUrl && (
-            <a href={project.githubUrl} target="_blank" rel="noopener noreferrer" className="btn btn-ghost project-card__btn" aria-label={`View ${project.title} on GitHub`} onClick={() => trackInteraction('project_click', { projectId: project._id, source: 'github' })}>
+            <a href={project.githubUrl} target="_blank" rel="noopener noreferrer" className="btn btn-ghost project-card__btn" aria-label={`View ${project.title} on GitHub`} onClick={() => trackGithubLinkClick(project.title)}>
               <Github size={14} />
               GitHub
             </a>
           )}
           {project.liveUrl && (
-            <a href={project.liveUrl} target="_blank" rel="noopener noreferrer" className="btn btn-primary project-card__btn" aria-label={`View ${project.title} live`} onClick={() => trackInteraction('project_click', { projectId: project._id, source: 'live' })}>
+            <a href={project.liveUrl} target="_blank" rel="noopener noreferrer" className="btn btn-primary project-card__btn" aria-label={`View ${project.title} live`} onClick={() => trackProjectDemoClick(project.title)}>
               <ExternalLink size={14} />
               Live Demo
             </a>
@@ -132,7 +132,7 @@ function Projects() {
 
         <div className="projects__cta animate-fadeInUp">
           <p>Want to see more? Visit my GitHub for all repositories.</p>
-          <a href="https://github.com/TesheBizu" target="_blank" rel="noopener noreferrer" className="btn btn-primary" onClick={() => trackInteraction('project_click', { source: 'cta' })}>
+          <a href="https://github.com/TesheBizu" target="_blank" rel="noopener noreferrer" className="btn btn-primary" onClick={() => trackGithubLinkClick('View All CTA')}>
             <Github size={16} />
             View All on GitHub
           </a>

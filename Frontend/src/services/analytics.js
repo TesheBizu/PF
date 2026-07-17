@@ -1,142 +1,123 @@
-import api from './api';
-
-const VISITOR_ID_KEY = 'pf_visitor_id';
-const VISIT_DATE_KEY = 'pf_visit_date';
+const GA_MEASUREMENT_ID = import.meta.env.VITE_GA_MEASUREMENT_ID;
 const DEBUG = import.meta.env.MODE === 'development';
 
-function generateId() {
-  return 'v_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 8);
-}
-
-function getVisitorId() {
-  let id = localStorage.getItem(VISITOR_ID_KEY);
-  if (!id) {
-    id = generateId();
-    localStorage.setItem(VISITOR_ID_KEY, id);
-  }
-  return id;
-}
-
-function isNewVisitToday() {
-  const today = new Date().toISOString().slice(0, 10);
-  const lastVisit = localStorage.getItem(VISIT_DATE_KEY);
-  if (lastVisit !== today) {
-    localStorage.setItem(VISIT_DATE_KEY, today);
-    return true;
-  }
-  return false;
-}
-
-function detectBrowser() {
-  const ua = navigator.userAgent.toLowerCase();
-  if (ua.includes('chrome') && !ua.includes('edg')) return 'chrome';
-  if (ua.includes('firefox')) return 'firefox';
-  if (ua.includes('safari') && !ua.includes('chrome')) return 'safari';
-  if (ua.includes('edg')) return 'edge';
-  return 'other';
-}
-
-function detectDevice() {
-  const ua = navigator.userAgent.toLowerCase();
-  if (/mobile|android|iphone|ipad|ipod/i.test(ua)) {
-    return /ipad|tablet/i.test(ua) ? 'tablet' : 'mobile';
-  }
-  return 'desktop';
-}
-
-function detectSource() {
-  const ref = document.referrer;
-  if (!ref) return 'direct';
-  try {
-    const url = new URL(ref);
-    const host = url.hostname;
-    if (host.includes('google')) return 'organic';
-    if (host.includes('facebook') || host.includes('twitter') || host.includes('linkedin') || host.includes('instagram')) return 'social';
-    return 'referral';
-  } catch {
-    return 'referral';
+function gtag() {
+  if (typeof window.gtag === 'function') {
+    window.gtag(...arguments);
+  } else if (DEBUG) {
+    console.warn('[GA4] gtag not loaded yet');
   }
 }
 
 const log = (msg, data) => {
-  if (DEBUG) console.log(`[Analytics] ${msg}`, data || '');
+  if (DEBUG) console.log(`[GA4] ${msg}`, data || '');
 };
 
-export async function trackVisit() {
-  try {
-    const visitorId = getVisitorId();
-    const newVisit = isNewVisitToday();
-    log('trackVisit', { visitorId, newVisit, device: detectDevice(), browser: detectBrowser(), source: detectSource() });
-    const { data } = await api.post('/analytics/record', {
-      type: 'visit',
-      isNewVisitor: newVisit,
-      visitorId,
-      source: detectSource(),
-      device: detectDevice(),
-      browser: detectBrowser(),
-    });
-    log('trackVisit response', data);
-    return data;
-  } catch (err) {
-    if (DEBUG) console.warn('[Analytics] trackVisit failed:', err.message);
+export function initGA() {
+  if (!GA_MEASUREMENT_ID) {
+    if (DEBUG) console.warn('[GA4] VITE_GA_MEASUREMENT_ID not set');
+    return;
   }
+  log('GA4 initialized with ID', GA_MEASUREMENT_ID);
 }
 
-export async function trackPageView(page) {
-  try {
-    const visitorId = getVisitorId();
-    log('trackPageView', { page, visitorId });
-    const { data } = await api.post('/analytics/record', {
-      type: 'pageview',
-      page,
-      visitorId,
-    });
-    return data;
-  } catch (err) {
-    if (DEBUG) console.warn('[Analytics] trackPageView failed:', err.message);
-  }
+export function trackPageView(page) {
+  const path = page || window.location.pathname;
+  gtag('event', 'page_view', {
+    page_path: path,
+    page_title: document.title,
+  });
+  log('page_view', { page_path: path });
 }
 
-export async function trackInteraction(type, metadata = {}) {
-  try {
-    log('trackInteraction', { type, metadata });
-    const { data } = await api.post('/analytics/record', {
-      type: 'interaction',
-      interactionType: type,
-      ...metadata,
-    });
-    return data;
-  } catch (err) {
-    if (DEBUG) console.warn('[Analytics] trackInteraction failed:', err.message);
-  }
+export function trackHeroCtaClick(label = 'hero_cta') {
+  gtag('event', 'hero_cta_click', {
+    event_category: 'engagement',
+    event_label: label,
+  });
+  log('hero_cta_click', { label });
 }
 
-export async function trackSocialClick(platform) {
-  try {
-    log('trackSocialClick', { platform });
-    const { data } = await api.post('/analytics/record', { type: 'socialClick', platform });
-    return data;
-  } catch (err) {
-    if (DEBUG) console.warn('[Analytics] socialClick failed:', err.message);
-  }
+export function trackProjectClick(projectTitle) {
+  gtag('event', 'project_click', {
+    event_category: 'projects',
+    event_label: projectTitle,
+  });
+  log('project_click', { projectTitle });
 }
 
-export async function trackTestimonialConversion() {
-  try {
-    log('trackTestimonialConversion');
-    const { data } = await api.post('/analytics/record', { type: 'testimonialConversion' });
-    return data;
-  } catch (err) {
-    if (DEBUG) console.warn('[Analytics] testimonialConversion failed:', err.message);
-  }
+export function trackProjectDemoClick(projectTitle) {
+  gtag('event', 'project_demo_click', {
+    event_category: 'projects',
+    event_label: projectTitle,
+  });
+  log('project_demo_click', { projectTitle });
 }
 
-export async function trackContactSubmission() {
-  try {
-    log('trackContactSubmission');
-    const { data } = await api.post('/analytics/record', { type: 'contactSubmission' });
-    return data;
-  } catch (err) {
-    if (DEBUG) console.warn('[Analytics] contactSubmission failed:', err.message);
-  }
+export function trackGithubLinkClick(projectTitle) {
+  gtag('event', 'github_link_click', {
+    event_category: 'projects',
+    event_label: projectTitle,
+  });
+  log('github_link_click', { projectTitle });
+}
+
+export function trackContactFormSubmit() {
+  gtag('event', 'contact_form_submit', {
+    event_category: 'contact',
+    event_label: 'contact_form',
+  });
+  log('contact_form_submit');
+}
+
+export const trackContactSubmission = trackContactFormSubmit;
+
+export function trackResumeDownload() {
+  gtag('event', 'resume_download', {
+    event_category: 'engagement',
+    event_label: 'resume',
+  });
+  log('resume_download');
+}
+
+export function trackSocialClick(platform) {
+  const eventName = `${platform}_click`;
+  gtag('event', eventName, {
+    event_category: 'social',
+    event_label: platform,
+  });
+  log('social_click', { platform });
+}
+
+export function trackThemeToggle(theme) {
+  gtag('event', 'theme_toggle', {
+    event_category: 'ui',
+    event_label: theme,
+  });
+  log('theme_toggle', { theme });
+}
+
+export function trackScrollDepth(depth) {
+  gtag('event', `scroll_depth_${depth}`, {
+    event_category: 'engagement',
+    event_label: `${depth}%`,
+    value: depth,
+  });
+  log('scroll_depth', { depth });
+}
+
+export function trackSectionView(section) {
+  gtag('event', `section_view_${section}`, {
+    event_category: 'navigation',
+    event_label: section,
+  });
+  log('section_view', { section });
+}
+
+export function trackInteraction(type, metadata = {}) {
+  gtag('event', type, {
+    event_category: 'interaction',
+    ...metadata,
+  });
+  log('interaction', { type, metadata });
 }

@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { Sun, Moon, Menu, X } from 'lucide-react';
+import { trackSectionView } from '../../services/analytics';
 import './Navbar.css';
 
 const DEFAULT_NAV_LINKS = [
@@ -35,14 +36,15 @@ function Navbar({ theme, onToggleTheme }) {
   }, [handleScroll]);
 
   /* ── IntersectionObserver for active nav section ── */
+  const trackedSections = useRef(new Set());
   useEffect(() => {
+    trackedSections.current.clear();
     const ids = navLinks.map((l) => l.id || l.path.replace('/#', '')).filter(Boolean);
     const els = ids.map((id) => document.getElementById(id)).filter(Boolean);
     if (!els.length) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
-        /* find the section with the largest intersection ratio */
         let best = null;
         let bestRatio = 0;
         entries.forEach((entry) => {
@@ -51,14 +53,20 @@ function Navbar({ theme, onToggleTheme }) {
             best = entry.target.id;
           }
         });
-        if (best) setActiveSection(best);
+        if (best) {
+          setActiveSection(best);
+          if (!trackedSections.current.has(best) && bestRatio > 0.4) {
+            trackedSections.current.add(best);
+            trackSectionView(best);
+          }
+        }
       },
       { threshold: [0, 0.2, 0.4, 0.6, 0.8, 1], rootMargin: '-10% 0px -15% 0px' }
     );
 
     els.forEach((el) => observer.observe(el));
     return () => observer.disconnect();
-  }, [navLinks]);
+  }, [navLinks, location.pathname]);
 
   /* ── mobile menu lock ── */
   useEffect(() => {

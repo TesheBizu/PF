@@ -3,11 +3,11 @@ import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 import { sendMessage, resetSent } from '../../redux/slices/messagesSlice';
 import { Mail, Send, Phone, MapPin } from 'lucide-react';
-import { trackContactSubmission } from '../../services/analytics';
+import { trackContactSubmission, trackSocialClick } from '../../services/analytics';
 import './Contact.css';
 
 const CONTACT_INFO = [
-  { icon: <Mail size={20} />, label: 'Email', value: 'teshelin7@gmail.com', href: 'mailto:teshelin7@gmail.com' },
+  { icon: <Mail size={20} />, label: 'Email', value: 'teshelin7@gmail.com', href: 'mailto:teshelin7@gmail.com', track: () => trackSocialClick('email') },
   { icon: <Phone size={20} />, label: 'Phone', value: '+251988044439', href: null },
   { icon: <MapPin size={20} />, label: 'Location', value: 'Bahir Dar, Ethiopia', href: null },
 ];
@@ -77,7 +77,7 @@ function Contact() {
             <div className="contact__cards">
               {CONTACT_INFO.map((c) =>
                 c.href ? (
-                  <a key={c.label} href={c.href} target="_blank" rel="noopener noreferrer" className="contact__card">
+                  <a key={c.label} href={c.href} target="_blank" rel="noopener noreferrer" className="contact__card" onClick={c.track}>
                     <div className="contact__card-icon">{c.icon}</div>
                     <div>
                       <div className="contact__card-label">{c.label}</div>

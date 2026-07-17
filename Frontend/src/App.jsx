@@ -6,7 +6,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import Navbar from './components/Navbar/Navbar';
 import Footer from './components/Footer/Footer';
 import SocketListener from './components/SocketListener/SocketListener';
-import { trackVisit, trackPageView } from './services/analytics';
+import { trackPageView, trackThemeToggle, trackScrollDepth } from './services/analytics';
 
 const Home       = lazy(() => import('./pages/Home/Home'));
 const About      = lazy(() => import('./pages/About/About'));
@@ -36,15 +36,27 @@ function AnalyticsTracker() {
   const location = useLocation();
 
   useEffect(() => {
-    const delay = setTimeout(() => {
-      trackPageView(location.pathname);
-    }, 500);
-    return () => clearTimeout(delay);
+    trackPageView(location.pathname);
   }, [location.pathname]);
 
   useEffect(() => {
-    trackVisit();
-  }, []);
+    const depths = [25, 50, 75, 100];
+    const tracked = new Set();
+    const handleScroll = () => {
+      const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+      if (scrollHeight <= 0) return;
+      const pct = Math.round((window.scrollY / scrollHeight) * 100);
+      depths.forEach((d) => {
+        if (pct >= d && !tracked.has(d)) {
+          tracked.add(d);
+          trackScrollDepth(d);
+        }
+      });
+    };
+    tracked.clear();
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [location.pathname]);
 
   return null;
 }
@@ -58,7 +70,11 @@ function App() {
   }, [theme]);
 
   const toggleTheme = () => {
-    setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
+    setTheme((prev) => {
+      const next = prev === 'dark' ? 'light' : 'dark';
+      trackThemeToggle(next);
+      return next;
+    });
   };
 
   return (

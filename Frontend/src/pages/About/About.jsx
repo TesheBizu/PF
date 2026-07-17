@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import { Mail, Download } from 'lucide-react';
 import { setCircularFavicon } from '../../utils/circularFavicon';
+import { trackResumeDownload } from '../../services/analytics';
 import './About.css';
 
 function AnimatedNumber({ target, duration = 1500, suffix = '+' }) {
@@ -96,7 +97,7 @@ function About() {
                 <Mail size={15} />
                 Contact Me
               </a>
-              <a href={about.cvUrl || '/cv.pdf'} download="Teshome_Bizuayehu_CV.pdf" className="btn btn-ghost">
+              <a href={about.cvUrl || '/cv.pdf'} download="Teshome_Bizuayehu_CV.pdf" className="btn btn-ghost" onClick={trackResumeDownload}>
                 <Download size={15} />
                 Download CV
               </a>

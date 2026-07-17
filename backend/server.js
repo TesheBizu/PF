@@ -21,6 +21,7 @@ const sectionRoutes = require('./routes/sections');
 const notificationRoutes = require('./routes/notifications');
 const analyticsRoutes = require('./routes/analytics');
 const socialLinkRoutes = require('./routes/socialLinks');
+const adminAnalyticsRoutes = require('./routes/adminAnalytics');
 
 
 // Connect to Database
@@ -89,6 +90,7 @@ app.use('/api/sections', sectionRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/social-links', socialLinkRoutes);
+app.use('/api/admin/analytics', adminAnalyticsRoutes);
 
 
 // Health check

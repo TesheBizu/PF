@@ -2,15 +2,14 @@ import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import {
   Users, Eye, MessageSquare, BarChart3, Activity, Bell, Mail, Star,
-  Briefcase, Zap, History, Plus, ArrowUp, ArrowDown, TrendingUp, Clock,
-  RefreshCw, LayoutDashboard, TrendingDown, MousePointerClick,
-  ExternalLink, Share2, Settings, Download, FileText,
+  Briefcase, Zap, Plus, ArrowUp, ArrowDown, TrendingUp, Clock,
+  RefreshCw, LayoutDashboard, Download, FileText,
 } from 'lucide-react';
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as ReTooltip,
   ResponsiveContainer,
 } from 'recharts';
-import { fetchAnalytics } from '../../redux/slices/analyticsSlice';
+import { fetchOverview, fetchTrend } from '../../redux/slices/analyticsSlice';
 import api from '../../services/api';
 import './AnalyticsPanels.css';
 
@@ -20,7 +19,7 @@ const QUICK_ACTIONS = [
   { id: 'testimonials', label: 'Testimonial', icon: Star, color: '#f59e0b' },
   { id: 'messages', label: 'View Inbox', icon: MessageSquare, color: '#ec4899' },
   { id: 'analytics', label: 'Analytics', icon: BarChart3, color: '#a855f7' },
-  { id: 'social-links', label: 'Social Links', icon: Share2, color: '#06b6d4' },
+  { id: 'social-links', label: 'Social Links', icon: BarChart3, color: '#06b6d4' },
 ];
 
 function AnimatedCounter({ value, suffix = '', duration = 1200, decimals = 0 }) {
@@ -33,7 +32,6 @@ function AnimatedCounter({ value, suffix = '', duration = 1200, decimals = 0 }) 
     fromRef.current = display;
     startRef.current = performance.now();
     let raf;
-
     const step = (now) => {
       const elapsed = now - startRef.current;
       const t = Math.min(elapsed / duration, 1);
@@ -42,7 +40,6 @@ function AnimatedCounter({ value, suffix = '', duration = 1200, decimals = 0 }) 
       setDisplay(current);
       if (t < 1) raf = requestAnimationFrame(step);
     };
-
     raf = requestAnimationFrame(step);
     return () => cancelAnimationFrame(raf);
   }, [value, duration]);
@@ -65,31 +62,32 @@ function CustomTooltip({ active, payload, label }) {
   );
 }
 
+function formatDuration(seconds) {
+  if (!seconds || seconds <= 0) return '0m 0s';
+  const m = Math.floor(seconds / 60);
+  const s = Math.round(seconds % 60);
+  return `${m}m ${s}s`;
+}
+
 export default function OverviewPanel({ onNavigate }) {
   const dispatch = useDispatch();
-  const { summary, entries, loading, trends } = useSelector((s) => s.analytics);
+  const { overview, trend, loading } = useSelector((s) => s.analytics);
   const { items: messages } = useSelector((s) => s.messages);
   const { items: notifications } = useSelector((s) => s.notifications);
-  const [seeding, setSeeding] = useState(false);
 
   useEffect(() => {
-    dispatch(fetchAnalytics());
+    dispatch(fetchOverview({ preset: '30days' }));
+    dispatch(fetchTrend({ preset: '30days', metric: 'activeUsers' }));
   }, [dispatch]);
 
   const chartData = useMemo(() => {
-    if (!entries?.length) return [];
-    return entries.map((e) => ({
-      date: e.date?.slice(5) || e.date,
-      fullDate: e.date,
-      visitors: e.visitors || 0,
-      pageViews: e.pageViews || 0,
+    if (!trend?.values?.length) return [];
+    return trend.values.map((v) => ({
+      date: v.date?.slice(5) || v.date,
+      fullDate: v.date,
+      value: v.value || 0,
     }));
-  }, [entries]);
-
-  const conversionRate = useMemo(() => {
-    if (!summary?.visitors || summary.visitors === 0) return 0;
-    return (summary.contactSubmissions || 0) / summary.visitors * 100;
-  }, [summary]);
+  }, [trend]);
 
   const unreadMessages = useMemo(() =>
     (messages || []).filter((m) => !m.isRead).length,
@@ -108,76 +106,116 @@ export default function OverviewPanel({ onNavigate }) {
   }, [notifications, messages]);
 
   const handleRefresh = useCallback(() => {
-    dispatch(fetchAnalytics());
-  }, [dispatch]);
-
-  const handleSeed = useCallback(async () => {
-    setSeeding(true);
-    try {
-      await api.post('/analytics/seed');
-      dispatch(fetchAnalytics());
-    } catch (e) {
-      console.error('Seeding failed:', e);
-    }
-    setSeeding(false);
+    dispatch(fetchOverview({ preset: '30days' }));
+    dispatch(fetchTrend({ preset: '30days', metric: 'activeUsers' }));
   }, [dispatch]);
 
   const KPI_CONFIG = [
     {
-      key: 'visitors',
-      label: 'Visitors',
-      value: summary?.visitors || 0,
+      key: 'totalUsers',
+      label: 'Total Users',
+      value: overview?.totalUsers || 0,
       icon: Users,
       gradient: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
       bg: 'rgba(99,102,241,0.08)',
     },
     {
-      key: 'pageViews',
-      label: 'Page Views',
-      value: summary?.pageViews || 0,
+      key: 'activeUsers',
+      label: 'Active Users',
+      value: overview?.activeUsers || 0,
+      icon: Activity,
+      gradient: 'linear-gradient(135deg, #10b981, #06b6d4)',
+      bg: 'rgba(16,185,129,0.08)',
+    },
+    {
+      key: 'newUsers',
+      label: 'New Users',
+      value: overview?.newUsers || 0,
+      icon: Users,
+      gradient: 'linear-gradient(135deg, #3b82f6, #2563eb)',
+      bg: 'rgba(59,130,246,0.08)',
+    },
+    {
+      key: 'sessions',
+      label: 'Sessions',
+      value: overview?.sessions || 0,
       icon: Eye,
       gradient: 'linear-gradient(135deg, #06b6d4, #3b82f6)',
       bg: 'rgba(6,182,212,0.08)',
     },
     {
-      key: 'messages',
-      label: 'Messages',
-      value: unreadMessages,
-      icon: MessageSquare,
+      key: 'engagedSessions',
+      label: 'Engaged Sessions',
+      value: overview?.engagedSessions || 0,
+      icon: Zap,
+      gradient: 'linear-gradient(135deg, #f59e0b, #f97316)',
+      bg: 'rgba(245,158,11,0.08)',
+    },
+    {
+      key: 'pageViews',
+      label: 'Page Views',
+      value: overview?.pageViews || 0,
+      icon: Eye,
       gradient: 'linear-gradient(135deg, #ec4899, #a855f7)',
       bg: 'rgba(236,72,153,0.08)',
     },
     {
-      key: 'conversionRate',
-      label: 'Conversion Rate',
-      value: conversionRate,
+      key: 'avgSessionDuration',
+      label: 'Avg Session Duration',
+      value: overview?.averageSessionDuration || 0,
+      icon: Clock,
+      gradient: 'linear-gradient(135deg, #8b5cf6, #6366f1)',
+      bg: 'rgba(139,92,246,0.08)',
+      format: 'duration',
+    },
+    {
+      key: 'bounceRate',
+      label: 'Bounce Rate',
+      value: overview?.bounceRate ? overview.bounceRate * 100 : 0,
+      icon: ArrowDown,
+      gradient: 'linear-gradient(135deg, #ef4444, #f97316)',
+      bg: 'rgba(239,68,68,0.08)',
+      suffix: '%',
+      decimals: 1,
+    },
+    {
+      key: 'engagementRate',
+      label: 'Engagement Rate',
+      value: overview?.engagementRate ? overview.engagementRate * 100 : 0,
       icon: TrendingUp,
-      gradient: 'linear-gradient(135deg, #10b981, #06b6d4)',
+      gradient: 'linear-gradient(135deg, #10b981, #34d399)',
       bg: 'rgba(16,185,129,0.08)',
       suffix: '%',
       decimals: 1,
     },
+    {
+      key: 'contactSubmissions',
+      label: 'Contact Submissions',
+      value: overview?.contactSubmissions || 0,
+      icon: MessageSquare,
+      gradient: 'linear-gradient(135deg, #ec4899, #f43f5e)',
+      bg: 'rgba(236,72,153,0.08)',
+    },
+    {
+      key: 'resumeDownloads',
+      label: 'Resume Downloads',
+      value: overview?.resumeDownloads || 0,
+      icon: Download,
+      gradient: 'linear-gradient(135deg, #06b6d4, #0891b2)',
+      bg: 'rgba(6,182,212,0.08)',
+    },
+    {
+      key: 'projectClicks',
+      label: 'Project Clicks',
+      value: overview?.projectClicks || 0,
+      icon: Briefcase,
+      gradient: 'linear-gradient(135deg, #a855f7, #7c3aed)',
+      bg: 'rgba(168,85,247,0.08)',
+    },
   ];
-
-  const visitorDelta = useMemo(() => {
-    if (!chartData || chartData.length < 2) return null;
-    const last = chartData[chartData.length - 1]?.visitors || 0;
-    const prev = chartData[chartData.length - 2]?.visitors || 0;
-    if (prev === 0) return null;
-    return ((last - prev) / prev * 100).toFixed(1);
-  }, [chartData]);
-
-  const pageViewDelta = useMemo(() => {
-    if (!chartData || chartData.length < 2) return null;
-    const last = chartData[chartData.length - 1]?.pageViews || 0;
-    const prev = chartData[chartData.length - 2]?.pageViews || 0;
-    if (prev === 0) return null;
-    return ((last - prev) / prev * 100).toFixed(1);
-  }, [chartData]);
 
   return (
     <div className="exec-dashboard animate-fadeInUp">
-      {/* Header */}
       <div className="exec-header">
         <div className="exec-header__left">
           <div className="exec-header__brand">
@@ -187,98 +225,48 @@ export default function OverviewPanel({ onNavigate }) {
             <div>
               <h2 className="exec-header__title">Executive Dashboard</h2>
               <p className="exec-header__subtitle">
-                Real-time overview of your portfolio performance
-                {trends && (
-                  <span className="exec-header__trend">
-                    &nbsp;· Trend: <strong>{trends.label}</strong>
-                    {trends.direction === 'up' ? <ArrowUp size={11} style={{ color: '#10b981', marginLeft: 2 }} />
-                    : trends.direction === 'down' ? <ArrowDown size={11} style={{ color: '#ef4444', marginLeft: 2 }} />
-                    : <Clock size={11} style={{ marginLeft: 2 }} />}
-                  </span>
-                )}
+                Real-time overview powered by Google Analytics 4
               </p>
             </div>
           </div>
         </div>
         <div className="exec-header__right">
-          <button className="exec-btn exec-btn--ghost" onClick={handleSeed} disabled={seeding}>
-            <BarChart3 size={13} /> {seeding ? 'Seeding...' : 'Seed Data'}
-          </button>
           <button className="exec-btn exec-btn--ghost" onClick={handleRefresh}>
             <RefreshCw size={13} /> Refresh
           </button>
         </div>
       </div>
 
-      {/* KPI Row */}
       <div className="exec-kpi-grid">
         {KPI_CONFIG.map((kpi) => {
           const Icon = kpi.icon;
-          const isVisitors = kpi.key === 'visitors';
-          const isPageViews = kpi.key === 'pageViews';
-          const delta = isVisitors ? visitorDelta : isPageViews ? pageViewDelta : null;
-          const isUp = delta && parseFloat(delta) >= 0;
-
           return (
             <div key={kpi.key} className="exec-kpi-card" style={{ '--kpi-bg': kpi.bg, '--kpi-gradient': kpi.gradient }}>
               <div className="exec-kpi-card__top">
                 <div className="exec-kpi-card__icon-wrap">
                   <Icon size={16} />
                 </div>
-                {delta != null && (
-                  <span className={`exec-kpi-card__delta exec-kpi-card__delta--${isUp ? 'up' : 'down'}`}>
-                    {isUp ? <ArrowUp size={10} /> : <ArrowDown size={10} />}
-                    {Math.abs(parseFloat(delta))}%
-                  </span>
-                )}
               </div>
               <div className="exec-kpi-card__value">
-                {kpi.key === 'conversionRate' ? (
-                  <AnimatedCounter value={kpi.value} suffix="%" duration={1400} decimals={1} />
+                {kpi.format === 'duration' ? (
+                  formatDuration(kpi.value)
+                ) : kpi.suffix ? (
+                  <AnimatedCounter value={kpi.value} suffix={kpi.suffix} duration={1400} decimals={kpi.decimals || 0} />
                 ) : (
                   <AnimatedCounter value={kpi.value} duration={1200} />
                 )}
               </div>
               <div className="exec-kpi-card__label">{kpi.label}</div>
-              {kpi.key === 'visitors' && summary?.growthRate != null && (
-                <div className="exec-kpi-card__trend">
-                  <span style={{ color: summary.growthRate >= 0 ? '#10b981' : '#ef4444' }}>
-                    {summary.growthRate >= 0 ? '+' : ''}{summary.growthRate}% MoM
-                  </span>
-                </div>
-              )}
-              {kpi.key === 'pageViews' && (
-                <div className="exec-kpi-card__trend">
-                  <span style={{ color: 'var(--color-text-dim)' }}>
-                    Avg {summary?.avgPageViewsPerVisitor || '0'} / visitor
-                  </span>
-                </div>
-              )}
-              {kpi.key === 'messages' && messages && (
-                <div className="exec-kpi-card__trend">
-                  <span style={{ color: 'var(--color-text-dim)' }}>
-                    {messages.length} total
-                  </span>
-                </div>
-              )}
-              {kpi.key === 'conversionRate' && (
-                <div className="exec-kpi-card__trend">
-                  <span style={{ color: 'var(--color-text-dim)' }}>
-                    {summary?.contactSubmissions || 0} submissions
-                  </span>
-                </div>
-              )}
             </div>
           );
         })}
       </div>
 
-      {/* Traffic Trend Chart */}
       <div className="exec-chart-card">
         <div className="exec-chart-card__header">
           <div className="exec-chart-card__title">
             <TrendingUp size={15} />
-            <span>Traffic Trend</span>
+            <span>Active Users Trend (30 days)</span>
           </div>
         </div>
         <div className="exec-chart-card__body">
@@ -292,52 +280,25 @@ export default function OverviewPanel({ onNavigate }) {
                     <stop offset="0%" stopColor="#6366f1" stopOpacity={0.35} />
                     <stop offset="100%" stopColor="#6366f1" stopOpacity={0} />
                   </linearGradient>
-                  <linearGradient id="execPageViewGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#06b6d4" stopOpacity={0.25} />
-                    <stop offset="100%" stopColor="#06b6d4" stopOpacity={0} />
-                  </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" strokeOpacity={0.5} />
                 <XAxis dataKey="date" tick={{ fontSize: 10, fill: 'var(--color-text-dim)' }} interval="preserveStartEnd" minTickGap={30} />
                 <YAxis tick={{ fontSize: 10, fill: 'var(--color-text-dim)' }} />
                 <ReTooltip content={<CustomTooltip />} />
-                <Area type="monotone" dataKey="visitors" stroke="#6366f1" strokeWidth={2.5} fill="url(#execVisitorGrad)" name="Visitors" dot={false} activeDot={{ r: 4, fill: '#6366f1' }} />
-                <Area type="monotone" dataKey="pageViews" stroke="#06b6d4" strokeWidth={2} fill="url(#execPageViewGrad)" name="Page Views" dot={false} activeDot={{ r: 4, fill: '#06b6d4' }} />
+                <Area type="monotone" dataKey="value" stroke="#6366f1" strokeWidth={2.5} fill="url(#execVisitorGrad)" name="Active Users" dot={false} activeDot={{ r: 4, fill: '#6366f1' }} />
               </AreaChart>
             </ResponsiveContainer>
           ) : (
             <div className="empty-panel" style={{ minHeight: 260 }}>
               <BarChart3 size={28} />
               <h3>No data yet</h3>
-              <p>Visit the public site or seed data to generate analytics.</p>
+              <p>GA4 will populate this chart once visitors arrive at your portfolio.</p>
             </div>
           )}
         </div>
-        {chartData.length > 0 && (
-          <div className="exec-chart-card__footer">
-            <div className="exec-chart-legend">
-              <span className="exec-chart-legend__item">
-                <span className="exec-chart-legend__dot" style={{ background: '#6366f1' }} />
-                Visitors
-              </span>
-              <span className="exec-chart-legend__item">
-                <span className="exec-chart-legend__dot" style={{ background: '#06b6d4' }} />
-                Page Views
-              </span>
-            </div>
-            {trends && (
-              <span className="exec-chart-legend__trend">
-                <TrendingUp size={11} />
-                {trends.label} ({trends.strength})
-              </span>
-            )}
-          </div>
-        )}
       </div>
 
-      {/* Bottom Row */}
       <div className="exec-bottom-grid">
-        {/* Recent Activity */}
         <div className="exec-card">
           <div className="exec-card__header">
             <span className="exec-card__title"><Activity size={14} /> Recent Activity</span>
@@ -369,7 +330,6 @@ export default function OverviewPanel({ onNavigate }) {
           </div>
         </div>
 
-        {/* Quick Actions */}
         <div className="exec-card">
           <div className="exec-card__header">
             <span className="exec-card__title"><Zap size={14} /> Quick Actions</span>

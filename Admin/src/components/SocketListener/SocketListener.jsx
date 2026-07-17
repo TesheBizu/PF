@@ -26,7 +26,6 @@ import {
   socialLinkRealtimeAdded, socialLinkRealtimeUpdated, socialLinkRealtimeRemoved,
   socialLinksRealtimeReordered,
 } from '../../redux/slices/socialLinksSlice';
-import { realtimeAnalyticsUpdate } from '../../redux/slices/analyticsSlice';
 import { toast } from 'react-toastify';
 
 function SocketListener() {
@@ -78,10 +77,6 @@ function SocketListener() {
     socket.on('socialLink:updated', (data) => dispatch(socialLinkRealtimeUpdated(data)));
     socket.on('socialLink:deleted', (id) => dispatch(socialLinkRealtimeRemoved(id)));
     socket.on('socialLinks:reordered', (data) => dispatch(socialLinksRealtimeReordered(data)));
-
-    socket.on('analytics:stats', (data) => {
-      dispatch(realtimeAnalyticsUpdate(data));
-    });
 
     return () => {
       socket.disconnect();

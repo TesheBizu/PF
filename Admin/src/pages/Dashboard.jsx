@@ -11,7 +11,7 @@ import { fetchProfileImage, updateProfileImage, deleteProfileImage } from '../re
 import { fetchTestimonials, createTestimonial, updateTestimonial, deleteTestimonial } from '../redux/slices/testimonialsSlice';
 import { fetchAllSections, updateSection } from '../redux/slices/sectionsSlice';
 import { fetchNotifications, markNotificationRead, markAllNotificationsRead, deleteNotification } from '../redux/slices/notificationsSlice';
-import { fetchAnalytics } from '../redux/slices/analyticsSlice';
+import { fetchOverview } from '../redux/slices/analyticsSlice';
 import { fetchSocialLinks, createSocialLink, updateSocialLink, reorderSocialLinks, deleteSocialLink, setItems } from '../redux/slices/socialLinksSlice';
 import api from '../services/api';
 import {
@@ -40,6 +40,7 @@ const SKILL_BRAND_COLORS = {
   npm: '#CB3837', Vercel: '#000000', Figma: '#F24E1E',
 };
 import MetricsPanel from '../components/Analytics/MetricsPanel';
+import RealtimePanel from '../components/Analytics/RealtimePanel';
 
 function Modal({ title, onClose, children }) {
   return (
@@ -181,7 +182,7 @@ function Dashboard({ theme, onToggleTheme }) {
     dispatch(fetchTestimonials());
     dispatch(fetchAllSections());
     dispatch(fetchNotifications());
-    dispatch(fetchAnalytics());
+    dispatch(fetchOverview());
     dispatch(fetchSocialLinks());
   }, [dispatch]);
 
@@ -226,6 +227,7 @@ function Dashboard({ theme, onToggleTheme }) {
     { label: 'Engagement', items: [
       { id: 'analytics', label: 'Analytics', icon: BarChart3 },
       { id: 'metrics', label: 'Metrics', icon: TrendingUp },
+      { id: 'realtime', label: 'Real-Time', icon: Activity },
       { id: 'notifications-center', label: 'Notifications', icon: Bell, badge: notifUnread },
       { id: 'social-links', label: 'Social Links', icon: Share2 },
     ]},
@@ -1149,6 +1151,9 @@ const handleSectionSave = async (key) => {
 
         {/* ── METRICS ── */}
         {tab === 'metrics' && <MetricsPanel />}
+
+        {/* ── REAL-TIME ── */}
+        {tab === 'realtime' && <RealtimePanel />}
 
         {/* ── NOTIFICATIONS CENTER ── */}
         {tab === 'notifications-center' && (

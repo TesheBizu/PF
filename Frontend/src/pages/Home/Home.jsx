@@ -6,6 +6,7 @@ import { fetchSkills } from '../../redux/slices/skillsSlice';
 import { fetchExperiences } from '../../redux/slices/experiencesSlice';
 import { fetchSocialLinks } from '../../redux/slices/socialLinksSlice';
 import { SocialIcon } from '../../components/Icons';
+import { trackHeroCtaClick } from '../../services/analytics';
 import api from '../../services/api';
 import About from '../About/About';
 import Skills from '../Skills/Skills';
@@ -88,11 +89,11 @@ function HeroSection({ settings }) {
           <p className="home__bio">{settings?.bio || 'Passionate about building modern, responsive, scalable web applications.'}</p>
 
           <div className="home__actions">
-            <a href="#projects" className="btn btn-primary" onClick={(e) => { e.preventDefault(); document.getElementById('projects')?.scrollIntoView({ behavior: 'smooth' }); }}>
+            <a href="#projects" className="btn btn-primary" onClick={(e) => { e.preventDefault(); trackHeroCtaClick('view_projects'); document.getElementById('projects')?.scrollIntoView({ behavior: 'smooth' }); }}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
               View Projects
             </a>
-            <a href="#contact" className="btn btn-secondary" onClick={(e) => { e.preventDefault(); document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' }); }}>
+            <a href="#contact" className="btn btn-secondary" onClick={(e) => { e.preventDefault(); trackHeroCtaClick('get_in_touch'); document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' }); }}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
               Get In Touch
             </a>
