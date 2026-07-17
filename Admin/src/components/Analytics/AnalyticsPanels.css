@@ -2012,6 +2012,26 @@
   font-size: 0.68rem;
 }
 
+.rt-connection-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 10px;
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.rt-connection-badge--live {
+  background: rgba(16, 185, 129, 0.12);
+  color: #10b981;
+}
+.rt-connection-badge--polling {
+  background: rgba(245, 158, 11, 0.12);
+  color: #f59e0b;
+}
+
 .rt-footer-note {
   display: flex;
   align-items: center;

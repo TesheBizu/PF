@@ -96,6 +96,7 @@ const initialState = {
   countries: null,
   events: null,
   trend: null,
+  liveStats: null,
   datePreset: '30days',
   customStartDate: '',
   customEndDate: '',
@@ -124,6 +125,10 @@ const analyticsSlice = createSlice({
       state.countries = null;
       state.events = null;
       state.trend = null;
+      state.liveStats = null;
+    },
+    realtimeStatsReceived(state, action) {
+      state.liveStats = action.payload;
     },
   },
   extraReducers: (builder) => {
@@ -145,5 +150,5 @@ const analyticsSlice = createSlice({
   },
 });
 
-export const { setDatePreset, setCustomDateRange, clearAnalytics } = analyticsSlice.actions;
+export const { setDatePreset, setCustomDateRange, clearAnalytics, realtimeStatsReceived } = analyticsSlice.actions;
 export default analyticsSlice.reducer;

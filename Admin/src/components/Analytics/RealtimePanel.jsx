@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import {
   Activity, Globe, Monitor, Smartphone, Tablet, RefreshCw,
-  Users, Eye, Zap, Clock, Radio,
+  Users, Eye, Zap, Clock, Radio, Wifi, WifiOff,
 } from 'lucide-react';
 import { fetchRealtime } from '../../redux/slices/analyticsSlice';
 import './AnalyticsPanels.css';
@@ -11,8 +11,9 @@ const POLL_INTERVAL = 60000;
 
 export default function RealtimePanel() {
   const dispatch = useDispatch();
-  const { realtime, realtimeLoading } = useSelector((s) => s.analytics);
+  const { realtime, realtimeLoading, liveStats } = useSelector((s) => s.analytics);
   const [lastUpdated, setLastUpdated] = useState(null);
+  const [socketConnected, setSocketConnected] = useState(false);
   const intervalRef = useRef(null);
 
   const fetchData = useCallback(() => {
@@ -27,10 +28,17 @@ export default function RealtimePanel() {
     return () => clearInterval(intervalRef.current);
   }, [fetchData]);
 
-  const activeUsers = realtime?.activeUsers || 0;
+  useEffect(() => {
+    if (liveStats) {
+      setSocketConnected(true);
+      setLastUpdated(new Date());
+    }
+  }, [liveStats]);
+
+  const liveActiveUsers = liveStats?.activeUsers ?? realtime?.activeUsers ?? 0;
+  const liveDevices = liveStats?.devices?.length > 0 ? liveStats.devices : (realtime?.devices || []);
   const pages = realtime?.pages || [];
   const countries = realtime?.countries || [];
-  const devices = realtime?.devices || [];
   const events = realtime?.events || [];
 
   const currentPage = pages.length > 0 ? pages[0] : null;
@@ -44,12 +52,15 @@ export default function RealtimePanel() {
             <div>
               <h2 className="rt-header__title">Real-Time Dashboard</h2>
               <p className="rt-header__subtitle">
-                Live visitor activity from Google Analytics 4
+                {socketConnected ? 'Live visitor activity via Socket.io + GA4' : 'Visitor activity from Google Analytics 4'}
               </p>
             </div>
           </div>
         </div>
         <div className="rt-header__right">
+          <span className={`rt-connection-badge ${socketConnected ? 'rt-connection-badge--live' : 'rt-connection-badge--polling'}`}>
+            {socketConnected ? <><Wifi size={11} /> Live</> : <><Clock size={11} /> Polling</>}
+          </span>
           {lastUpdated && (
             <span className="rt-header__timestamp">
               <Clock size={12} />
@@ -69,7 +80,7 @@ export default function RealtimePanel() {
             <Users size={24} />
           </div>
           <div className="rt-hero-card__content">
-            <div className="rt-hero-card__value">{activeUsers}</div>
+            <div className="rt-hero-card__value">{liveActiveUsers}</div>
             <div className="rt-hero-card__label">Active Users Right Now</div>
           </div>
           <div className="rt-hero-card__pulse" />
@@ -96,7 +107,7 @@ export default function RealtimePanel() {
         </div>
       </div>
 
-      {realtimeLoading && !realtime ? (
+      {realtimeLoading && !realtime && !liveStats ? (
         <div className="analytics-loading">
           {Array.from({ length: 3 }).map((_, i) => (
             <div key={i} className="skeleton" style={{ height: 160, borderRadius: 12, marginBottom: 16 }} />
@@ -150,16 +161,17 @@ export default function RealtimePanel() {
                 <Radio size={14} className="rt-card__live-icon" />
               </div>
               <div className="rt-card__body">
-                {devices.length > 0 ? devices.map((d, i) => {
-                  const icon = d.device?.toLowerCase() === 'desktop' ? Monitor :
-                               d.device?.toLowerCase() === 'mobile' ? Smartphone : Tablet;
+                {liveDevices.length > 0 ? liveDevices.map((d, i) => {
+                  const deviceName = d.device || d.name || 'unknown';
+                  const icon = deviceName.toLowerCase() === 'desktop' ? Monitor :
+                               deviceName.toLowerCase() === 'mobile' ? Smartphone : Tablet;
                   const Icon = icon;
                   return (
-                    <div key={d.device} className="rt-list-item">
+                    <div key={deviceName + i} className="rt-list-item">
                       <span className="rt-list-item__rank">
                         <Icon size={13} />
                       </span>
-                      <span className="rt-list-item__name">{d.device}</span>
+                      <span className="rt-list-item__name">{deviceName}</span>
                       <span className="rt-list-item__value">{d.users}</span>
                     </div>
                   );
@@ -180,7 +192,7 @@ export default function RealtimePanel() {
               <div className="rt-card__body">
                 <div className="rt-events-grid">
                   {events.map((e, i) => (
-                    <div key={e.name} className="rt-event-chip">
+                    <div key={e.name + i} className="rt-event-chip">
                       <span className="rt-event-chip__name">{e.name}</span>
                       <span className="rt-event-chip__count">{e.count}</span>
                     </div>
@@ -194,7 +206,9 @@ export default function RealtimePanel() {
 
       <div className="rt-footer-note">
         <Activity size={12} />
-        Auto-refreshes every 60 seconds. GA4 Realtime API has ~30 second latency.
+        {socketConnected
+          ? 'Real-time updates via Socket.io. GA4 historical data updated every 60 seconds.'
+          : 'Auto-refreshes every 60 seconds via GA4 API. Open the public site to generate real-time data.'}
       </div>
     </div>
   );

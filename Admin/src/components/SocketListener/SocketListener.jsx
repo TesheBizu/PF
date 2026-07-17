@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import socket from '../../services/socket';
+import { connectAnalyticsSocket } from '../../services/analyticsSocket';
 import {
   skillRealtimeAdded, skillRealtimeUpdated, skillRealtimeRemoved,
 } from '../../redux/slices/skillsSlice';
@@ -26,6 +27,7 @@ import {
   socialLinkRealtimeAdded, socialLinkRealtimeUpdated, socialLinkRealtimeRemoved,
   socialLinksRealtimeReordered,
 } from '../../redux/slices/socialLinksSlice';
+import { realtimeStatsReceived } from '../../redux/slices/analyticsSlice';
 import { toast } from 'react-toastify';
 
 function SocketListener() {
@@ -77,6 +79,10 @@ function SocketListener() {
     socket.on('socialLink:updated', (data) => dispatch(socialLinkRealtimeUpdated(data)));
     socket.on('socialLink:deleted', (id) => dispatch(socialLinkRealtimeRemoved(id)));
     socket.on('socialLinks:reordered', (data) => dispatch(socialLinksRealtimeReordered(data)));
+
+    connectAnalyticsSocket((stats) => {
+      dispatch(realtimeStatsReceived(stats));
+    });
 
     return () => {
       socket.disconnect();
